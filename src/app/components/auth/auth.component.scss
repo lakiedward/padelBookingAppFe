@@ -1,0 +1,85 @@
+.auth-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(480px 480px at 12% 25%, rgba(167, 238, 67, 0.18), rgba(0, 0, 0, 0) 58%),
+      radial-gradient(320px 320px at 78% 28%, rgba(167, 238, 67, 0.35), rgba(0, 0, 0, 0) 58%),
+      radial-gradient(400px 400px at 32% 68%, rgba(167, 238, 67, 0.24), rgba(0, 0, 0, 0) 60%),
+      radial-gradient(380px 380px at 74% 78%, rgba(214, 221, 230, 0.18), rgba(0, 0, 0, 0) 65%),
+      linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(80% 80% at 50% 30%, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+    z-index: 1;
+  }
+
+  .auth-content-box {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.06);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    padding: 40px 32px 40px 32px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    text-align: center;
+    max-width: 520px;
+    width: 92%;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    h2 {
+      color: #e8eef5;
+      margin-bottom: 16px;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    p {
+      color: #94a3b8;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    &::before {
+      background:
+        radial-gradient(320px 320px at 12% 25%, rgba(167, 238, 67, 0.18), rgba(0, 0, 0, 0) 56%),
+        radial-gradient(240px 240px at 78% 28%, rgba(167, 238, 67, 0.32), rgba(0, 0, 0, 0) 56%),
+        radial-gradient(260px 260px at 32% 68%, rgba(167, 238, 67, 0.2), rgba(0, 0, 0, 0) 58%),
+        radial-gradient(300px 300px at 74% 78%, rgba(214, 221, 230, 0.16), rgba(0, 0, 0, 0) 62%),
+        linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
+    }
+  }
+}
+
+@keyframes zoomIn {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}

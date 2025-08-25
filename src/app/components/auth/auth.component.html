@@ -1,0 +1,10 @@
+<div class="auth-container">
+  <div class="auth-content-box">
+    <ng-container *ngIf="mode === 'login'; else registerTpl">
+      <app-login (switchToRegister)="switchTo('register')"></app-login>
+    </ng-container>
+    <ng-template #registerTpl>
+      <app-register (switchToLogin)="switchTo('login')"></app-register>
+    </ng-template>
+  </div>
+</div>
