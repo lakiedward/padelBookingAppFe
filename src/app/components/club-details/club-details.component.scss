@@ -1,0 +1,211 @@
+.club-details {
+  position: relative;
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .field {
+    label { color: #d6dde6; font-weight: 700; font-size: 14px; display: block; margin-bottom: 8px; }
+    input[pInputText] {
+      width: 100%;
+      padding: 14px;
+      background: rgba(15, 27, 38, 0.85);
+      border: 1px solid rgba(214, 221, 230, 0.25);
+      border-radius: 12px;
+      color: #e2e8f0;
+    }
+
+    .location-input { position: relative; }
+    .map-btn {
+      position: absolute;
+      right: 6px; top: 6px; bottom: 6px;
+      width: 44px;
+      border-radius: 10px;
+      background: #a7ee43;
+      border: none; cursor: pointer; font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .map-btn img, .map-btn svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+  }
+
+  /* Add more space above Description */
+  .description-field { margin-top: 24px; }
+
+  /* Add more space above Phone Number & Location row */
+  .phone-location-row { margin-top: 24px; }
+
+  .textarea {
+    width: 100%;
+    min-height: 160px;
+    padding: 14px;
+    background: rgba(15, 27, 38, 0.85);
+    border: 1px solid rgba(214, 221, 230, 0.25);
+    border-radius: 12px;
+    color: #e2e8f0;
+    font-size: 14px;
+    /* Match placeholder/text styling to inputs */
+    &::placeholder { color: #7e8ea2; opacity: 1; }
+    resize: vertical;
+  }
+
+  .section { margin-top: 24px; }
+  .section > h3 { color: #d6dde6; font-size: 16px; margin: 0 0 12px 0; }
+
+  .sports {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+
+    button {
+      display: grid;
+      grid-template-rows: auto auto;
+      justify-items: center;
+      align-items: center;
+      padding: 16px 10px;
+      border-radius: 16px;
+      background: rgba(15, 27, 38, 0.5);
+      border: 1px solid rgba(214, 221, 230, 0.25);
+      color: #d6dde6;
+      cursor: pointer;
+
+      &.active { background: rgba(167, 238, 67, 0.1); border-color: #a7ee43; }
+      .sport-icon { width: 40px; height: 40px; }
+      .sport-icon img, .sport-icon svg { width: 40px; height: 40px; display: block; }
+      .label { font-size: 14px; font-weight: 700; margin-top: 4px; }
+    }
+  }
+
+  .media-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .media-card {
+    .title { color: #d6dde6; font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+    .drop {
+      background: rgba(15, 27, 38, 0.85);
+      border: 2px solid rgba(214, 221, 230, 0.25);
+      border-radius: 12px;
+      padding: 32px; /* a bit bigger */
+      text-align: center;
+      color: #c9d5e1;
+      min-height: 320px; /* bigger box */
+      max-height: 320px; /* lock height to prevent growing */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer; /* clickable hint */
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* Ensure different aspect media keep fixed container height */
+    .drop.profile { height: 320px; }
+    .drop.wallpaper { height: 320px; }
+
+    /* Preview image styles */
+    .preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }
+    .preview.wide { object-fit: cover; }
+
+    /* Overlay actions on top-right of image */
+    .overlay-actions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: rgba(15, 27, 38, 0.85);
+      border: 1px solid rgba(214, 221, 230, 0.35);
+      color: #a7ee43; /* green for edit */
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .icon-btn:hover { background: rgba(15, 27, 38, 0.95); border-color: rgba(214, 221, 230, 0.6); }
+    .icon-btn img, .icon-btn svg { width: 20px; height: 20px; }
+    .icon-btn.danger { color: #ee6363; border-color: rgba(238, 99, 99, 0.6); }
+    .icon-btn.danger:hover { background: rgba(238, 99, 99, 0.15); }
+
+    /* Centered spinner */
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      border-top-color: #a7ee43;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .drop-emoji { font-size: 32px; display: flex; align-items: center; justify-content: center; }
+    .drop-emoji img { width: 40px; height: 40px; display: inline-block; }
+    .drop-title { color: #d6dde6; font-weight: 700; margin-top: 8px; font-size: 15px; }
+    .drop-sub { color: #8aa0b5; font-size: 13px; }
+    .drop-hint { color: #6b7a8b; font-size: 12px; margin-top: 6px; }
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(214, 221, 230, 0.15);
+    .hint { color: #6b7a8b; font-size: 14px; }
+    .save-btn {
+      margin-left: auto;
+      background: #a7ee43;
+      border: 1px solid #8ae22a;
+      color: #000a14;
+      border-radius: 12px;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+  }
+}
+
+:host ::ng-deep {
+  .p-inputtext {
+    width: 100%;
+    padding: 14px;
+    background: rgba(15, 27, 38, 0.85);
+    border: 1px solid rgba(214, 221, 230, 0.25);
+    border-radius: 12px;
+    color: #e2e8f0;
+  }
+}
+
+

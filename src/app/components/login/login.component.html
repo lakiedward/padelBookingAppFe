@@ -44,13 +44,16 @@
     </div>
 
     <div class="form-actions">
-      <p-button type="submit" [label]="loading ? 'Signing in…' : 'Sign In'" [disabled]="loading || loginForm.invalid" styleClass="w-full"></p-button>
+      <button type="submit" class="submit-btn" [disabled]="loading || loginForm.invalid">
+        <span class="spinner" *ngIf="loading" aria-hidden="true"></span>
+        <span *ngIf="!loading">Sign In</span>
+      </button>
     </div>
 
     <div class="divider"><span>Or continue with</span></div>
 
     <button type="button" class="google-btn" (click)="onGoogleSignIn()" [disabled]="loading">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+      <img src="assets/icons/google.png" alt="Google" width="20" height="20" />
       Google
     </button>
 

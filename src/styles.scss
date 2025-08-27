@@ -8,3 +8,39 @@ html, body {
   height: 100%;
   width: 100%;
 }
+
+/* Global page gradient background to avoid duplication */
+.page-gradient-bg {
+  position: relative;
+  min-height: 100vh;
+}
+.page-gradient-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(clamp(280px, 35vw, 640px) clamp(280px, 35vw, 640px) at 12% 25%, rgba(167, 238, 67, 0.18), rgba(0, 0, 0, 0) 58%),
+    radial-gradient(clamp(200px, 24vw, 480px) clamp(200px, 24vw, 480px) at 78% 28%, rgba(167, 238, 67, 0.35), rgba(0, 0, 0, 0) 58%),
+    radial-gradient(clamp(240px, 30vw, 560px) clamp(240px, 30vw, 560px) at 32% 68%, rgba(167, 238, 67, 0.24), rgba(0, 0, 0, 0) 60%),
+    radial-gradient(clamp(220px, 28vw, 520px) clamp(220px, 28vw, 520px) at 74% 78%, rgba(214, 221, 230, 0.18), rgba(0, 0, 0, 0) 65%),
+    linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
+  z-index: 0;
+}
+.page-gradient-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(80% 80% at 50% 30%, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .page-gradient-bg::before {
+    background:
+      radial-gradient(clamp(200px, 48vw, 360px) clamp(200px, 48vw, 360px) at 12% 25%, rgba(167, 238, 67, 0.18), rgba(0, 0, 0, 0) 56%),
+      radial-gradient(clamp(160px, 36vw, 300px) clamp(160px, 36vw, 300px) at 78% 28%, rgba(167, 238, 67, 0.32), rgba(0, 0, 0, 0) 56%),
+      radial-gradient(clamp(180px, 38vw, 320px) clamp(180px, 38vw, 320px) at 32% 68%, rgba(167, 238, 67, 0.2), rgba(0, 0, 0, 0) 58%),
+      radial-gradient(clamp(200px, 40vw, 340px) clamp(200px, 40vw, 340px) at 74% 78%, rgba(214, 221, 230, 0.16), rgba(0, 0, 0, 0) 62%),
+      linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
+  }
+}

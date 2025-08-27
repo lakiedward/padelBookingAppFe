@@ -1,9 +1,11 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +26,11 @@ export class LoginComponent {
   loading = false;
   @Output() switchToRegister = new EventEmitter<void>();
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -37,12 +43,23 @@ export class LoginComponent {
     if (!this.loginForm.valid || this.loading) return;
 
     this.loading = true;
-    console.log('Login form submitted:', this.loginForm.value);
-    // TODO: Implement actual login logic
-    // Simulate async finish
-    setTimeout(() => {
-      this.loading = false;
-    }, 800);
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        console.log('Login successful:', response);
+        this.loading = false;
+        if (this.authService.isAdmin()) {
+          this.router.navigate(['/admin']);
+        } else {
+          console.log('Regular user logged in');
+        }
+      },
+      error: (error) => {
+        console.error('Login failed:', error);
+        this.loading = false;
+      }
+    });
   }
 
   onSignUp() {

@@ -1,0 +1,125 @@
+.admin-container {
+  position: relative;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: 96px 1fr;
+  grid-template-areas:
+    'sidebar topbar'
+    'sidebar content';
+
+  /* Background handled globally via .page-gradient-bg */
+}
+
+.sidebar {
+  grid-area: sidebar;
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border-right: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 24px 16px;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px 20px 8px;
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #a7ee43;
+    }
+    .logo { color: #a7ee43; font-weight: 800; letter-spacing: 0.6px; font-size: 28px; }
+    .name { color: #d6dde6; font-weight: 700; margin-top: 2px; }
+    .desc { color: #6b7a8b; font-size: 12px; }
+  }
+
+  .menu-separator {
+    height: 1px;
+    background: rgba(214, 221, 230, 0.15);
+    margin: 8px 0 16px 0;
+    border-radius: 1px;
+  }
+
+  .menu {
+    display: grid;
+    gap: 10px;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 16px;
+      background: transparent;
+      border: 1px solid rgba(214, 221, 230, 0.15);
+      color: #d6dde6;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s ease, border-color 0.2s ease;
+
+      .icon { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; }
+
+      &.active {
+        background: #a7ee43;
+        color: #000a14;
+        border-color: #a7ee43;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+.topbar {
+  grid-area: topbar;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(214, 221, 230, 0.15);
+
+  .page .name { color: #d6dde6; font-weight: 700; font-size: 20px; }
+  .page .desc { color: #6b7a8b; font-size: 12px; }
+  .spacer { flex: 1; }
+  .admin-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(167, 238, 67, 0.2);
+    border: none;
+    color: #d6dde6;
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: default;
+  }
+}
+
+.content {
+  grid-area: content;
+  position: relative;
+  z-index: 2;
+  padding: 32px;
+  overflow-y: auto;
+}
+
+.content-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.content-card.empty { color: #9fb0c0; text-align: center; padding: 80px; }
+
+
