@@ -1,0 +1,64 @@
+<div class="login-container">
+
+  <h2 class="login-title">Playora</h2>
+  <p class="login-subtitle">Sign in to book your favorite courts</p>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSignIn()" class="login-form">
+    <div class="form-field">
+      <label for="email">Email Address</label>
+      <input
+        pInputText
+        id="email"
+        formControlName="email"
+        placeholder="Enter your email"
+        class="w-full"
+        autocomplete="email"
+      />
+      <small class="error-message" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || loginForm.get('email')?.dirty || submitted)">
+        <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
+        <span *ngIf="loginForm.get('email')?.errors?.['email']">Enter a valid email</span>
+      </small>
+    </div>
+
+    <div class="form-field">
+      <label for="password">Password</label>
+      <p-password
+        formControlName="password"
+        placeholder="Enter your password"
+        [toggleMask]="false"
+        [feedback]="false"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+      ></p-password>
+      <small class="error-message" *ngIf="loginForm.get('password')?.invalid && (loginForm.get('password')?.touched || loginForm.get('password')?.dirty || submitted)">
+        <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
+        <span *ngIf="loginForm.get('password')?.errors?.['minlength']">At least 6 characters</span>
+      </small>
+      <div class="row-between">
+        <div class="remember">
+          <input type="checkbox" id="rememberMe" formControlName="rememberMe" />
+          <label for="rememberMe">Remember me</label>
+        </div>
+        <button type="button" class="link" (click)="onForgotPassword()">Forgot password?</button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="submit-btn" [disabled]="loading || loginForm.invalid">
+        <span class="spinner" *ngIf="loading" aria-hidden="true"></span>
+        <span *ngIf="!loading">Sign In</span>
+      </button>
+    </div>
+
+    <div class="divider"><span>Or continue with</span></div>
+
+    <button type="button" class="google-btn" (click)="onGoogleSignIn()" [disabled]="loading">
+      <img src="assets/icons/google.png" alt="Google" width="20" height="20" />
+      Google
+    </button>
+
+    <div class="signup-link">
+      <p>Don't have an account? <button type="button" class="link" (click)="onSignUp()">Sign up</button></p>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,128 @@
+<div class="club-details">
+  <form [formGroup]="form">
+
+    <div class="grid" style="margin-top: 16px;">
+      <div class="field">
+        <label>Club Name</label>
+        <input pInputText placeholder="Enter club name" formControlName="name" />
+      </div>
+      <div class="field right">
+        <label>Club Email</label>
+        <input pInputText placeholder="Enter club email" formControlName="email"/>
+      </div>
+    </div>
+
+    <div class="grid phone-location-row">
+      <div class="field">
+        <label>Phone Number</label>
+        <input pInputText placeholder="Enter phone number" formControlName="phone" />
+      </div>
+      <div class="field right">
+        <label>Location</label>
+        <div class="location-input">
+          <input pInputText placeholder="Enter club location or select from map" formControlName="location" />
+          <button type="button" class="map-btn" aria-label="Select on map">
+            <img src="assets/icons/map-pin.png" alt="Map" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field description-field">
+      <label>Description</label>
+      <textarea class="textarea" placeholder="Enter club description" formControlName="description"></textarea>
+    </div>
+
+    <div class="section">
+      <h3>Select Sport Category</h3>
+      <div class="sports">
+        <button *ngFor="let s of sports" type="button" [class.active]="s.selected" (click)="toggleSportSelection(s.key)">
+          <div class="sport-icon" [ngSwitch]="s.key">
+            <img *ngSwitchCase="'tennis'" src="assets/icons/tennis.png" alt="Tennis" />
+            <img *ngSwitchCase="'padel'" src="assets/icons/padel.png" alt="Padel" />
+            <img *ngSwitchCase="'football'" src="assets/icons/football.png" alt="Football" />
+            <img *ngSwitchCase="'basketball'" src="assets/icons/basketball.png" alt="Basketball" />
+            <img *ngSwitchCase="'volleyball'" src="assets/icons/volleyball.png" alt="Volleyball" />
+            <img *ngSwitchCase="'badminton'" src="assets/icons/badminton.png" alt="Badminton" />
+            <img *ngSwitchCase="'squash'" src="assets/icons/squash.png" alt="Squash" />
+            <img *ngSwitchCase="'pingpong'" src="assets/icons/pingpong.png" alt="Ping Pong" />
+            <img *ngSwitchCase="'handball'" src="assets/icons/handball.png" alt="Handball" />
+            <img *ngSwitchDefault src="assets/icons/tennis.png" alt="Sport" />
+          </div>
+          <div class="label">{{ s.label }}</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Club Media</h3>
+      <div class="media-grid">
+        <div class="media-card">
+          <div class="title">Club Profile Picture</div>
+          <div class="drop clickable profile" (click)="onClickProfileUpload()">
+            <input type="file" accept="image/*" hidden #profileInput (click)="$event.stopPropagation()" (change)="onProfileSelected($event)" />
+
+            <ng-container *ngIf="isUploadingProfile(); else profileContent">
+              <div class="spinner" aria-label="Uploading"></div>
+              <div class="drop-sub">Uploading...</div>
+            </ng-container>
+            <ng-template #profileContent>
+              <ng-container *ngIf="profilePreviewUrl(); else profilePlaceholder">
+                <img class="preview" [src]="profilePreviewUrl()" alt="Profile preview" (click)="$event.stopPropagation()" />
+                <div class="overlay-actions" (click)="$event.stopPropagation()">
+                  <button type="button" class="icon-btn" title="Edit image" (click)="onEditProfileImage($event)">
+                    <img src="assets/icons/edit.png" alt="Edit" />
+                  </button>
+                  <button type="button" class="icon-btn danger" title="Delete image" (click)="onDeleteProfileImage($event)">
+                    <img src="assets/icons/trash.png" alt="Delete" />
+                  </button>
+                </div>
+              </ng-container>
+              <ng-template #profilePlaceholder>
+                <div class="drop-emoji"><img src="assets/icons/photo.png" alt="Upload" /></div>
+                <div class="drop-title">Upload Profile Picture</div>
+                <div class="drop-sub">Click to browse files</div>
+              </ng-template>
+            </ng-template>
+          </div>
+        </div>
+        <div class="media-card">
+          <div class="title">Club Wallpaper</div>
+          <div class="drop clickable wallpaper" (click)="onClickWallpaperUpload()">
+            <input type="file" accept="image/*" hidden #wallpaperInput (click)="$event.stopPropagation()" (change)="onWallpaperSelected($event)" />
+
+            <ng-container *ngIf="isUploadingWallpaper(); else wallpaperContent">
+              <div class="spinner" aria-label="Uploading"></div>
+              <div class="drop-sub">Uploading...</div>
+            </ng-container>
+            <ng-template #wallpaperContent>
+              <ng-container *ngIf="wallpaperPreviewUrl(); else wallpaperPlaceholder">
+                <img class="preview wide" [src]="wallpaperPreviewUrl()" alt="Wallpaper preview" (click)="$event.stopPropagation()" />
+                <div class="overlay-actions" (click)="$event.stopPropagation()">
+                  <button type="button" class="icon-btn" title="Edit image" (click)="onEditWallpaperImage($event)">
+                    <img src="assets/icons/edit.png" alt="Edit" />
+                  </button>
+                  <button type="button" class="icon-btn danger" title="Delete image" (click)="onDeleteWallpaperImage($event)">
+                    <img src="assets/icons/trash.png" alt="Delete" />
+                  </button>
+                </div>
+              </ng-container>
+              <ng-template #wallpaperPlaceholder>
+                <div class="drop-emoji"><img src="assets/icons/photo.png" alt="Upload" /></div>
+                <div class="drop-title">Upload Wallpaper</div>
+                <div class="drop-sub">Click to browse files</div>
+              </ng-template>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="hint">Make sure all information is accurate before saving</div>
+      <button pButton type="button" (click)="save()" class="save-btn">Save Club</button>
+    </div>
+  </form>
+</div>
+
+

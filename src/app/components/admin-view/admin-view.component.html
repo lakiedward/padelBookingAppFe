@@ -1,0 +1,46 @@
+<div class="admin-container page-gradient-bg">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-text">
+        <div class="logo">PLAYORA</div>
+        <div class="name">Sports Club Management</div>
+        <div class="desc">Professional club and court management platform</div>
+      </div>
+    </div>
+
+    <div class="menu-separator"></div>
+
+    <nav class="menu">
+      <button (click)="select('club-details')" [class.active]="selectedMenu === 'club-details'">
+        <span class="icon">+</span>
+        <span>Club Details</span>
+      </button>
+      <button (click)="select('courts')" [class.active]="selectedMenu === 'courts'">
+        <span class="icon">■</span>
+        <span>Courts & Scheduling</span>
+      </button>
+    </nav>
+  </aside>
+
+  <header class="topbar">
+    <div class="page">
+      <div class="name">{{ selectedMenu === 'club-details' ? 'Club Details' : 'Courts & Scheduling' }}</div>
+      <div class="desc">{{ selectedMenu === 'club-details' ? 'Manage club profile and branding' : 'Configure courts and booking schedule' }}</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="admin-chip">
+      <span>Admin Panel</span>
+    </button>
+  </header>
+
+  <main class="content">
+    <section class="content-card" *ngIf="selectedMenu === 'club-details'">
+      <app-club-details></app-club-details>
+    </section>
+    <section class="content-card empty" *ngIf="selectedMenu === 'courts'">
+      <p>Courts & Scheduling — coming soon</p>
+    </section>
+  </main>
+</div>
+
+
