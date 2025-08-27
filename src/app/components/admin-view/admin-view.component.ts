@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClubDetailsComponent } from '../club-details/club-details.component';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 type AdminMenuKey = 'club-details' | 'courts';
 
@@ -14,8 +16,15 @@ type AdminMenuKey = 'club-details' | 'courts';
 export class AdminViewComponent {
   selectedMenu: AdminMenuKey = 'club-details';
 
+  constructor(private auth: AuthService, private router: Router) {}
+
   select(menu: AdminMenuKey) {
     this.selectedMenu = menu;
+  }
+
+  onLogout() {
+    this.auth.logout();
+    this.router.navigate(['/auth']);
   }
 }
 

@@ -28,8 +28,11 @@
       <div class="desc">{{ selectedMenu === 'club-details' ? 'Manage club profile and branding' : 'Configure courts and booking schedule' }}</div>
     </div>
     <div class="spacer"></div>
-    <button class="admin-chip">
+    <button class="admin-chip" type="button">
       <span>Admin Panel</span>
+    </button>
+    <button class="logout-btn" type="button" (click)="onLogout()" aria-label="Logout">
+      <span class="logout-text">Logout</span>
     </button>
   </header>
 

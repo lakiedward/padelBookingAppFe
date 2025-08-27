@@ -9,6 +9,41 @@ html, body {
   width: 100%;
 }
 
+/* Custom scrollbars to match design (dark track, subtle thumb, Playora green on hover/active) */
+/* For WebKit-based browsers (Chrome, Edge, Safari) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(214, 221, 230, 0.25);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #a7ee43;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* For Firefox */
+html {
+  scrollbar-width: thin;               /* thin | auto */
+  scrollbar-color: #7aa82b rgba(255, 255, 255, 0.06); /* thumb color | track color */
+}
+
+/* Make scrollbars visible inside scrollable areas like the admin content */
+.content {
+  scrollbar-width: thin;
+}
+
 /* Global page gradient background to avoid duplication */
 .page-gradient-bg {
   position: relative;
