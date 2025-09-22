@@ -1,37 +1,66 @@
 <div class="club-details">
   <form [formGroup]="form">
 
-    <div class="grid" style="margin-top: 16px;">
+    <div class="section">
+      <h3>Club Details</h3>
+    </div>
+
+    <!-- Club Name on its own row -->
+    <div class="single-row" style="margin-top: 16px;">
       <div class="field">
         <label>Club Name</label>
         <input pInputText placeholder="Enter club name" formControlName="name" />
       </div>
-      <div class="field right">
-        <label>Club Email</label>
-        <input pInputText placeholder="Enter club email" formControlName="email"/>
-      </div>
     </div>
 
-    <div class="grid phone-location-row">
+    <!-- Email first and Phone on the same row; spacing handled in SCSS (.email-phone-row) -->
+    <div class="grid email-phone-row">
       <div class="field">
+        <label>Club Email</label>
+        <input pInputText placeholder="Enter club email" formControlName="email" />
+      </div>
+      <div class="field right">
         <label>Phone Number</label>
         <input pInputText placeholder="Enter phone number" formControlName="phone" />
       </div>
-      <div class="field right">
-        <label>Location</label>
-        <div class="location-input">
-          <input pInputText placeholder="Enter club location or select from map" formControlName="location" />
-          <button type="button" class="map-btn" aria-label="Select on map">
-            <img src="assets/icons/map-pin.png" alt="Map" />
-          </button>
-        </div>
-      </div>
     </div>
 
+    <!-- Description section followed by a line break -->
     <div class="field description-field">
       <label>Description</label>
       <textarea class="textarea" placeholder="Enter club description" formControlName="description"></textarea>
     </div>
+    <hr class="section-separator" />
+
+    <!-- Location section: title + address field with Add location button on same row, map and saved locations below -->
+    <div class="section location-section">
+      <h3>Club Location</h3>
+      <div class="grid" style="margin-top: 12px; grid-template-columns: 1fr auto; align-items: end;">
+        <div class="field">
+          <label>Enter address</label>
+          <input pInputText placeholder="Start typing an address" formControlName="address" />
+        </div>
+        <div class="field right" style="display: flex; justify-content: flex-end;">
+          <label class="sr-only">Add Location</label>
+          <button type="button" class="add-location-btn" (click)="onAddLocation()">Add location</button>
+        </div>
+      </div>
+
+      <div #mapContainer class="map" aria-label="Location map"></div>
+
+      <!-- Saved locations list -->
+      <div class="saved-locations" *ngIf="savedLocations.length > 0">
+        <div class="loc-card" *ngFor="let loc of savedLocations; let i = index">
+          <div class="loc-main">
+            <div class="loc-title">{{ loc.address }}</div>
+            <div class="loc-sub">{{ loc.lat | number:'1.5-5' }}, {{ loc.lng | number:'1.5-5' }}</div>
+          </div>
+          <button type="button" class="remove-btn" (click)="removeLocation(i)">Remove</button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-separator" />
 
     <div class="section">
       <h3>Select Sport Category</h3>
@@ -54,6 +83,7 @@
       </div>
     </div>
 
+    <hr class="section-separator" />
     <div class="section">
       <h3>Club Media</h3>
       <div class="media-grid">

@@ -8,7 +8,22 @@
     'sidebar topbar'
     'sidebar content';
 
-  /* Background handled globally via .page-gradient-bg */
+  /* Ensure content sits above the global gradient pseudo-elements */
+  isolation: isolate;
+}
+
+/* Position content layers above background */
+.admin-container > .sidebar,
+.admin-container > .topbar,
+.admin-container > .content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Create a lower stacking context for the gradient background from .page-gradient-bg */
+.admin-container.page-gradient-bg::before,
+.admin-container.page-gradient-bg::after {
+  z-index: 0;
 }
 
 .sidebar {

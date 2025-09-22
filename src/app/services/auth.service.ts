@@ -1,8 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 import { LoginRequest, AuthResponse, User } from '../models/auth.models';
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -20,19 +27,28 @@ export class AuthService {
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginRequest)
       .pipe(
-        tap(response => {
-          if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-            localStorage.setItem('token', response.token);
-          }
-          const user: User = {
-            username: response.username,
-            email: response.email,
-            roles: response.roles,
-            profileImageUrl: response.profileImageUrl
-          };
-          this.currentUserSubject.next(user);
-        })
+        tap(response => this.handleAuthSuccess(response))
       );
+  }
+
+  register(payload: { username: string; email: string; phoneNumber: string; password: string }): Observable<void> {
+    // Accept text responses from backend to avoid JSON parse issues on 201/empty or text bodies
+    return this.http
+      .post<string>(`${this.apiUrl}/register`, payload, { responseType: 'text' as 'json' })
+      .pipe(map(() => void 0));
+  }
+
+  private handleAuthSuccess(response: AuthResponse) {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('token', response.token);
+    }
+    const user: User = {
+      username: response.username,
+      email: response.email,
+      roles: response.roles,
+      profileImageUrl: response.profileImageUrl
+    };
+    this.currentUserSubject.next(user);
   }
 
   logout(): void {
