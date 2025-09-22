@@ -46,7 +46,6 @@ export class RegisterComponent {
       .subscribe({
         next: () => {
           this.success = true;
-          // Detection also runs in finalize, but keep state correct immediately.
           this.cdr.markForCheck();
         },
         error: (error) => {

@@ -4,6 +4,9 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
+import { MapService } from '../../services/map.service';
+import { ClubService } from '../../services/club.service';
+import { ClubDetails, SportKey, SPORT_OPTIONS } from '../../models/club.models';
 
 interface SavedLocation {
   address: string;
@@ -26,14 +29,12 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   @ViewChild('wallpaperInput') wallpaperInput?: ElementRef<HTMLInputElement>;
   @ViewChild('mapContainer') mapContainer?: ElementRef<HTMLDivElement>;
 
-  // upload state and previews (signals for zoneless change detection)
   isUploadingProfile = signal(false);
   isUploadingWallpaper = signal(false);
   profilePreviewUrl = signal<string | null>(null);
   wallpaperPreviewUrl = signal<string | null>(null);
 
-  // map state
-  private map?: any; // Leaflet map (typed as any to avoid requiring type deps)
+  private map?: any;
   private marker?: any;
   currentLat = signal<number | null>(null);
   currentLng = signal<number | null>(null);
@@ -41,20 +42,12 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   savedLocations: SavedLocation[] = [];
   geocodeDebounce?: any;
 
-  sports = [
-    { key: 'tennis', icon: '', label: 'Tennis', selected: true },
-    { key: 'padel', icon: '', label: 'Padel' },
-    { key: 'football', icon: '', label: 'Football' },
-    { key: 'basketball', icon: '', label: 'Basketball' },
-    { key: 'volleyball', icon: '', label: 'Volleyball' },
-    { key: 'badminton', icon: '', label: 'Badminton' },
-    { key: 'squash', icon: '', label: 'Squash' },
-    { key: 'pingpong', icon: '', label: 'Ping Pong' },
-    { key: 'handball', icon: '', label: 'Handball' }
-  ];
+  sports = SPORT_OPTIONS;
+
+  selectedSports = new Set<SportKey>(['tennis']);
 
 
-  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object) {
+  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, private clubService: ClubService) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -65,153 +58,89 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       description: [''],
     });
 
-
-    // Watch address field for geocoding
     this.form.get('address')!.valueChanges.subscribe(value => {
       if (this.geocodeDebounce) clearTimeout(this.geocodeDebounce);
-      this.geocodeDebounce = setTimeout(() => this.forwardGeocode(String(value || '')), 500);
+      this.geocodeDebounce = setTimeout(async () => {
+        const query = String(value || '');
+        if (!query) return;
+        this.isGeocoding.set(true);
+        try {
+          const res = await this.mapService.forwardGeocode(query);
+          if (res) {
+            this.mapService.setPosition(res.lat, res.lon);
+            this.currentLat.set(res.lat);
+            this.currentLng.set(res.lon);
+            this.form.patchValue({ location: res.display }, { emitEvent: false });
+          }
+        } finally {
+          this.isGeocoding.set(false);
+        }
+      }, 500);
     });
   }
 
   ngAfterViewInit(): void {
     if (!this.isBrowser) return;
-    // Dynamically load Leaflet CSS/JS if not present to minimize project changes
-    this.injectLeafletAssets().then(() => {
-      this.initMap();
-      this.tryInitFromGeolocation();
+    this.mapService.loadLeafletAssets().then(() => {
+      if (!this.mapContainer) return;
+      this.mapService.initMap(this.mapContainer.nativeElement, (lat, lon) => {
+        this.currentLat.set(lat);
+        this.currentLng.set(lon);
+        this.isGeocoding.set(true);
+        this.mapService.reverseGeocode(lat, lon)
+          .then(display => {
+            this.form.patchValue({ address: display, location: display }, { emitEvent: false });
+          })
+          .finally(() => this.isGeocoding.set(false));
+      });
+      this.mapService.tryInitFromGeolocation((lat, lon) => {
+        this.currentLat.set(lat);
+        this.currentLng.set(lon);
+        this.isGeocoding.set(true);
+        this.mapService.reverseGeocode(lat, lon)
+          .then(display => {
+            this.form.patchValue({ address: display, location: display }, { emitEvent: false });
+          })
+          .finally(() => this.isGeocoding.set(false));
+      });
     }).catch(err => console.error('Leaflet load error', err));
   }
 
-  private async injectLeafletAssets(): Promise<void> {
-    if (!this.isBrowser) return;
-    const cssId = 'leaflet-css';
-    const jsId = 'leaflet-js';
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement('link');
-      link.id = cssId;
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
-    }
-    if (!document.getElementById(jsId)) {
-      await new Promise<void>((resolve, reject) => {
-        const script = document.createElement('script');
-        script.id = jsId;
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.onload = () => resolve();
-        script.onerror = () => reject();
-        document.body.appendChild(script);
-      });
+  toggleSportSelection(key: SportKey) {
+    if (this.selectedSports.has(key)) {
+      this.selectedSports.delete(key);
+    } else {
+      this.selectedSports.add(key);
     }
   }
 
-  private initMap(): void {
-    if (!this.isBrowser) return;
-    const L = (window as any).L;
-    if (!L || !this.mapContainer) return;
-    this.map = L.map(this.mapContainer.nativeElement, { zoomControl: true }).setView([45.9432, 24.9668], 6); // Romania center
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(this.map);
-
-    this.marker = L.marker([45.9432, 24.9668], { draggable: true }).addTo(this.map);
-    this.marker.on('dragend', () => {
-      const pos = this.marker.getLatLng();
-      this.updateFromCoords(pos.lat, pos.lng, true);
-    });
-    this.map.on('click', (e: any) => {
-      this.updateFromCoords(e.latlng.lat, e.latlng.lng, true);
-    });
+  isSelected(key: SportKey): boolean {
+    return this.selectedSports.has(key);
   }
 
-  private async forwardGeocode(query: string): Promise<void> {
-    if (!this.isBrowser) return;
-    if (!query || query.trim().length < 3) return;
-    try {
-      this.isGeocoding.set(true);
-      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1`, {
-        headers: { 'Accept-Language': 'en', 'User-Agent': 'PadelBookingAppFe/1.0 (contact@example.com)' }
-      });
-      const data = await resp.json();
-      if (Array.isArray(data) && data[0]) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
-        this.setMapPosition(lat, lon);
-        // Keep location text in sync with a readable display name
-        this.form.patchValue({ location: data[0].display_name }, { emitEvent: false });
-      }
-    } catch (e) {
-      console.warn('Geocoding failed', e);
-    } finally {
-      this.isGeocoding.set(false);
-    }
-  }
-
-  private async reverseGeocode(lat: number, lon: number): Promise<void> {
-    if (!this.isBrowser) return;
-    try {
-      this.isGeocoding.set(true);
-      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
-        headers: { 'Accept-Language': 'en', 'User-Agent': 'PadelBookingAppFe/1.0 (contact@example.com)' }
-      });
-      const data = await resp.json();
-      const display = data?.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-      this.form.patchValue({ address: display, location: display }, { emitEvent: false });
-    } catch (e) {
-      console.warn('Reverse geocoding failed', e);
-    } finally {
-      this.isGeocoding.set(false);
-    }
-  }
-
-  private setMapPosition(lat: number, lon: number): void {
-    if (!this.isBrowser) return;
-    this.currentLat.set(lat);
-    this.currentLng.set(lon);
-    const L = (window as any).L;
-    if (this.map) this.map.setView([lat, lon], Math.max(this.map.getZoom(), 14));
-    if (this.marker && L) {
-      this.marker.setLatLng([lat, lon]);
-    }
-  }
-
-  private updateFromCoords(lat: number, lon: number, doReverse = false): void {
-    this.setMapPosition(lat, lon);
-    if (doReverse) this.reverseGeocode(lat, lon);
-  }
-
-  private tryInitFromGeolocation(): void {
-    if (!this.isBrowser) return;
-    if (!('geolocation' in navigator)) return;
-    try {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          this.setMapPosition(lat, lon);
-          // Update address, country, and city from coordinates
-          this.reverseGeocode(lat, lon);
-        },
-        (err) => {
-          console.warn('Geolocation error', err);
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
-      );
-    } catch (e) {
-      console.warn('Geolocation not available', e);
-    }
-  }
-
-
-  toggleSportSelection(key: string) {
-    const index = this.sports.findIndex(s => s.key === key);
-    if (index === -1) return;
-    this.sports[index] = { ...this.sports[index], selected: !this.sports[index].selected };
+  labelFromKey(key: SportKey): string {
+    if (!key) return '';
+    return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
   }
 
   save() {
     if (this.form.invalid) return;
-    console.log('Save club:', this.form.value, 'savedLocations:', this.savedLocations);
+    const v = this.form.value;
+    const selectedSports: SportKey[] = Array.from(this.selectedSports);
+    const details: ClubDetails = {
+      id: undefined,
+      name: v.name,
+      email: v.email,
+      phone: v.phone,
+      description: v.description || null,
+      locations: this.savedLocations.map(l => ({ address: l.address, lat: l.lat, lng: l.lng })),
+      sports: selectedSports,
+      profileImageUrl: this.profilePreviewUrl(),
+      wallpaperImageUrl: this.wallpaperPreviewUrl(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.clubService.saveClub(details);
+    console.log('Club saved', details);
   }
 
   onAddLocation() {
@@ -316,9 +245,11 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     const wallpaperUrl = this.wallpaperPreviewUrl();
     if (profileUrl) URL.revokeObjectURL(profileUrl);
     if (wallpaperUrl) URL.revokeObjectURL(wallpaperUrl);
-    if (this.map) {
-      try { this.map.remove(); } catch {}
+    if (this.geocodeDebounce) {
+      clearTimeout(this.geocodeDebounce);
+      this.geocodeDebounce = undefined;
     }
+    this.mapService.destroy();
   }
 }
 

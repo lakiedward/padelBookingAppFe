@@ -5,7 +5,6 @@
       <h3>Club Details</h3>
     </div>
 
-    <!-- Club Name on its own row -->
     <div class="single-row" style="margin-top: 16px;">
       <div class="field">
         <label>Club Name</label>
@@ -13,7 +12,6 @@
       </div>
     </div>
 
-    <!-- Email first and Phone on the same row; spacing handled in SCSS (.email-phone-row) -->
     <div class="grid email-phone-row">
       <div class="field">
         <label>Club Email</label>
@@ -25,14 +23,12 @@
       </div>
     </div>
 
-    <!-- Description section followed by a line break -->
     <div class="field description-field">
       <label>Description</label>
       <textarea class="textarea" placeholder="Enter club description" formControlName="description"></textarea>
     </div>
     <hr class="section-separator" />
 
-    <!-- Location section: title + address field with Add location button on same row, map and saved locations below -->
     <div class="section location-section">
       <h3>Club Location</h3>
       <div class="grid" style="margin-top: 12px; grid-template-columns: 1fr auto; align-items: end;">
@@ -48,7 +44,6 @@
 
       <div #mapContainer class="map" aria-label="Location map"></div>
 
-      <!-- Saved locations list -->
       <div class="saved-locations" *ngIf="savedLocations.length > 0">
         <div class="loc-card" *ngFor="let loc of savedLocations; let i = index">
           <div class="loc-main">
@@ -65,8 +60,8 @@
     <div class="section">
       <h3>Select Sport Category</h3>
       <div class="sports">
-        <button *ngFor="let s of sports" type="button" [class.active]="s.selected" (click)="toggleSportSelection(s.key)">
-          <div class="sport-icon" [ngSwitch]="s.key">
+        <button *ngFor="let s of sports" type="button" [class.active]="isSelected(s)" (click)="toggleSportSelection(s)">
+          <div class="sport-icon" [ngSwitch]="s">
             <img *ngSwitchCase="'tennis'" src="assets/icons/tennis.png" alt="Tennis" />
             <img *ngSwitchCase="'padel'" src="assets/icons/padel.png" alt="Padel" />
             <img *ngSwitchCase="'football'" src="assets/icons/football.png" alt="Football" />
@@ -78,7 +73,7 @@
             <img *ngSwitchCase="'handball'" src="assets/icons/handball.png" alt="Handball" />
             <img *ngSwitchDefault src="assets/icons/tennis.png" alt="Sport" />
           </div>
-          <div class="label">{{ s.label }}</div>
+          <div class="label">{{ labelFromKey(s) }}</div>
         </button>
       </div>
     </div>

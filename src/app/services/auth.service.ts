@@ -32,7 +32,6 @@ export class AuthService {
   }
 
   register(payload: { username: string; email: string; phoneNumber: string; password: string }): Observable<void> {
-    // Accept text responses from backend to avoid JSON parse issues on 201/empty or text bodies
     return this.http
       .post<string>(`${this.apiUrl}/register`, payload, { responseType: 'text' as 'json' })
       .pipe(map(() => void 0));
