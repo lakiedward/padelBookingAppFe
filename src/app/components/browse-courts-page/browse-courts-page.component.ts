@@ -45,8 +45,32 @@ export class BrowseCourtsPageComponent {
   sportFilter: SportFilter = 'all';
   venueFilter: VenueFilter = 'all';
   sortBy: SortBy = 'earliest';
+  sortOptions: { label: string; value: SortBy }[] = [
+    { label: 'Earliest availability', value: 'earliest' },
+    { label: 'Price: Low to High', value: 'price-asc' },
+    { label: 'Price: High to Low', value: 'price-desc' }
+  ];
   moreSportsOpen = false;
   selectedDate: Date | null = null;
+  // Time range filters (time-only pickers)
+  timeFrom: Date | null = null;
+  timeTo: Date | null = null;
+
+  // Prefer PrimeNG DatePicker "touch" modal experience on phones and keep
+  // the overlay alive until user confirms selection (iOS/Safari quirks).
+  // SSR-safe detection (window may be undefined during server render).
+  get isTouch(): boolean {
+    if (typeof window === 'undefined') return false;
+    try {
+      return (
+        (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+        (navigator as any).maxTouchPoints > 0 ||
+        'ontouchstart' in window
+      );
+    } catch {
+      return false;
+    }
+  }
 
   readonly additionalSports: { key: SportFilter; label: string }[] = [
     { key: 'volleyball', label: '🏐 Volleyball' },
@@ -125,7 +149,35 @@ export class BrowseCourtsPageComponent {
       (this.venueFilter === 'indoor' && it.tags.includes('Indoor')) ||
       (this.venueFilter === 'outdoor' && it.tags.includes('Outdoor'));
 
-    const parsed = this.items.filter((it) => sportMatch(it) && venueMatch(it));
+    const timeInRange = (slots: string[]): boolean => {
+      // If no time filter, accept
+      if (!this.timeFrom && !this.timeTo) return true;
+
+      const fromMin = this.timeFrom ? this.minutesOfDate(this.timeFrom) : null;
+      const toMin = this.timeTo ? this.minutesOfDate(this.timeTo) : null;
+
+      // Iterate slot strings like "6:00 AM"
+      for (const s of slots) {
+        if (s.startsWith('+')) continue; // "+6 more" etc.
+        const m = this.parseTimeString(s);
+        if (m == null) continue;
+        if (fromMin != null && toMin != null) {
+          if (fromMin <= toMin) {
+            if (m >= fromMin && m <= toMin) return true;
+          } else {
+            // Over midnight case
+            if (m >= fromMin || m <= toMin) return true;
+          }
+        } else if (fromMin != null) {
+          if (m >= fromMin) return true;
+        } else if (toMin != null) {
+          if (m <= toMin) return true;
+        }
+      }
+      return false;
+    };
+
+    const parsed = this.items.filter((it) => sportMatch(it) && venueMatch(it) && timeInRange(it.slots));
 
     const toPrice = (p: string) => Number((p || '').replace(/[^0-9.]/g, '')) || 0;
     if (this.sortBy === 'price-asc') parsed.sort((a, b) => toPrice(a.price) - toPrice(b.price));
@@ -149,6 +201,36 @@ export class BrowseCourtsPageComponent {
     const now = new Date();
     // zero out time for clearer comparisons
     this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  clearTime() {
+    this.timeFrom = null;
+    this.timeTo = null;
+  }
+
+  private minutesOfDate(d: Date): number {
+    return d.getHours() * 60 + d.getMinutes();
+  }
+
+  private parseTimeString(s: string): number | null {
+    // Accept formats like "6:00 AM", "18:30", "6:05PM"
+    const trimmed = s.trim();
+    const ampm = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(trimmed);
+    if (ampm) {
+      let h = parseInt(ampm[1], 10);
+      const min = parseInt(ampm[2], 10);
+      const mer = ampm[3].toUpperCase();
+      if (mer === 'PM' && h !== 12) h += 12;
+      if (mer === 'AM' && h === 12) h = 0;
+      return h * 60 + min;
+    }
+    const h24 = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
+    if (h24) {
+      const h = parseInt(h24[1], 10);
+      const min = parseInt(h24[2], 10);
+      if (h >= 0 && h < 24 && min >= 0 && min < 60) return h * 60 + min;
+    }
+    return null;
   }
 
   // No global click listener needed for inline expansion

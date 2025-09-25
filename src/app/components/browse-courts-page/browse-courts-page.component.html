@@ -89,11 +89,12 @@
 
           <div class="sort">
             <span class="sort__label">Sort by</span>
-            <select class="sort__select" [(ngModel)]="sortBy">
-              <option value="earliest">Earliest availability</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
+            <div class="sort__select-wrapper">
+              <select class="sort__select" [(ngModel)]="sortBy">
+                <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+              <span aria-hidden="true" class="sort__caret">▾</span>
+            </div>
           </div>
         </div>
 
@@ -112,9 +113,13 @@
                 [(ngModel)]="selectedDate"
                 inputId="date"
                 showIcon="true"
+                [iconDisplay]="isTouch ? 'button' : 'input'"
                 [showButtonBar]="true"
-                [touchUI]="false"
-                appendTo="body"
+                [touchUI]="isTouch"
+                [readonlyInput]="isTouch"
+                [appendTo]="isTouch ? null : 'body'"
+                [hideOnDateTimeSelect]="!isTouch"
+                [focusTrap]="isTouch"
                 styleClass="pbp-datepicker"
                 panelStyleClass="pbp-datepicker-panel"
               ></p-datepicker>
@@ -122,12 +127,41 @@
           </div>
           <div class="field">
             <div class="label">Time</div>
-            <select class="input">
-              <option>Any time</option>
-              <option>Morning</option>
-              <option>Afternoon</option>
-              <option>Evening</option>
-            </select>
+            <div class="field__controls field__controls--time">
+              <p-datepicker
+                [(ngModel)]="timeFrom"
+                inputId="timeFrom"
+                [timeOnly]="true"
+                hourFormat="24"
+                showIcon="true"
+                [iconDisplay]="isTouch ? 'button' : 'input'"
+                [touchUI]="isTouch"
+                [readonlyInput]="isTouch"
+                [appendTo]="isTouch ? null : 'body'"
+                [hideOnDateTimeSelect]="!isTouch"
+                [focusTrap]="isTouch"
+                styleClass="pbp-datepicker"
+                panelStyleClass="pbp-datepicker-panel"
+                placeholder="From"
+              ></p-datepicker>
+              <p-datepicker
+                [(ngModel)]="timeTo"
+                inputId="timeTo"
+                [timeOnly]="true"
+                hourFormat="24"
+                showIcon="true"
+                [iconDisplay]="isTouch ? 'button' : 'input'"
+                [touchUI]="isTouch"
+                [readonlyInput]="isTouch"
+                [appendTo]="isTouch ? null : 'body'"
+                [hideOnDateTimeSelect]="!isTouch"
+                [focusTrap]="isTouch"
+                styleClass="pbp-datepicker"
+                panelStyleClass="pbp-datepicker-panel"
+                placeholder="To"
+              ></p-datepicker>
+              <button class="btn" type="button" (click)="clearTime()">Clear</button>
+            </div>
           </div>
           <div class="field">
             <div class="label">City</div>

@@ -84,13 +84,39 @@ $white: #fff;
 
 .sort { display: flex; align-items: center; gap: 12px; }
 .sort__label { color: $muted; font-size: 14px; }
-.sort__select { height: 36px; border-radius: 8px; background: #d9d9d9; color: #000; font-size: 14px; padding: 0 12px; border: 0; }
+.sort__select-wrapper { position: relative; display: inline-flex; align-items: center; }
+.sort__select {
+  height: 36px;
+  border-radius: 8px;
+  background: $panel;
+  color: $text;
+  font-size: 14px;
+  padding: 0 36px 0 12px;
+  border: 1px solid $border;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sort__select:focus {
+  outline: none;
+  border-color: $accent-border;
+  box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25);
+}
+.sort__caret {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: $muted;
+  font-size: 14px;
+}
 
 .filters__row2 { margin-top: 12px; display: grid; grid-template-columns: 1fr; gap: 12px; }
 @media (min-width: 640px) { .filters__row2 { grid-template-columns: repeat(3, 1fr); } }
 
 .field .label { color: $muted; font-size: 12px; margin-bottom: 6px; }
 .field__controls { display: flex; align-items: center; gap: 8px; }
+.field__controls--time .pbp-datepicker .p-inputtext { min-width: 8rem; }
 .input { height: 32px; border-radius: 8px; border: 1px solid $border; background: $panel; color: $text; padding: 0 10px; width: 100%; }
 
 /* PrimeNG DatePicker theming (scoped) */
