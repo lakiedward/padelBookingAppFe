@@ -12,7 +12,8 @@
         formControlName="email"
         placeholder="Enter your email"
         class="w-full"
-        autocomplete="email"
+        name="email"
+        autocomplete="username"
       />
       <small class="error-message" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || loginForm.get('email')?.dirty || submitted)">
         <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
@@ -27,6 +28,7 @@
         placeholder="Enter your password"
         [toggleMask]="false"
         [feedback]="false"
+        inputId="password"
         styleClass="w-full"
         inputStyleClass="w-full"
       ></p-password>
@@ -44,7 +46,7 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="submit-btn" [disabled]="loading || loginForm.invalid">
+      <button type="submit" class="submit-btn" [disabled]="loading">
         <span class="spinner" *ngIf="loading" aria-hidden="true"></span>
         <span *ngIf="!loading">Sign In</span>
       </button>
