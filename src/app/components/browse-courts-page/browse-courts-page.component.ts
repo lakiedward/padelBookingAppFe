@@ -4,8 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { AuthService } from '../../services/auth.service';
+import { DatePickerModule } from 'primeng/datepicker';
 
-type SportFilter = 'all' | 'tennis' | 'football' | 'basketball' | 'padel';
+type SportFilter =
+  | 'all'
+  | 'tennis'
+  | 'football'
+  | 'basketball'
+  | 'padel'
+  | 'volleyball'
+  | 'badminton'
+  | 'squash'
+  | 'table-tennis';
 type VenueFilter = 'all' | 'indoor' | 'outdoor';
 type SortBy = 'earliest' | 'price-asc' | 'price-desc';
 
@@ -20,12 +30,13 @@ interface CourtItem {
   tags: string[]; // e.g. ["Indoor","Synthetic"]
   availableDate?: string; // e.g. "2025-09-01"
   slots: string[]; // e.g. ["6:00 AM","7:00 AM","9:00 AM","+6 more"]
+  sport: SportFilter;
 }
 
 @Component({
   selector: 'app-browse-courts-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CourtListingCardComponent],
+  imports: [CommonModule, FormsModule, DatePickerModule, CourtListingCardComponent],
   templateUrl: './browse-courts-page.component.html',
   styleUrl: './browse-courts-page.component.scss'
 })
@@ -34,6 +45,15 @@ export class BrowseCourtsPageComponent {
   sportFilter: SportFilter = 'all';
   venueFilter: VenueFilter = 'all';
   sortBy: SortBy = 'earliest';
+  moreSportsOpen = false;
+  selectedDate: Date | null = null;
+
+  readonly additionalSports: { key: SportFilter; label: string }[] = [
+    { key: 'volleyball', label: '🏐 Volleyball' },
+    { key: 'badminton', label: '🏸 Badminton' },
+    { key: 'squash', label: 'Squash' },
+    { key: 'table-tennis', label: '🏓 Table Tennis' }
+  ];
 
   // Placeholder demo data; images use remote placeholders for now.
   items: CourtItem[] = [
@@ -45,7 +65,8 @@ export class BrowseCourtsPageComponent {
       location: 'Downtown Sports Complex',
       price: '$40',
       tags: ['Indoor', 'Synthetic'],
-      slots: ['6:00 AM', '7:00 AM', '9:00 AM', '+6 more']
+      slots: ['6:00 AM', '7:00 AM', '9:00 AM', '+6 more'],
+      sport: 'basketball'
     },
     {
       image: 'https://images.unsplash.com/photo-1537824598505-99ee03483384?q=80&w=1200&auto=format&fit=crop',
@@ -55,7 +76,8 @@ export class BrowseCourtsPageComponent {
       location: 'City Sports Park',
       price: '$80',
       tags: ['Outdoor', 'Grass'],
-      slots: ['6:00 AM', '8:00 AM', '10:00 AM', '+5 more']
+      slots: ['6:00 AM', '8:00 AM', '10:00 AM', '+5 more'],
+      sport: 'football'
     },
     {
       image: 'https://images.unsplash.com/photo-1500835556837-99ac94a94552?q=80&w=1200&auto=format&fit=crop',
@@ -65,7 +87,8 @@ export class BrowseCourtsPageComponent {
       location: 'Downtown Sports Complex',
       price: '$45',
       tags: ['Outdoor', 'Clay'],
-      slots: ['7:00 AM', '8:00 AM', '10:00 AM', '+5 more']
+      slots: ['7:00 AM', '8:00 AM', '10:00 AM', '+5 more'],
+      sport: 'tennis'
     },
     {
       image: 'https://images.unsplash.com/photo-1512163143273-bde0e3cc740e?q=80&w=1200&auto=format&fit=crop',
@@ -75,7 +98,8 @@ export class BrowseCourtsPageComponent {
       location: 'Downtown Sports Complex',
       price: '$50',
       tags: ['Indoor', 'Hard Court'],
-      slots: ['8:00 AM', '9:00 AM', '11:00 AM', '+6 more']
+      slots: ['8:00 AM', '9:00 AM', '11:00 AM', '+6 more'],
+      sport: 'tennis'
     },
     {
       image: 'https://images.unsplash.com/photo-1593111776706-b6400dd9fec4?q=80&w=1200&auto=format&fit=crop',
@@ -85,7 +109,8 @@ export class BrowseCourtsPageComponent {
       location: 'North District',
       price: '$35',
       tags: ['Indoor', 'Artificial Turf'],
-      slots: ['9:00 AM', '11:00 AM', '1:00 PM', '+4 more']
+      slots: ['9:00 AM', '11:00 AM', '1:00 PM', '+4 more'],
+      sport: 'padel'
     }
   ];
 
@@ -93,11 +118,7 @@ export class BrowseCourtsPageComponent {
 
   get filtered(): CourtItem[] {
     const sportMatch = (it: CourtItem) =>
-      this.sportFilter === 'all' ||
-      (this.sportFilter === 'tennis' && it.emoji === '🎾') ||
-      (this.sportFilter === 'football' && it.emoji === '⚽') ||
-      (this.sportFilter === 'basketball' && it.emoji === '🏀') ||
-      (this.sportFilter === 'padel' && it.emoji === '🏓');
+      this.sportFilter === 'all' || it.sport === this.sportFilter;
 
     const venueMatch = (it: CourtItem) =>
       this.venueFilter === 'all' ||
@@ -115,9 +136,25 @@ export class BrowseCourtsPageComponent {
 
   toggleMobile() { this.mobileOpen = !this.mobileOpen; }
 
+  toggleMoreSports(event: Event) {
+    event.stopPropagation();
+    this.moreSportsOpen = !this.moreSportsOpen;
+  }
+
+  selectSport(key: SportFilter) {
+    this.sportFilter = key;
+  }
+
+  setToday() {
+    const now = new Date();
+    // zero out time for clearer comparisons
+    this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  // No global click listener needed for inline expansion
+
   logout() {
     this.auth.logout();
     this.router.navigate(['/auth']);
   }
 }
-

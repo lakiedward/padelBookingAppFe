@@ -75,7 +75,13 @@
             <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="sportFilter='football'">⚽ Football</button>
             <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="sportFilter='basketball'">🏀 Basketball</button>
             <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="sportFilter='padel'">🏓 Padel</button>
-            <button class="pill pill--more" [class.pill--active]="sportFilter==='all'" (click)="sportFilter='all'">+4 more</button>
+            <button
+              class="pill pill--more"
+              [class.pill--active]="sportFilter==='all'"
+              (click)="toggleMoreSports($event)"
+            >
+              +4 more
+            </button>
             <div class="sep"></div>
             <button class="pill" [class.pill--active]="venueFilter==='indoor'" (click)="venueFilter='indoor'">🏢 Indoor</button>
             <button class="pill" [class.pill--active]="venueFilter==='outdoor'" (click)="venueFilter='outdoor'">🌤️ Outdoor</button>
@@ -91,12 +97,27 @@
           </div>
         </div>
 
+        <!-- Inline expanded extra sports (no dropdown, no scroll) -->
+        <div class="more-inline" *ngIf="moreSportsOpen">
+          <button class="pill" *ngFor="let s of additionalSports" [class.pill--active]="sportFilter===s.key" (click)="selectSport(s.key)">{{ s.label }}</button>
+          <button class="pill" (click)="selectSport('all')">Show all</button>
+        </div>
+
         <div class="filters__row2">
           <div class="field">
             <div class="label">Date</div>
-            <div class="field__controls">
-              <button class="btn btn--accent">Today</button>
-              <input type="date" class="input" />
+            <div class="field__controls field__controls--date">
+              <button class="btn btn--accent" (click)="setToday()">Today</button>
+              <p-datepicker
+                [(ngModel)]="selectedDate"
+                inputId="date"
+                showIcon="true"
+                [showButtonBar]="true"
+                [touchUI]="false"
+                appendTo="body"
+                styleClass="pbp-datepicker"
+                panelStyleClass="pbp-datepicker-panel"
+              ></p-datepicker>
             </div>
           </div>
           <div class="field">
@@ -141,4 +162,3 @@
     </div>
   </section>
 </div>
-
