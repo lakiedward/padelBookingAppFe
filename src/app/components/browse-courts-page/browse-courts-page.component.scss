@@ -7,7 +7,17 @@ $text: #d6dde6;
 $muted: #9aa7b5;
 $white: #fff;
 
-.page { min-height: 100vh; background: $bg; color: $white; }
+.page {
+  position: relative;
+  min-height: 100vh;
+  color: $white;
+  isolation: isolate;
+
+  &.page-gradient-bg::before,
+  &.page-gradient-bg::after {
+    z-index: 0;
+  }
+}
 .container { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
 
 .header {
