@@ -7,6 +7,7 @@ import { PasswordModule } from 'primeng/password';
 import { MapService } from '../../services/map.service';
 import { ClubService } from '../../services/club.service';
 import { ClubDetails, SportKey, SPORT_OPTIONS } from '../../models/club.models';
+import { ClubPreviewComponent } from '../club-preview/club-preview.component';
 
 interface SavedLocation {
   address: string;
@@ -17,7 +18,7 @@ interface SavedLocation {
   @Component({
   selector: 'app-club-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputTextModule, ButtonModule, PasswordModule],
+  imports: [CommonModule, ReactiveFormsModule, InputTextModule, ButtonModule, PasswordModule, ClubPreviewComponent],
   templateUrl: './club-details.component.html',
   styleUrl: './club-details.component.scss'
 })
@@ -34,6 +35,10 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   profilePreviewUrl = signal<string | null>(null);
   wallpaperPreviewUrl = signal<string | null>(null);
 
+  // Drag and drop state
+  isDragOverProfile = signal(false);
+  isDragOverWallpaper = signal(false);
+
   private map?: any;
   private marker?: any;
   currentLat = signal<number | null>(null);
@@ -47,7 +52,10 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   selectedSports = new Set<SportKey>(['tennis']);
 
 
-  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, private clubService: ClubService) {
+  // Edit/preview toggle
+  isEditing = signal(true);
+
+  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, public clubService: ClubService) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -57,6 +65,12 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       location: ['', Validators.required],
       description: [''],
     });
+
+    // Initialize editing mode depending on whether we have saved data
+    const last = this.clubService.lastSaved();
+    if (last) {
+      this.isEditing.set(false);
+    }
 
     this.form.get('address')!.valueChanges.subscribe(value => {
       if (this.geocodeDebounce) clearTimeout(this.geocodeDebounce);
@@ -140,7 +154,45 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       updatedAt: new Date().toISOString(),
     };
     this.clubService.saveClub(details);
+    this.isEditing.set(false);
     console.log('Club saved', details);
+  }
+
+  startEdit() {
+    const saved = this.clubService.lastSaved();
+    if (saved) {
+      this.applyDetailsToForm(saved);
+    }
+    this.isEditing.set(true);
+    // Bring user to top of the form for editing convenience
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+  }
+
+  private applyDetailsToForm(details: ClubDetails) {
+    this.form.patchValue({
+      name: details.name || '',
+      email: details.email || '',
+      phone: details.phone || '',
+      description: details.description || '',
+      address: details.locations && details.locations[0] ? details.locations[0].address : '',
+      location: details.locations && details.locations[0] ? details.locations[0].address : ''
+    }, { emitEvent: false });
+
+    // Locations
+    this.savedLocations = (details.locations || []).map(l => ({ address: l.address, lat: l.lat, lng: l.lng }));
+
+    // Sports
+    this.selectedSports = new Set<SportKey>(details.sports || []);
+
+    // Images
+    // If previous object URLs were used, revoke them to prevent leaks
+    const prevProfile = this.profilePreviewUrl();
+    const prevWallpaper = this.wallpaperPreviewUrl();
+    if (prevProfile && prevProfile.startsWith('blob:')) URL.revokeObjectURL(prevProfile);
+    if (prevWallpaper && prevWallpaper.startsWith('blob:')) URL.revokeObjectURL(prevWallpaper);
+
+    this.profilePreviewUrl.set(details.profileImageUrl || null);
+    this.wallpaperPreviewUrl.set(details.wallpaperImageUrl || null);
   }
 
   onAddLocation() {
@@ -239,6 +291,92 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   private simulateUpload(file: File): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, 1200));
   }
+
+  // Drag and drop handlers
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Determine which drop zone is being hovered
+    const target = event.currentTarget as HTMLElement;
+    if (target.classList.contains('profile')) {
+      this.isDragOverProfile.set(true);
+    } else if (target.classList.contains('wallpaper')) {
+      this.isDragOverWallpaper.set(true);
+    }
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Reset drag over states
+    this.isDragOverProfile.set(false);
+    this.isDragOverWallpaper.set(false);
+  }
+
+  onProfileDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.isDragOverProfile.set(false);
+
+    if (this.isUploadingProfile()) return;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (this.isValidImageFile(file)) {
+        this.handleProfileFile(file);
+      }
+    }
+  }
+
+  onWallpaperDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.isDragOverWallpaper.set(false);
+
+    if (this.isUploadingWallpaper()) return;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (this.isValidImageFile(file)) {
+        this.handleWallpaperFile(file);
+      }
+    }
+  }
+
+  private isValidImageFile(file: File): boolean {
+    return file.type.startsWith('image/');
+  }
+
+  private handleProfileFile(file: File) {
+    const previousUrl = this.profilePreviewUrl();
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+    this.profilePreviewUrl.set(URL.createObjectURL(file));
+    this.isUploadingProfile.set(true);
+    this.simulateUpload(file)
+      .catch(() => {})
+      .finally(() => {
+        this.isUploadingProfile.set(false);
+      });
+  }
+
+  private handleWallpaperFile(file: File) {
+    const previousUrl = this.wallpaperPreviewUrl();
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+    this.wallpaperPreviewUrl.set(URL.createObjectURL(file));
+    this.isUploadingWallpaper.set(true);
+    this.simulateUpload(file)
+      .catch(() => {})
+      .finally(() => {
+        this.isUploadingWallpaper.set(false);
+      });
+  }
+
 
   ngOnDestroy() {
     const profileUrl = this.profilePreviewUrl();

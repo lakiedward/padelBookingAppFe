@@ -1,13 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { ClubDetails } from '../models/club.models';
 
 @Injectable({ providedIn: 'root' })
 export class ClubService {
+  // Holds the last saved club details in-memory only (no persistence)
+  lastSaved = signal<ClubDetails | null>(null);
+
+  constructor() {}
+
   saveClub(details: ClubDetails): void {
-    try {
-      console.log(JSON.stringify(details));
-    } catch (e) {
-      console.warn('Failed to persist club details', e);
-    }
+    // Do not persist to localStorage or any storage. Just keep it in memory and log.
+    this.lastSaved.set(details);
+    console.log('Club details (non-persistent):', details);
   }
 }

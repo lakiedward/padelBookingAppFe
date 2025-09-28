@@ -1,0 +1,125 @@
+<div class="club-preview" *ngIf="details as d">
+  <div class="hero" [style.background-image]="d.wallpaperImageUrl ? 'url(' + d.wallpaperImageUrl + ')' : 'none'">
+    <div class="hero-overlay"></div>
+    <button type="button" class="edit-btn edit-on-hero" (click)="editRequested.emit()">Edit Club</button>
+    <div class="hero-content">
+      <div class="logo" *ngIf="d.profileImageUrl">
+        <img [src]="d.profileImageUrl" alt="Club logo" />
+      </div>
+      <div class="titles">
+        <h1>{{ d.name }}</h1>
+        <div class="meta">
+          <span class="sport" *ngFor="let s of d.sports; trackBy: trackByIndex">{{ s | titlecase }}</span>
+        </div>
+        <div class="location" *ngIf="d.locations && d.locations.length">
+          <span>{{ d.locations[0].address }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Line break / divider above club information -->
+  <div class="top-divider" role="separator" aria-hidden="true"></div>
+
+  <div class="container">
+    <section class="about" *ngIf="d.description">
+      <h2>About {{ d.name }}</h2>
+      <p>{{ d.description }}</p>
+    </section>
+
+    <div class="top-divider" role="separator" aria-hidden="true"></div>
+    <section class="contact">
+      <h2>Contact Information</h2>
+      <div class="grid">
+        <div class="contact-item">
+          <div class="icon-box"><span>✉️</span></div>
+          <div class="content">
+            <div class="title">Email Address</div>
+            <div class="value">{{ d.email }}</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="icon-box"><span>📞</span></div>
+          <div class="content">
+            <div class="title">Phone Number</div>
+            <div class="value">{{ d.phone }}</div>
+          </div>
+        </div>
+        <div class="contact-item" *ngIf="d.locations?.length">
+          <div class="icon-box"><span>📍</span></div>
+          <div class="content">
+            <div class="title">Location</div>
+            <div class="value">
+              <div *ngFor="let loc of d.locations; trackBy: trackByIndex">{{ loc.address }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Courts Section -->
+    <section class="courts">
+      <div class="courts-header">
+        <h2>Club Courts</h2>
+        <div class="controls">
+          <div class="hint">Manage courts by sport below</div>
+        </div>
+      </div>
+      <div class="filters">
+        <button type="button" class="chip" [class.active]="activeCourtFilter() === 'all'" (click)="setCourtFilter('all')">All</button>
+        <button type="button" class="chip" [class.active]="activeCourtFilter() === 'padel'" (click)="setCourtFilter('padel')">Padel</button>
+        <button type="button" class="chip" [class.active]="activeCourtFilter() === 'tennis'" (click)="setCourtFilter('tennis')">Tennis</button>
+      </div>
+
+      <!-- Padel Courts -->
+      <ng-container *ngIf="activeCourtFilter() === 'all' || activeCourtFilter() === 'padel'">
+        <h3 class="section-sub">Padel</h3>
+        <div class="cards">
+          <div class="court-card">
+            <div class="image"></div>
+            <div class="body">
+              <div class="badge primary">Padel</div>
+              <h4>Main Padel Court</h4>
+              <div class="row"><span class="check">✔</span><span class="muted">Padel Center - Court A</span></div>
+              <div class="tags"><span class="tag">Outdoor</span><span class="tag">Synthetic Clay</span></div>
+            </div>
+          </div>
+          <div class="court-card">
+            <div class="image"></div>
+            <div class="body">
+              <div class="badge primary">Padel</div>
+              <h4>Indoor Padel Court</h4>
+              <div class="row"><span class="check">✔</span><span class="muted">Padel Center - Indoor Hall</span></div>
+              <div class="tags"><span class="tag">Indoor</span><span class="tag">Glass Walls</span></div>
+            </div>
+          </div>
+          <div class="court-card">
+            <div class="image"></div>
+            <div class="body">
+              <div class="badge primary">Padel</div>
+              <h4>West Padel Court</h4>
+              <div class="row"><span class="check">✔</span><span class="muted">Padel Center - West Wing</span></div>
+              <div class="tags"><span class="tag">Outdoor</span><span class="tag">Synthetic Clay</span></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Tennis Courts -->
+      <ng-container *ngIf="activeCourtFilter() === 'all' || activeCourtFilter() === 'tennis'">
+        <h3 class="section-sub">Tennis</h3>
+        <div class="cards">
+          <div class="court-card">
+            <div class="image"></div>
+            <div class="body">
+              <div class="badge primary">Tennis</div>
+              <h4>Center Tennis Court</h4>
+              <div class="row"><span class="check">✔</span><span class="muted">Main Sports Complex</span></div>
+              <div class="tags"><span class="tag">Outdoor</span><span class="tag">Hard Court</span></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </section>
+  </div>
+</div>

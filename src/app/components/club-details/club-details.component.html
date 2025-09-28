@@ -1,5 +1,6 @@
 <div class="club-details">
-  <form [formGroup]="form">
+
+  <form *ngIf="isEditing(); else previewBlock" [formGroup]="form">
 
     <div class="section">
       <h3>Club Details</h3>
@@ -84,7 +85,12 @@
       <div class="media-grid">
         <div class="media-card">
           <div class="title">Club Profile Picture</div>
-          <div class="drop clickable profile" (click)="onClickProfileUpload()">
+          <div class="drop clickable profile"
+               (click)="onClickProfileUpload()"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onProfileDrop($event)"
+               [class.drag-over]="isDragOverProfile()">
             <input type="file" accept="image/*" hidden #profileInput (click)="$event.stopPropagation()" (change)="onProfileSelected($event)" />
 
             <ng-container *ngIf="isUploadingProfile(); else profileContent">
@@ -106,14 +112,19 @@
               <ng-template #profilePlaceholder>
                 <div class="drop-emoji"><img src="assets/icons/photo.png" alt="Upload" /></div>
                 <div class="drop-title">Upload Profile Picture</div>
-                <div class="drop-sub">Click to browse files</div>
+                <div class="drop-sub">Click to browse or drag & drop</div>
               </ng-template>
             </ng-template>
           </div>
         </div>
         <div class="media-card">
           <div class="title">Club Wallpaper</div>
-          <div class="drop clickable wallpaper" (click)="onClickWallpaperUpload()">
+          <div class="drop clickable wallpaper"
+               (click)="onClickWallpaperUpload()"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onWallpaperDrop($event)"
+               [class.drag-over]="isDragOverWallpaper()">
             <input type="file" accept="image/*" hidden #wallpaperInput (click)="$event.stopPropagation()" (change)="onWallpaperSelected($event)" />
 
             <ng-container *ngIf="isUploadingWallpaper(); else wallpaperContent">
@@ -135,7 +146,7 @@
               <ng-template #wallpaperPlaceholder>
                 <div class="drop-emoji"><img src="assets/icons/photo.png" alt="Upload" /></div>
                 <div class="drop-title">Upload Wallpaper</div>
-                <div class="drop-sub">Click to browse files</div>
+                <div class="drop-sub">Click to browse or drag & drop</div>
               </ng-template>
             </ng-template>
           </div>
@@ -148,6 +159,18 @@
       <button pButton type="button" (click)="save()" class="save-btn">Save Club</button>
     </div>
   </form>
+
+  <ng-template #previewBlock>
+    <ng-container *ngIf="clubService.lastSaved() as saved; else noData">
+      <app-club-preview [details]="saved" (editRequested)="startEdit()"></app-club-preview>
+    </ng-container>
+    <ng-template #noData>
+      <div class="no-data">
+        <div class="preview-title">No club saved yet</div>
+        <button type="button" class="edit-btn" (click)="startEdit()">Create Club</button>
+      </div>
+    </ng-template>
+  </ng-template>
 </div>
 
 
