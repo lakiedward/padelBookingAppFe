@@ -12,6 +12,13 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+## Backend API (Railway)
+
+- Production/remote backend is deployed on Railway: `https://padelbookingappbe-production.up.railway.app`.
+- The auth service currently points to this Railway API by default: `src/app/services/auth.service.ts` (`apiUrl`).
+- For fully local development, change that base to `http://localhost:8081/api/auth` (backend runs with profile `local`).
+- Prefer centralizing the API base URL in an environment/config service to avoid hard‑coding in multiple places.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
