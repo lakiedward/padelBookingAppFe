@@ -71,6 +71,11 @@ $white: #fff;
 .glow--hero-b { position: absolute; right: 96px; top: 64px; width: 192px; height: 192px; background: linear-gradient(90deg, transparent, $accent); border-radius: 999px; filter: blur(18px); }
 .glow--hero-c { position: absolute; right: 224px; top: 40px; width: 80px; height: 80px; background: linear-gradient(90deg, transparent, $text); border-radius: 999px; filter: blur(16px); }
 
+/* Optional: make user page background match Admin by hiding extra hero glows */
+.bg-admin-like .glow--hero-a,
+.bg-admin-like .glow--hero-b,
+.bg-admin-like .glow--hero-c { display: none; }
+
 .hero__inner { padding: 40px 16px 48px; }
 .hero__title { font-size: 40px; font-weight: 800; letter-spacing: 0.02em; }
 .hero__subtitle { color: $muted; margin-top: 8px; font-size: 16px; }
@@ -78,8 +83,11 @@ $white: #fff;
 .accent { color: $accent; }
 
 .filters { margin-top: 24px; border: 1px solid $border; background: $panel; border-radius: 16px; padding: 16px; backdrop-filter: blur(6px); }
-.filters__row { display: flex; flex-direction: column; gap: 12px; align-items: stretch; justify-content: space-between; }
-@media (min-width: 1024px) { .filters__row { flex-direction: row; align-items: center; } }
+.filters__row { display: flex; flex-direction: column; gap: 12px; align-items: stretch; justify-content: space-between; flex-wrap: wrap; }
+@media (min-width: 1024px) {
+  .filters__row { flex-direction: row; align-items: center; }
+  .more-inline { flex-basis: 100%; }
+}
 
 .pills { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; row-gap: 8px; }
 .more-inline { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -127,6 +135,31 @@ $white: #fff;
 .field .label { color: $muted; font-size: 12px; margin-bottom: 6px; }
 .field__controls { display: flex; align-items: center; gap: 8px; }
 .field__controls--time .pbp-datepicker .p-inputtext { min-width: 8rem; }
+.field__controls--time .time-input-wrapper { position: relative; display: inline-block; }
+.field__controls--time .time-mask { min-width: 8rem; text-transform: none; letter-spacing: normal; padding-left: 36px; padding-right: 36px; }
+.field__controls--time .time-icon { position: absolute; left: 10px; width: 16px; height: 16px; color: $muted; top: 50%; transform: translateY(-50%); pointer-events: none; }
+
+/* Keep PrimeNG input present for correct overlay positioning, but invisible */
+:host ::ng-deep .pbp-time-trigger {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* above masked input for clickable trigger */
+}
+:host ::ng-deep .pbp-time-trigger .p-inputtext {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none; /* do not capture typing */
+}
+:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
 .input { height: 32px; border-radius: 8px; border: 1px solid $border; background: $panel; color: $text; padding: 0 10px; width: 100%; }
 
 /* PrimeNG DatePicker theming (scoped) */

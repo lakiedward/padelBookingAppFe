@@ -1,7 +1,5 @@
-<div class="page page-gradient-bg">
+<div class="page page-gradient-bg bg-admin-like">
   <header class="header">
-    <div class="glow glow--left"></div>
-    <div class="glow glow--right"></div>
 
     <div class="container header__inner">
       <div class="brand">
@@ -71,13 +69,12 @@
       <div class="filters">
         <div class="filters__row">
           <div class="pills">
-            <button class="pill" [class.pill--active]="sportFilter==='tennis'" (click)="sportFilter='tennis'">🎾 Tennis</button>
-            <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="sportFilter='football'">⚽ Football</button>
-            <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="sportFilter='basketball'">🏀 Basketball</button>
-            <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="sportFilter='padel'">🏓 Padel</button>
+            <button class="pill" [class.pill--active]="sportFilter==='tennis'" (click)="selectSport('tennis')">🎾 Tennis</button>
+            <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="selectSport('football')">⚽ Football</button>
+            <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="selectSport('basketball')">🏀 Basketball</button>
+            <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="selectSport('padel')">🏓 Padel</button>
             <button
               class="pill pill--more"
-              [class.pill--active]="sportFilter==='all'"
               (click)="toggleMoreSports($event)"
             >
               +4 more
@@ -85,6 +82,11 @@
             <div class="sep"></div>
             <button class="pill" [class.pill--active]="venueFilter==='indoor'" (click)="venueFilter='indoor'">🏢 Indoor</button>
             <button class="pill" [class.pill--active]="venueFilter==='outdoor'" (click)="venueFilter='outdoor'">🌤️ Outdoor</button>
+          </div>
+          <!-- Extra sports should appear directly under main sports on mobile -->
+          <div class="more-inline" *ngIf="moreSportsOpen">
+            <button class="pill" *ngFor="let s of additionalSports" [class.pill--active]="sportFilter===s.key" (click)="selectSport(s.key)">{{ s.label }}</button>
+            <button class="pill" (click)="selectSport('all')">Show all</button>
           </div>
 
           <div class="sort">
@@ -96,12 +98,6 @@
               <span aria-hidden="true" class="sort__caret">▾</span>
             </div>
           </div>
-        </div>
-
-        <!-- Inline expanded extra sports (no dropdown, no scroll) -->
-        <div class="more-inline" *ngIf="moreSportsOpen">
-          <button class="pill" *ngFor="let s of additionalSports" [class.pill--active]="sportFilter===s.key" (click)="selectSport(s.key)">{{ s.label }}</button>
-          <button class="pill" (click)="selectSport('all')">Show all</button>
         </div>
 
         <div class="filters__row2">
@@ -128,38 +124,67 @@
           <div class="field">
             <div class="label">Time</div>
             <div class="field__controls field__controls--time">
-              <p-datepicker
-                [(ngModel)]="timeFrom"
-                inputId="timeFrom"
-                [timeOnly]="true"
-                hourFormat="24"
-                showIcon="true"
-                [iconDisplay]="isTouch ? 'button' : 'input'"
-                [touchUI]="isTouch"
-                [readonlyInput]="isTouch"
-                [appendTo]="isTouch ? null : 'body'"
-                [hideOnDateTimeSelect]="!isTouch"
-                [focusTrap]="isTouch"
-                styleClass="pbp-datepicker"
-                panelStyleClass="pbp-datepicker-panel"
-                placeholder="From"
-              ></p-datepicker>
-              <p-datepicker
-                [(ngModel)]="timeTo"
-                inputId="timeTo"
-                [timeOnly]="true"
-                hourFormat="24"
-                showIcon="true"
-                [iconDisplay]="isTouch ? 'button' : 'input'"
-                [touchUI]="isTouch"
-                [readonlyInput]="isTouch"
-                [appendTo]="isTouch ? null : 'body'"
-                [hideOnDateTimeSelect]="!isTouch"
-                [focusTrap]="isTouch"
-                styleClass="pbp-datepicker"
-                panelStyleClass="pbp-datepicker-panel"
-                placeholder="To"
-              ></p-datepicker>
+              <!-- HH:MM masked inputs everywhere (mobile + desktop) -->
+              <div class="time-input-wrapper" #timeFromWrapper>
+                <svg class="time-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+                <input
+                  pInputMask
+                  mask="99:99"
+                  slotChar="HH:MM"
+                  inputmode="numeric"
+                  class="input time-mask"
+                  placeholder="From"
+                  [(ngModel)]="timeFromStr"
+                  (onComplete)="onTimeMaskComplete('from')"
+                />
+                <p-datepicker
+                  [(ngModel)]="timeFrom"
+                  [timeOnly]="true"
+                  hourFormat="24"
+                  showIcon="true"
+                  [iconDisplay]="'button'"
+                  [touchUI]="false"
+                  [readonlyInput]="true"
+                  [appendTo]="timeFromWrapper"
+                  [hideOnDateTimeSelect]="true"
+                  styleClass="pbp-datepicker pbp-time-trigger"
+                  panelStyleClass="pbp-datepicker-panel"
+                  (ngModelChange)="onTimePickerChange($event, 'from')"
+                ></p-datepicker>
+              </div>
+              <div class="time-input-wrapper" #timeToWrapper>
+                <svg class="time-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+                <input
+                  pInputMask
+                  mask="99:99"
+                  slotChar="HH:MM"
+                  inputmode="numeric"
+                  class="input time-mask"
+                  placeholder="To"
+                  [(ngModel)]="timeToStr"
+                  (onComplete)="onTimeMaskComplete('to')"
+                />
+                <p-datepicker
+                  [(ngModel)]="timeTo"
+                  [timeOnly]="true"
+                  hourFormat="24"
+                  showIcon="true"
+                  [iconDisplay]="'button'"
+                  [touchUI]="false"
+                  [readonlyInput]="true"
+                  [appendTo]="timeToWrapper"
+                  [hideOnDateTimeSelect]="true"
+                  styleClass="pbp-datepicker pbp-time-trigger"
+                  panelStyleClass="pbp-datepicker-panel"
+                  (ngModelChange)="onTimePickerChange($event, 'to')"
+                ></p-datepicker>
+              </div>
               <button class="btn" type="button" (click)="clearTime()">Clear</button>
             </div>
           </div>

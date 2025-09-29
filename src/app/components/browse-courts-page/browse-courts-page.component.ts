@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { AuthService } from '../../services/auth.service';
 import { DatePickerModule } from 'primeng/datepicker';
+import { InputMaskModule } from 'primeng/inputmask';
 
 type SportFilter =
   | 'all'
@@ -36,7 +37,7 @@ interface CourtItem {
 @Component({
   selector: 'app-browse-courts-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePickerModule, CourtListingCardComponent],
+  imports: [CommonModule, FormsModule, DatePickerModule, InputMaskModule, CourtListingCardComponent],
   templateUrl: './browse-courts-page.component.html',
   styleUrl: './browse-courts-page.component.scss'
 })
@@ -55,6 +56,9 @@ export class BrowseCourtsPageComponent {
   // Time range filters (time-only pickers)
   timeFrom: Date | null = null;
   timeTo: Date | null = null;
+  // Masked time strings for manual input on touch devices (HH:MM)
+  timeFromStr = '';
+  timeToStr = '';
 
   // Prefer PrimeNG DatePicker "touch" modal experience on phones and keep
   // the overlay alive until user confirms selection (iOS/Safari quirks).
@@ -195,6 +199,8 @@ export class BrowseCourtsPageComponent {
 
   selectSport(key: SportFilter) {
     this.sportFilter = key;
+    // Close the extra sports panel after selecting, including 'Show all'
+    this.moreSportsOpen = false;
   }
 
   setToday() {
@@ -206,6 +212,8 @@ export class BrowseCourtsPageComponent {
   clearTime() {
     this.timeFrom = null;
     this.timeTo = null;
+    this.timeFromStr = '';
+    this.timeToStr = '';
   }
 
   private minutesOfDate(d: Date): number {
@@ -231,6 +239,38 @@ export class BrowseCourtsPageComponent {
       if (h >= 0 && h < 24 && min >= 0 && min < 60) return h * 60 + min;
     }
     return null;
+  }
+
+  onTimeMaskComplete(which: 'from' | 'to') {
+    let str = which === 'from' ? this.timeFromStr : this.timeToStr;
+    const re = /^(\d{1,2}):(\d{2})$/;
+    const m = re.exec((str || '').trim());
+    if (!m) return;
+    let h = Math.min(23, Math.max(0, parseInt(m[1], 10)));
+    let min = Math.min(59, Math.max(0, parseInt(m[2], 10)));
+    const d = new Date();
+    d.setHours(h, min, 0, 0);
+    // Normalize displayed value to HH:MM
+    const norm = `${h.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+    if (which === 'from') {
+      this.timeFrom = d;
+      this.timeFromStr = norm;
+    } else {
+      this.timeTo = d;
+      this.timeToStr = norm;
+    }
+  }
+
+  onTimePickerChange(value: Date | null, which: 'from' | 'to') {
+    if (!value) {
+      if (which === 'from') this.timeFromStr = '';
+      else this.timeToStr = '';
+      return;
+    }
+    const h = value.getHours();
+    const m = value.getMinutes();
+    const norm = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    if (which === 'from') this.timeFromStr = norm; else this.timeToStr = norm;
   }
 
   // No global click listener needed for inline expansion

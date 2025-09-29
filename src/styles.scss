@@ -62,6 +62,7 @@ html {
     radial-gradient(clamp(220px, 28vw, 520px) clamp(220px, 28vw, 520px) at 74% 78%, rgba(214, 221, 230, 0.18), rgba(0, 0, 0, 0) 65%),
     linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
   z-index: 0;
+  pointer-events: none; /* never block interactions */
 }
 .page-gradient-bg::after {
   content: '';
@@ -69,6 +70,7 @@ html {
   inset: 0;
   background: radial-gradient(80% 80% at 50% 30%, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
   z-index: 1;
+  pointer-events: none; /* never block interactions */
 }
 
 @media (max-width: 640px) {
