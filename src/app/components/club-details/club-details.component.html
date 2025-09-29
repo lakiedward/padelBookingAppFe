@@ -1,6 +1,8 @@
 <div class="club-details">
+  <p-toast key="error" position="bottom-right" appendTo="body" [baseZIndex]="10000"></p-toast>
+  <p-toast key="success" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
 
-  <form *ngIf="isEditing(); else previewBlock" [formGroup]="form">
+  <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted">
 
     <div class="section">
       <h3>Club Details</h3>
@@ -43,7 +45,7 @@
         </div>
       </div>
 
-      <div #mapContainer class="map" aria-label="Location map"></div>
+      <div #mapContainer class="map" aria-label="Location map" [class.invalid]="submitted && savedLocations.length === 0"></div>
 
       <div class="saved-locations" *ngIf="savedLocations.length > 0">
         <div class="loc-card" *ngFor="let loc of savedLocations; let i = index">
@@ -54,6 +56,7 @@
           <button type="button" class="remove-btn" (click)="removeLocation(i)">Remove</button>
         </div>
       </div>
+      <div class="error-text" *ngIf="submitted && savedLocations.length === 0">Please add at least one location.</div>
     </div>
 
     <hr class="section-separator" />
@@ -90,7 +93,8 @@
                (dragover)="onDragOver($event)"
                (dragleave)="onDragLeave($event)"
                (drop)="onProfileDrop($event)"
-               [class.drag-over]="isDragOverProfile()">
+               [class.drag-over]="isDragOverProfile()"
+               [class.invalid]="submitted && !profilePreviewUrl()">
             <input type="file" accept="image/*" hidden #profileInput (click)="$event.stopPropagation()" (change)="onProfileSelected($event)" />
 
             <ng-container *ngIf="isUploadingProfile(); else profileContent">
@@ -124,7 +128,8 @@
                (dragover)="onDragOver($event)"
                (dragleave)="onDragLeave($event)"
                (drop)="onWallpaperDrop($event)"
-               [class.drag-over]="isDragOverWallpaper()">
+               [class.drag-over]="isDragOverWallpaper()"
+               [class.invalid]="submitted && !wallpaperPreviewUrl()">
             <input type="file" accept="image/*" hidden #wallpaperInput (click)="$event.stopPropagation()" (change)="onWallpaperSelected($event)" />
 
             <ng-container *ngIf="isUploadingWallpaper(); else wallpaperContent">
@@ -162,7 +167,7 @@
 
   <ng-template #previewBlock>
     <ng-container *ngIf="clubService.lastSaved() as saved; else noData">
-      <app-club-preview [details]="saved" (editRequested)="startEdit()"></app-club-preview>
+      <app-club-preview [details]="saved" (editRequested)="startEdit()" (editCourtsRequested)="onEditCourtsRequested()"></app-club-preview>
     </ng-container>
     <ng-template #noData>
       <div class="no-data">
@@ -172,5 +177,3 @@
     </ng-template>
   </ng-template>
 </div>
-
-

@@ -236,6 +236,12 @@
     }
   }
 
+  /* Show red border for invalid textareas only after save attempt */
+  form.submitted .textarea.ng-invalid {
+    border-color: #ef4444; /* red */
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) inset;
+  }
+
   .section { margin-top: 24px; }
   .section > h3 { color: #d6dde6; font-size: 16px; margin: 0 0 12px 0; }
 
@@ -380,6 +386,12 @@
       transform: scale(1.02);
     }
 
+    /* Invalid state for required images after submit */
+    .drop.invalid {
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) inset;
+    }
+
     /* Ensure different aspect media keep fixed container height */
     .drop.profile { height: 320px; }
     .drop.wallpaper { height: 320px; }
@@ -493,6 +505,12 @@
     border-color: #a7ee43;
     box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.12) inset;
   }
+
+  /* Show red border for invalid inputs only after save attempt */
+  form.submitted .p-inputtext.ng-invalid {
+    border-color: #ef4444 !important; /* red */
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) inset;
+  }
 }
 
 
@@ -507,6 +525,20 @@
     overflow: hidden;
     border: 1px solid rgba(214, 221, 230, 0.15);
     background: rgba(15, 27, 38, 0.85);
+  }
+  .map.invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18) inset;
+  }
+  .error-text {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #ef4444; /* stronger red */
+    font-size: 14px;
+    font-weight: 700;
   }
   .saved-locations {
     margin-top: 12px;

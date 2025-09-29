@@ -4,7 +4,7 @@ import { ClubDetailsComponent } from '../club-details/club-details.component';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
-type AdminMenuKey = 'club-details' | 'courts';
+type AdminMenuKey = 'club-management' | 'courts' | 'events';
 
 @Component({
   selector: 'app-admin-view',
@@ -14,7 +14,7 @@ type AdminMenuKey = 'club-details' | 'courts';
   styleUrl: './admin-view.component.scss'
 })
 export class AdminViewComponent {
-  selectedMenu: AdminMenuKey = 'club-details';
+  selectedMenu: AdminMenuKey = 'club-management';
 
   constructor(private auth: AuthService, private router: Router) {}
 
@@ -22,10 +22,12 @@ export class AdminViewComponent {
     this.selectedMenu = menu;
   }
 
+  onCourtsRequestedFromChild() {
+    this.select('courts');
+  }
+
   onLogout() {
     this.auth.logout();
     this.router.navigate(['/auth']);
   }
 }
-
-

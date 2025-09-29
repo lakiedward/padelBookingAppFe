@@ -1,0 +1,39 @@
+.court-card {
+  background: #0f1b26;
+  border: 1px solid rgba(214,221,230,0.15);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.court-card .image {
+  height: 160px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  background-size: cover;
+  background-position: center;
+}
+.court-card .body { padding: 12px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 11px; border: 1px solid rgba(214,221,230,0.15); background: rgba(255,255,255,0.05); color: #fff; }
+.badge.primary { background: #a7ee43; color: #000a14; border-color: #a7ee43; }
+.court-card h4 { margin: 8px 0; font-size: 15px; color: #fff; }
+.row { display: flex; align-items: center; gap: 6px; }
+.check { color: #a7ee43; }
+.muted { color: #8aa0b5; font-size: 13px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag { font-size: 11px; color: #8aa0b5; border: 1px solid #a7ee43; border-radius: 999px; padding: 2px 8px; background: rgba(255,255,255,0.05); }
+
+.actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+.edit-court-btn {
+  background: #a7ee43;
+  border: 1px solid #8ae22a;
+  color: #000a14;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.edit-court-btn .icon { width: 16px; height: 16px; }
+.edit-court-btn:hover { filter: brightness(0.95); }
+

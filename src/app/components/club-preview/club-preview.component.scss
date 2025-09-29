@@ -7,7 +7,6 @@
   color: #fff;
 }
 
-/* Match the same vibe/background container as club details */
 .top-divider {
   height: 1px;
   background: rgba(214,221,230,0.15);
@@ -54,12 +53,11 @@
 .about h2, .contact h2, .courts h2 { font-size: 20px; margin: 8px 0 8px; }
 .about p { color: #fff; }
 
-/* Contact items with icons */
 .contact .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 @media (min-width: 640px) { .contact .grid { grid-template-columns: 1fr 1fr; } }
 .contact-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
 .icon-box {
@@ -72,13 +70,31 @@
   color: #a7ee43;
   font-size: 22px;
 }
+.icon-box .icon { width: 24px; height: 24px; }
 .contact-item .content .title { color: #a7ee43; font-weight: 700; font-size: 14px; }
 .contact-item .content .value { color: #fff; font-size: 16px; margin-top: 4px; }
 
-/* Courts */
+.contact h2 { padding-bottom: 8px; }
+
 .courts { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(214,221,230,0.15); }
 .courts-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .courts .hint { color: #8aa0b5; font-size: 13px; }
+.courts-header .controls { display: flex; align-items: center; gap: 10px; }
+.edit-courts-btn {
+  background: #a7ee43;
+  border: 1px solid #8ae22a;
+  color: #000a14;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.edit-courts-btn .icon { width: 16px; height: 16px; }
+.edit-courts-btn:hover { filter: brightness(0.95); }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .chip {
   border-radius: 999px;
@@ -124,7 +140,6 @@
   color: #fff;
 }
 
-/* Header (inside the same box) */
 .club-preview .preview-header {
   display: flex;
   align-items: center;
@@ -143,13 +158,17 @@
   border: 1px solid #8ae22a;
   color: #000a14;
   border-radius: 12px;
-  padding: 8px 14px;
+  padding: 10px 16px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 700;
   cursor: pointer;
 }
+.club-preview .edit-btn .icon { width: 18px; height: 18px; }
 .club-preview .edit-btn:hover { filter: brightness(0.95); }
 
-/* Position edit button on the hero top-right */
 .hero .edit-on-hero {
   position: absolute;
   top: 12px;
@@ -157,7 +176,6 @@
   z-index: 2;
 }
 
-/* Match the same vibe/background container as club details */
 .top-divider {
   height: 1px;
   background: rgba(214,221,230,0.15);
@@ -209,7 +227,7 @@
 @media (min-width: 640px) { .contact .grid { grid-template-columns: 1fr 1fr; } }
 .contact-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
 .icon-box {
@@ -265,15 +283,10 @@
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .tag { font-size: 11px; color: #8aa0b5; border: 1px solid #a7ee43; border-radius: 999px; padding: 2px 8px; background: rgba(255,255,255,0.05); }
 
-
-/* Full-bleed hero override: remove any perceived margins by canceling parent padding */
 :host, .club-preview { display: block; }
 .club-preview .hero {
-  /* Cancel parent padding on the top/left/right to make wallpaper edge-to-edge */
   margin: -16px -16px 0;
-  /* Make wallpaper a bit taller */
-  height: 280px;
-  /* Ensure wallpaper corners match parent rounded corners */
+  height: 320px;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   overflow: hidden;
@@ -283,4 +296,15 @@
 }
 @media (min-width: 1024px) {
   .club-preview .hero { margin: -24px -24px 0; }
+}
+
+.club-preview .logo {
+  width: 120px;
+  height: 120px;
+}
+
+.club-preview .about,
+.club-preview .contact {
+  padding-top: 20px;
+  padding-bottom: 20px;
 }

@@ -1,9 +1,12 @@
-import { Component, ElementRef, ViewChild, signal, OnDestroy, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, ElementRef, ViewChild, signal, OnDestroy, AfterViewInit, Inject, PLATFORM_ID, Output, EventEmitter } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
 import { PasswordModule } from 'primeng/password';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { MapService } from '../../services/map.service';
 import { ClubService } from '../../services/club.service';
 import { ClubDetails, SportKey, SPORT_OPTIONS } from '../../models/club.models';
@@ -18,13 +21,15 @@ interface SavedLocation {
   @Component({
   selector: 'app-club-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputTextModule, ButtonModule, PasswordModule, ClubPreviewComponent],
+  imports: [CommonModule, ReactiveFormsModule, InputTextModule, ButtonModule, RippleModule, PasswordModule, ToastModule, ClubPreviewComponent],
   templateUrl: './club-details.component.html',
-  styleUrl: './club-details.component.scss'
+  styleUrl: './club-details.component.scss',
+  providers: [MessageService]
 })
 export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   form: FormGroup;
   private readonly isBrowser: boolean;
+  submitted = false;
 
   @ViewChild('profileInput') profileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('wallpaperInput') wallpaperInput?: ElementRef<HTMLInputElement>;
@@ -35,11 +40,11 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   profilePreviewUrl = signal<string | null>(null);
   wallpaperPreviewUrl = signal<string | null>(null);
 
-  // Drag and drop state
   isDragOverProfile = signal(false);
   isDragOverWallpaper = signal(false);
 
   private map?: any;
+  private mapInitialized = false;
   private marker?: any;
   currentLat = signal<number | null>(null);
   currentLng = signal<number | null>(null);
@@ -52,21 +57,21 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   selectedSports = new Set<SportKey>(['tennis']);
 
 
-  // Edit/preview toggle
   isEditing = signal(true);
 
-  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, public clubService: ClubService) {
+  @Output() courtsRequested = new EventEmitter<void>();
+
+  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, public clubService: ClubService, private messageService: MessageService, private host: ElementRef<HTMLElement>) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required]],
+      phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9\s\-().]{7,20}$/)]],
       name: ['', Validators.required],
       address: ['', Validators.required],
       location: ['', Validators.required],
-      description: [''],
+      description: ['', Validators.required],
     });
 
-    // Initialize editing mode depending on whether we have saved data
     const last = this.clubService.lastSaved();
     if (last) {
       this.isEditing.set(false);
@@ -95,29 +100,47 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!this.isBrowser) return;
-    this.mapService.loadLeafletAssets().then(() => {
-      if (!this.mapContainer) return;
-      this.mapService.initMap(this.mapContainer.nativeElement, (lat, lon) => {
-        this.currentLat.set(lat);
-        this.currentLng.set(lon);
-        this.isGeocoding.set(true);
-        this.mapService.reverseGeocode(lat, lon)
-          .then(display => {
-            this.form.patchValue({ address: display, location: display }, { emitEvent: false });
-          })
-          .finally(() => this.isGeocoding.set(false));
-      });
-      this.mapService.tryInitFromGeolocation((lat, lon) => {
-        this.currentLat.set(lat);
-        this.currentLng.set(lon);
-        this.isGeocoding.set(true);
-        this.mapService.reverseGeocode(lat, lon)
-          .then(display => {
-            this.form.patchValue({ address: display, location: display }, { emitEvent: false });
-          })
-          .finally(() => this.isGeocoding.set(false));
-      });
-    }).catch(err => console.error('Leaflet load error', err));
+    this.initMapOnce();
+  }
+
+  private initMapOnce() {
+    if (this.mapInitialized) return;
+    setTimeout(() => {
+      if (!this.isBrowser || !this.mapContainer) return;
+      this.mapService
+        .loadLeafletAssets()
+        .then(() => {
+          if (!this.mapContainer || this.mapInitialized) return;
+          this.mapService.initMap(this.mapContainer.nativeElement, (lat, lon) => {
+            this.currentLat.set(lat);
+            this.currentLng.set(lon);
+            this.isGeocoding.set(true);
+            this.mapService
+              .reverseGeocode(lat, lon)
+              .then(display => {
+                this.form.patchValue({ address: display, location: display }, { emitEvent: false });
+              })
+              .finally(() => this.isGeocoding.set(false));
+          });
+          this.mapService.tryInitFromGeolocation((lat, lon) => {
+            this.currentLat.set(lat);
+            this.currentLng.set(lon);
+            this.isGeocoding.set(true);
+            this.mapService
+              .reverseGeocode(lat, lon)
+              .then(display => {
+                this.form.patchValue({ address: display, location: display }, { emitEvent: false });
+              })
+              .finally(() => this.isGeocoding.set(false));
+          });
+          this.mapInitialized = true;
+        })
+        .catch(err => console.error('Leaflet load error', err));
+    });
+  }
+
+  onEditCourtsRequested() {
+    this.courtsRequested.emit();
   }
 
   toggleSportSelection(key: SportKey) {
@@ -138,7 +161,20 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   }
 
   save() {
-    if (this.form.invalid) return;
+    this.submitted = true;
+    this.form.markAllAsTouched();
+    this.form.updateValueAndValidity({ onlySelf: false, emitEvent: false });
+
+    const { missing, invalid } = this.buildValidationIssues();
+    const hasBlockingIssues = this.form.invalid || missing.length > 0 || invalid.length > 0;
+    if (hasBlockingIssues) {
+      const parts: string[] = [];
+      if (missing.length > 0) parts.push(`Missing: ${missing.join(', ')}`);
+      if (invalid.length > 0) parts.push(`Invalid format: ${invalid.join(', ')}`);
+      const detail = parts.join(' • ');
+      this.messageService.add({ key: 'error', severity: 'error', summary: 'Validation Error', detail, life: 5000 });
+      return;
+    }
     const v = this.form.value;
     const selectedSports: SportKey[] = Array.from(this.selectedSports);
     const details: ClubDetails = {
@@ -154,8 +190,60 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       updatedAt: new Date().toISOString(),
     };
     this.clubService.saveClub(details);
+    try {
+      const container = this.host.nativeElement.closest('.content') as HTMLElement | null;
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        this.host.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+      }
+    } catch {}
     this.isEditing.set(false);
     console.log('Club saved', details);
+    this.messageService.add({ key: 'success', severity: 'success', summary: 'Saved', detail: 'Club saved successfully', life: 3000 });
+  }
+
+  showError() {
+    this.submitted = true;
+    this.form.markAllAsTouched();
+    const { missing, invalid } = this.buildValidationIssues();
+    if (missing.length === 0 && invalid.length === 0) {
+      this.messageService.add({ severity: 'info', summary: 'No Errors', detail: 'All fields look good.', life: 2500 });
+      return;
+    }
+    const parts: string[] = [];
+    if (missing.length > 0) parts.push(`Missing: ${missing.join(', ')}`);
+    if (invalid.length > 0) parts.push(`Invalid format: ${invalid.join(', ')}`);
+    const detail = parts.join(' • ');
+    this.messageService.add({ severity: 'error', summary: 'Validation Error', detail, life: 5000 });
+  }
+
+  private buildValidationIssues(): { missing: string[]; invalid: string[] } {
+    const missing: string[] = [];
+    const invalid: string[] = [];
+    const controls = this.form.controls;
+    const isEmpty = (v: any) => (typeof v === 'string' ? v.trim() === '' : v == null);
+
+    if (isEmpty(controls['name'].value)) missing.push('Name');
+    if (isEmpty(controls['email'].value)) missing.push('Email');
+    if (isEmpty(controls['phone'].value)) missing.push('Phone');
+    if (isEmpty(controls['address'].value)) missing.push('Address');
+    if (isEmpty(controls['location'].value)) missing.push('Location');
+    if (isEmpty(controls['description'].value)) missing.push('Description');
+
+    if (this.savedLocations.length === 0) missing.push('Added Location');
+    if (!this.profilePreviewUrl()) missing.push('Profile Image');
+    if (!this.wallpaperPreviewUrl()) missing.push('Wallpaper Image');
+
+    if (!isEmpty(controls['email'].value) && controls['email'].invalid && controls['email'].errors?.['email']) {
+      invalid.push('Email');
+    }
+    if (!isEmpty(controls['phone'].value) && controls['phone'].invalid && controls['phone'].errors?.['pattern']) {
+      invalid.push('Phone');
+    }
+
+    return { missing, invalid };
   }
 
   startEdit() {
@@ -163,9 +251,10 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     if (saved) {
       this.applyDetailsToForm(saved);
     }
+    this.submitted = false;
     this.isEditing.set(true);
-    // Bring user to top of the form for editing convenience
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    this.initMapOnce();
   }
 
   private applyDetailsToForm(details: ClubDetails) {
@@ -178,14 +267,11 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       location: details.locations && details.locations[0] ? details.locations[0].address : ''
     }, { emitEvent: false });
 
-    // Locations
     this.savedLocations = (details.locations || []).map(l => ({ address: l.address, lat: l.lat, lng: l.lng }));
 
-    // Sports
     this.selectedSports = new Set<SportKey>(details.sports || []);
 
-    // Images
-    // If previous object URLs were used, revoke them to prevent leaks
+    
     const prevProfile = this.profilePreviewUrl();
     const prevWallpaper = this.wallpaperPreviewUrl();
     if (prevProfile && prevProfile.startsWith('blob:')) URL.revokeObjectURL(prevProfile);
@@ -292,12 +378,10 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     return new Promise((resolve) => setTimeout(resolve, 1200));
   }
 
-  // Drag and drop handlers
   onDragOver(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
 
-    // Determine which drop zone is being hovered
     const target = event.currentTarget as HTMLElement;
     if (target.classList.contains('profile')) {
       this.isDragOverProfile.set(true);
@@ -310,7 +394,6 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
-    // Reset drag over states
     this.isDragOverProfile.set(false);
     this.isDragOverWallpaper.set(false);
   }
@@ -390,5 +473,3 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     this.mapService.destroy();
   }
 }
-
-
