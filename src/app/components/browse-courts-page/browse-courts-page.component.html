@@ -73,6 +73,7 @@
             <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="selectSport('football')">⚽ Football</button>
             <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="selectSport('basketball')">🏀 Basketball</button>
             <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="selectSport('padel')">🏓 Padel</button>
+            <button class="pill" [class.pill--active]="sportFilter==='all'" (click)="selectSport('all')">All Sports</button>
             <button
               class="pill pill--more"
               (click)="toggleMoreSports($event)"
@@ -80,6 +81,7 @@
               +4 more
             </button>
             <div class="sep"></div>
+            <button class="pill" [class.pill--active]="venueFilter==='all'" (click)="venueFilter='all'">All Types</button>
             <button class="pill" [class.pill--active]="venueFilter==='indoor'" (click)="venueFilter='indoor'">🏢 Indoor</button>
             <button class="pill" [class.pill--active]="venueFilter==='outdoor'" (click)="venueFilter='outdoor'">🌤️ Outdoor</button>
           </div>
@@ -125,7 +127,7 @@
             <div class="label">Time</div>
             <div class="field__controls field__controls--time">
               <!-- HH:MM masked inputs everywhere (mobile + desktop) -->
-              <div class="time-input-wrapper" #timeFromWrapper>
+              <div class="time-input-wrapper">
                 <svg class="time-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 6v6l4 2" />
@@ -141,6 +143,7 @@
                   (onComplete)="onTimeMaskComplete('from')"
                 />
                 <p-datepicker
+                  #fromPicker
                   [(ngModel)]="timeFrom"
                   [timeOnly]="true"
                   hourFormat="24"
@@ -148,14 +151,17 @@
                   [iconDisplay]="'button'"
                   [touchUI]="false"
                   [readonlyInput]="true"
-                  [appendTo]="timeFromWrapper"
+                  [appendTo]="'body'"
                   [hideOnDateTimeSelect]="true"
+                  [showButtonBar]="true"
                   styleClass="pbp-datepicker pbp-time-trigger"
                   panelStyleClass="pbp-datepicker-panel"
                   (ngModelChange)="onTimePickerChange($event, 'from')"
+                  (onSelect)="onTimeSelect($event, 'from')"
+                  (onHide)="onTimePickerHide('from')"
                 ></p-datepicker>
               </div>
-              <div class="time-input-wrapper" #timeToWrapper>
+              <div class="time-input-wrapper">
                 <svg class="time-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 6v6l4 2" />
@@ -171,6 +177,7 @@
                   (onComplete)="onTimeMaskComplete('to')"
                 />
                 <p-datepicker
+                  #toPicker
                   [(ngModel)]="timeTo"
                   [timeOnly]="true"
                   hourFormat="24"
@@ -178,11 +185,14 @@
                   [iconDisplay]="'button'"
                   [touchUI]="false"
                   [readonlyInput]="true"
-                  [appendTo]="timeToWrapper"
+                  [appendTo]="'body'"
                   [hideOnDateTimeSelect]="true"
+                  [showButtonBar]="true"
                   styleClass="pbp-datepicker pbp-time-trigger"
                   panelStyleClass="pbp-datepicker-panel"
                   (ngModelChange)="onTimePickerChange($event, 'to')"
+                  (onSelect)="onTimeSelect($event, 'to')"
+                  (onHide)="onTimePickerHide('to')"
                 ></p-datepicker>
               </div>
               <button class="btn" type="button" (click)="clearTime()">Clear</button>

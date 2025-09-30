@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { AuthService } from '../../services/auth.service';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputMaskModule } from 'primeng/inputmask';
+import { DatePicker } from 'primeng/datepicker';
 
 type SportFilter =
   | 'all'
@@ -42,6 +43,9 @@ interface CourtItem {
   styleUrl: './browse-courts-page.component.scss'
 })
 export class BrowseCourtsPageComponent {
+  @ViewChild('fromPicker') fromPicker!: DatePicker;
+  @ViewChild('toPicker') toPicker!: DatePicker;
+  
   mobileOpen = false;
   sportFilter: SportFilter = 'all';
   venueFilter: VenueFilter = 'all';
@@ -271,6 +275,61 @@ export class BrowseCourtsPageComponent {
     const m = value.getMinutes();
     const norm = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
     if (which === 'from') this.timeFromStr = norm; else this.timeToStr = norm;
+  }
+
+  onTimeSelect(value: Date | null, which: 'from' | 'to') {
+    if (!value) return;
+    
+    // Validate time range
+    if (which === 'to' && this.timeFrom) {
+      const fromMinutes = this.minutesOfDate(this.timeFrom);
+      const toMinutes = this.minutesOfDate(value);
+      
+      if (toMinutes <= fromMinutes) {
+        // If "To" time is before or equal to "From" time, show warning
+        console.warn('End time must be after start time');
+        // Optionally, you could show a toast notification here
+        return;
+      }
+    }
+    
+    if (which === 'from' && this.timeTo) {
+      const fromMinutes = this.minutesOfDate(value);
+      const toMinutes = this.minutesOfDate(this.timeTo);
+      
+      if (fromMinutes >= toMinutes) {
+        console.warn('Start time must be before end time');
+        return;
+      }
+    }
+    
+    // Update the time values
+    if (which === 'from') {
+      this.timeFrom = value;
+    } else {
+      this.timeTo = value;
+    }
+    
+    // Update the string representation
+    const h = value.getHours();
+    const m = value.getMinutes();
+    const norm = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    if (which === 'from') this.timeFromStr = norm; else this.timeToStr = norm;
+    
+    // Close the picker after selection
+    setTimeout(() => {
+      if (which === 'from' && this.fromPicker) {
+        this.fromPicker.hideOverlay();
+      } else if (which === 'to' && this.toPicker) {
+        this.toPicker.hideOverlay();
+      }
+    }, 100);
+  }
+
+  onTimePickerHide(which: 'from' | 'to') {
+    // This method is called when the time picker is hidden
+    // We can use this to ensure proper cleanup or additional validation
+    console.log(`Time picker ${which} hidden`);
   }
 
   // No global click listener needed for inline expansion

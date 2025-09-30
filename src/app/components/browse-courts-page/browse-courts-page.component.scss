@@ -135,30 +135,84 @@ $white: #fff;
 .field .label { color: $muted; font-size: 12px; margin-bottom: 6px; }
 .field__controls { display: flex; align-items: center; gap: 8px; }
 .field__controls--time .pbp-datepicker .p-inputtext { min-width: 8rem; }
-.field__controls--time .time-input-wrapper { position: relative; display: inline-block; }
-.field__controls--time .time-mask { min-width: 8rem; text-transform: none; letter-spacing: normal; padding-left: 36px; padding-right: 36px; }
-.field__controls--time .time-icon { position: absolute; left: 10px; width: 16px; height: 16px; color: $muted; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.field__controls--time .time-input-wrapper { 
+  position: relative; 
+  display: inline-flex; 
+  align-items: center; 
+  width: 100%;
+}
+.field__controls--time .time-mask { 
+  min-width: 8rem; 
+  text-transform: none; 
+  letter-spacing: normal; 
+  padding-left: 36px; 
+  padding-right: 40px; 
+  height: 32px;
+  line-height: 32px;
+}
+.field__controls--time .time-input-wrapper .time-icon { 
+  position: absolute; 
+  left: 10px; 
+  top: 50%; 
+  transform: translateY(-50%); 
+  pointer-events: none; 
+  color: $muted; 
+  width: 16px; 
+  height: 16px;
+  z-index: 2;
+}
 
 /* Keep PrimeNG input present for correct overlay positioning, but invisible */
 :host ::ng-deep .pbp-time-trigger {
   position: absolute;
-  inset: 0;
-  z-index: 1; /* above masked input for clickable trigger */
-}
-:host ::ng-deep .pbp-time-trigger .p-inputtext {
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  border: 0;
-  margin: 0;
-  padding: 0;
-  pointer-events: none; /* do not capture typing */
-}
-:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger {
-  position: absolute;
   right: 6px;
   top: 50%;
   transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+:host ::ng-deep .pbp-time-trigger .p-inputtext {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #d6dde6;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+}
+:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger:focus-visible {
+  outline: 2px solid rgba(167, 238, 67, 0.45);
+  outline-offset: 2px;
+}
+:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger .p-icon {
+  width: 16px;
+  height: 16px;
 }
 .input { height: 32px; border-radius: 8px; border: 1px solid $border; background: $panel; color: $text; padding: 0 10px; width: 100%; }
 
@@ -209,6 +263,47 @@ $white: #fff;
   .p-timepicker {
     background: #0f1b26;
     border-top: 1px solid rgba(214, 221, 230, 0.18);
+  }
+  .p-timepicker {
+    .p-hour-picker,
+    .p-minute-picker {
+      .p-link {
+        color: #d6dde6;
+        &:hover {
+          background: rgba(255, 255, 255, 0.08);
+        }
+      }
+    }
+  }
+  .p-datepicker-buttonbar {
+    padding: 8px 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    .p-button {
+      background: $accent;
+      color: #000a14;
+      border: 1px solid $accent-border;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      min-width: 60px;
+      &:hover {
+        background: rgba(167, 238, 67, 0.8);
+      }
+      &:focus {
+        outline: 2px solid rgba(167, 238, 67, 0.5);
+        outline-offset: 2px;
+      }
+    }
+    .p-button.p-button-secondary {
+      background: transparent;
+      color: #d6dde6;
+      border: 1px solid rgba(214, 221, 230, 0.3);
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
   }
 }
 
