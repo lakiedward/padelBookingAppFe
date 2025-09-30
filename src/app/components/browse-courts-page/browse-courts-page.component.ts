@@ -1,12 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { AuthService } from '../../services/auth.service';
-import { DatePickerModule } from 'primeng/datepicker';
-import { InputMaskModule } from 'primeng/inputmask';
-import { DatePicker } from 'primeng/datepicker';
 
 type SportFilter =
   | 'all'
@@ -19,6 +16,7 @@ type SportFilter =
   | 'squash'
   | 'table-tennis';
 type VenueFilter = 'all' | 'indoor' | 'outdoor';
+type HeatedFilter = 'all' | 'heated' | 'unheated';
 type SortBy = 'earliest' | 'price-asc' | 'price-desc';
 
 interface CourtItem {
@@ -38,17 +36,15 @@ interface CourtItem {
 @Component({
   selector: 'app-browse-courts-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePickerModule, InputMaskModule, CourtListingCardComponent],
+  imports: [CommonModule, FormsModule, CourtListingCardComponent],
   templateUrl: './browse-courts-page.component.html',
   styleUrl: './browse-courts-page.component.scss'
 })
 export class BrowseCourtsPageComponent {
-  @ViewChild('fromPicker') fromPicker!: DatePicker;
-  @ViewChild('toPicker') toPicker!: DatePicker;
-  
   mobileOpen = false;
   sportFilter: SportFilter = 'all';
   venueFilter: VenueFilter = 'all';
+  heatedFilter: HeatedFilter = 'all';
   sortBy: SortBy = 'earliest';
   sortOptions: { label: string; value: SortBy }[] = [
     { label: 'Earliest availability', value: 'earliest' },
@@ -57,12 +53,13 @@ export class BrowseCourtsPageComponent {
   ];
   moreSportsOpen = false;
   selectedDate: Date | null = null;
-  // Time range filters (time-only pickers)
-  timeFrom: Date | null = null;
-  timeTo: Date | null = null;
-  // Masked time strings for manual input on touch devices (HH:MM)
+  selectedDateStr = '';
+  // Simple time strings (HH:MM format)
   timeFromStr = '';
   timeToStr = '';
+
+  // Time options (24h format with 15-minute intervals)
+  timeOptions: { label: string; value: string }[] = [];
 
   // Prefer PrimeNG DatePicker "touch" modal experience on phones and keep
   // the overlay alive until user confirms selection (iOS/Safari quirks).
@@ -146,7 +143,49 @@ export class BrowseCourtsPageComponent {
     }
   ];
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router) {
+    this.generateTimeOptions();
+  }
+
+  private generateTimeOptions() {
+    const options: { label: string; value: string }[] = [];
+    
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 15) {
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        options.push({
+          label: timeString,
+          value: timeString
+        });
+      }
+    }
+    
+    this.timeOptions = options;
+  }
+
+  onTimeChange(which: 'from' | 'to', event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const value = target.value;
+    
+    if (which === 'from') {
+      this.timeFromStr = value;
+    } else {
+      this.timeToStr = value;
+    }
+    
+    // Validate time range
+    if (this.timeFromStr && this.timeToStr) {
+      if (this.timeFromStr >= this.timeToStr) {
+        console.warn('End time must be after start time');
+        // Reset the invalid time
+        if (which === 'to') {
+          this.timeToStr = '';
+        } else {
+          this.timeFromStr = '';
+        }
+      }
+    }
+  }
 
   get filtered(): CourtItem[] {
     const sportMatch = (it: CourtItem) =>
@@ -159,10 +198,10 @@ export class BrowseCourtsPageComponent {
 
     const timeInRange = (slots: string[]): boolean => {
       // If no time filter, accept
-      if (!this.timeFrom && !this.timeTo) return true;
+      if (!this.timeFromStr && !this.timeToStr) return true;
 
-      const fromMin = this.timeFrom ? this.minutesOfDate(this.timeFrom) : null;
-      const toMin = this.timeTo ? this.minutesOfDate(this.timeTo) : null;
+      const fromMin = this.timeFromStr ? this.parseTimeString(this.timeFromStr) : null;
+      const toMin = this.timeToStr ? this.parseTimeString(this.timeToStr) : null;
 
       // Iterate slot strings like "6:00 AM"
       for (const s of slots) {
@@ -211,31 +250,35 @@ export class BrowseCourtsPageComponent {
     const now = new Date();
     // zero out time for clearer comparisons
     this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    this.selectedDateStr = this.formatDateForInput(this.selectedDate);
+  }
+
+  onDateChange(event: any) {
+    const value = event.target.value;
+    if (value) {
+      this.selectedDate = new Date(value);
+      this.selectedDateStr = value;
+    } else {
+      this.selectedDate = null;
+      this.selectedDateStr = '';
+    }
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   clearTime() {
-    this.timeFrom = null;
-    this.timeTo = null;
     this.timeFromStr = '';
     this.timeToStr = '';
   }
 
-  private minutesOfDate(d: Date): number {
-    return d.getHours() * 60 + d.getMinutes();
-  }
-
   private parseTimeString(s: string): number | null {
-    // Accept formats like "6:00 AM", "18:30", "6:05PM"
+    // Parse HH:MM format
     const trimmed = s.trim();
-    const ampm = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(trimmed);
-    if (ampm) {
-      let h = parseInt(ampm[1], 10);
-      const min = parseInt(ampm[2], 10);
-      const mer = ampm[3].toUpperCase();
-      if (mer === 'PM' && h !== 12) h += 12;
-      if (mer === 'AM' && h === 12) h = 0;
-      return h * 60 + min;
-    }
     const h24 = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
     if (h24) {
       const h = parseInt(h24[1], 10);
@@ -243,93 +286,6 @@ export class BrowseCourtsPageComponent {
       if (h >= 0 && h < 24 && min >= 0 && min < 60) return h * 60 + min;
     }
     return null;
-  }
-
-  onTimeMaskComplete(which: 'from' | 'to') {
-    let str = which === 'from' ? this.timeFromStr : this.timeToStr;
-    const re = /^(\d{1,2}):(\d{2})$/;
-    const m = re.exec((str || '').trim());
-    if (!m) return;
-    let h = Math.min(23, Math.max(0, parseInt(m[1], 10)));
-    let min = Math.min(59, Math.max(0, parseInt(m[2], 10)));
-    const d = new Date();
-    d.setHours(h, min, 0, 0);
-    // Normalize displayed value to HH:MM
-    const norm = `${h.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
-    if (which === 'from') {
-      this.timeFrom = d;
-      this.timeFromStr = norm;
-    } else {
-      this.timeTo = d;
-      this.timeToStr = norm;
-    }
-  }
-
-  onTimePickerChange(value: Date | null, which: 'from' | 'to') {
-    if (!value) {
-      if (which === 'from') this.timeFromStr = '';
-      else this.timeToStr = '';
-      return;
-    }
-    const h = value.getHours();
-    const m = value.getMinutes();
-    const norm = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    if (which === 'from') this.timeFromStr = norm; else this.timeToStr = norm;
-  }
-
-  onTimeSelect(value: Date | null, which: 'from' | 'to') {
-    if (!value) return;
-    
-    // Validate time range
-    if (which === 'to' && this.timeFrom) {
-      const fromMinutes = this.minutesOfDate(this.timeFrom);
-      const toMinutes = this.minutesOfDate(value);
-      
-      if (toMinutes <= fromMinutes) {
-        // If "To" time is before or equal to "From" time, show warning
-        console.warn('End time must be after start time');
-        // Optionally, you could show a toast notification here
-        return;
-      }
-    }
-    
-    if (which === 'from' && this.timeTo) {
-      const fromMinutes = this.minutesOfDate(value);
-      const toMinutes = this.minutesOfDate(this.timeTo);
-      
-      if (fromMinutes >= toMinutes) {
-        console.warn('Start time must be before end time');
-        return;
-      }
-    }
-    
-    // Update the time values
-    if (which === 'from') {
-      this.timeFrom = value;
-    } else {
-      this.timeTo = value;
-    }
-    
-    // Update the string representation
-    const h = value.getHours();
-    const m = value.getMinutes();
-    const norm = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    if (which === 'from') this.timeFromStr = norm; else this.timeToStr = norm;
-    
-    // Close the picker after selection
-    setTimeout(() => {
-      if (which === 'from' && this.fromPicker) {
-        this.fromPicker.hideOverlay();
-      } else if (which === 'to' && this.toPicker) {
-        this.toPicker.hideOverlay();
-      }
-    }, 100);
-  }
-
-  onTimePickerHide(which: 'from' | 'to') {
-    // This method is called when the time picker is hidden
-    // We can use this to ensure proper cleanup or additional validation
-    console.log(`Time picker ${which} hidden`);
   }
 
   // No global click listener needed for inline expansion

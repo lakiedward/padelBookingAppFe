@@ -82,29 +82,307 @@ $white: #fff;
 .muted { color: #d6dde6; }
 .accent { color: $accent; }
 
-.filters { margin-top: 24px; border: 1px solid $border; background: $panel; border-radius: 16px; padding: 16px; backdrop-filter: blur(6px); }
-.filters__row { display: flex; flex-direction: column; gap: 12px; align-items: stretch; justify-content: space-between; flex-wrap: wrap; }
-@media (min-width: 1024px) {
-  .filters__row { flex-direction: row; align-items: center; }
-  .more-inline { flex-basis: 100%; }
+.filters { 
+  margin-top: 24px; 
+  border: 1px solid $border; 
+  background: $panel; 
+  border-radius: 16px; 
+  padding: 20px; 
+  backdrop-filter: blur(6px); 
 }
 
-.pills { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; row-gap: 8px; }
-.more-inline { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+.filters__section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.filters__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filters__label {
+  color: $muted;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.filters__row { 
+  display: grid; 
+  grid-template-columns: 1fr; 
+  gap: 16px; 
+  align-items: start; 
+}
+
+@media (min-width: 640px) { 
+  .filters__row { 
+    grid-template-columns: repeat(2, 1fr); 
+  } 
+}
+
+@media (min-width: 1024px) { 
+  .filters__row { 
+    grid-template-columns: repeat(4, 1fr); 
+  } 
+  .filters__section {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 32px;
+  }
+  .filters__group {
+    flex: 1;
+  }
+}
+
+/* Minimal Filter Design */
+.filters__section--minimal {
+  margin-top: 0;
+  margin-bottom: 32px;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .filter-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .filter-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  color: $muted;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Date Controls */
+.date-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.today-btn {
+  padding: 6px 12px;
+  background: rgba(167, 238, 67, 0.1);
+  border: 1px solid rgba(167, 238, 67, 0.2);
+  border-radius: 8px;
+  color: $accent;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+  
+  &:hover {
+    background: rgba(167, 238, 67, 0.15);
+    border-color: rgba(167, 238, 67, 0.3);
+  }
+}
+
+/* Time Controls */
+.time-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Minimal Select - Match app styling */
+.minimal-select {
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  padding: 0 10px;
+  background: $panel;
+  border: 1px solid $border;
+  border-radius: 8px;
+  color: $text;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  flex: 1;
+  box-sizing: border-box;
+  
+  &:hover {
+    border-color: rgba(214, 221, 230, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: $accent-border;
+    box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  /* Style dropdown options */
+  option {
+    background: #0f1b26;
+    color: $text;
+    padding: 8px 12px;
+    border: none;
+    
+    &:hover {
+      background: rgba(167, 238, 67, 0.1);
+      color: $accent;
+    }
+    
+    &:checked {
+      background: rgba(167, 238, 67, 0.15);
+      color: $accent;
+    }
+  }
+}
+
+/* Mobile-specific fixes for consistent height */
+@media (max-width: 639px) {
+  .minimal-select {
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    line-height: 30px;
+  }
+}
+
+.clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: $muted;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: $text;
+  }
+}
+
+.pills { 
+  display: flex; 
+  gap: 8px; 
+  align-items: center; 
+  flex-wrap: wrap; 
+  row-gap: 8px; 
+}
+
+/* Mobile: 3 sports per line */
+@media (max-width: 639px) {
+  .pills {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    row-gap: 8px;
+    align-items: stretch;
+  }
+  /* Make the expanded "+4 more" container span the full grid width */
+  .pills .more-inline {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  
+  /* Ensure all pills have equal width */
+  .pills .pill {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+  }
+}
+.more-inline { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 8px; 
+  margin-left: 0;
+  margin-top: 8px;
+}
+
+/* Mobile: 3 sports per line for additional sports */
+@media (max-width: 639px) {
+  .more-inline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    row-gap: 8px;
+    align-items: stretch;
+    width: 100%;
+  }
+  
+  /* Ensure additional sports pills have equal width */
+  .more-inline .pill {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+  }
+}
 .sep { display: none; width: 1px; height: 24px; background: $border; margin: 0 8px; }
 @media (min-width: 768px) { .sep { display: block; } }
 
 .pill { padding: 6px 12px; border-radius: 999px; font-size: 14px; font-weight: 600; border: 1px solid $border; color: $text; background: $panel; white-space: nowrap;
   &:hover { background: rgba(255, 255, 255, 0.12); }
 }
+
+/* Mobile: smaller pills for 3 per line */
+@media (max-width: 639px) {
+  .pill {
+    padding: 6px 8px;
+    font-size: 12px;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    min-height: 28px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
 .pill--active { background: $accent; color: #000a14; border-color: $accent-border; }
 .pill--more { border-color: rgba(167, 238, 67, 0.3); color: $accent; }
 
-.sort { display: flex; align-items: center; gap: 12px; }
-.sort__label { color: $muted; font-size: 14px; }
-.sort__select-wrapper { position: relative; display: inline-flex; align-items: center; }
+.sort__select-wrapper { 
+  position: relative; 
+  display: flex; 
+  align-items: center; 
+  width: 100%;
+  min-height: 32px; /* Ensure consistent height with other inputs */
+}
 .sort__select {
-  height: 36px;
+  height: 32px;
   border-radius: 8px;
   background: $panel;
   color: $text;
@@ -115,6 +393,8 @@ $white: #fff;
   -webkit-appearance: none;
   -moz-appearance: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  min-width: 120px;
 }
 .sort__select:focus {
   outline: none;
@@ -129,180 +409,330 @@ $white: #fff;
   font-size: 14px;
 }
 
-.filters__row2 { margin-top: 12px; display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 640px) { .filters__row2 { grid-template-columns: repeat(3, 1fr); } }
 
-.field .label { color: $muted; font-size: 12px; margin-bottom: 6px; }
-.field__controls { display: flex; align-items: center; gap: 8px; }
-.field__controls--time .pbp-datepicker .p-inputtext { min-width: 8rem; }
-.field__controls--time .time-input-wrapper { 
-  position: relative; 
-  display: inline-flex; 
-  align-items: center; 
-  width: 100%;
-}
-.field__controls--time .time-mask { 
-  min-width: 8rem; 
-  text-transform: none; 
-  letter-spacing: normal; 
-  padding-left: 36px; 
-  padding-right: 40px; 
-  height: 32px;
-  line-height: 32px;
-}
-.field__controls--time .time-input-wrapper .time-icon { 
-  position: absolute; 
-  left: 10px; 
-  top: 50%; 
-  transform: translateY(-50%); 
-  pointer-events: none; 
+.field .label { 
   color: $muted; 
-  width: 16px; 
-  height: 16px;
-  z-index: 2;
-}
-
-/* Keep PrimeNG input present for correct overlay positioning, but invisible */
-:host ::ng-deep .pbp-time-trigger {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
+  font-size: 12px; 
+  margin-bottom: 6px; 
+  height: 18px; /* Fixed height for consistent alignment */
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 3;
 }
-:host ::ng-deep .pbp-time-trigger .p-inputtext {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  clip: rect(0 0 0 0) !important;
-  clip-path: inset(50%) !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
+.field__controls { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  min-height: 32px; /* Ensure consistent height with other inputs */
 }
-:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #d6dde6;
-  box-shadow: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
+.field__controls--time .pbp-datepicker .p-inputtext { min-width: 8rem; }
+.field__controls--time {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 32px; /* Ensure consistent height with other inputs */
 }
-:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
-}
-:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger:focus-visible {
-  outline: 2px solid rgba(167, 238, 67, 0.45);
-  outline-offset: 2px;
-}
-:host ::ng-deep .pbp-time-trigger .p-datepicker-trigger .p-icon {
-  width: 16px;
-  height: 16px;
-}
-.input { height: 32px; border-radius: 8px; border: 1px solid $border; background: $panel; color: $text; padding: 0 10px; width: 100%; }
 
-/* PrimeNG DatePicker theming (scoped) */
-:host ::ng-deep .pbp-datepicker {
+.time-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.time-selector-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.time-clear-group {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 2px;
+}
+
+.time-label {
+  color: $muted;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  height: 18px; /* Match main label height */
+  display: flex;
+  align-items: center;
+}
+
+.time-select {
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid $border;
+  background: $panel;
+  color: $text;
+  font-size: 14px;
+  width: 100%;
+  min-width: 120px;
+}
+
+.btn--small {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.input { 
+  height: 32px; 
+  border-radius: 8px; 
+  border: 1px solid $border; 
+  background: $panel; 
+  color: $text; 
+  padding: 0 10px; 
+  width: 100%; 
+  min-width: 120px;
+}
+
+.date-input {
+  height: 32px;
+  padding: 0 10px;
+  background: $panel;
+  border: 1px solid $border;
+  border-radius: 8px;
+  color: $text;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  flex: 1;
+  
+  &:hover {
+    border-color: rgba(214, 221, 230, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: $accent-border;
+    box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  /* Mobile-specific fixes */
+  @media (max-width: 639px) {
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    line-height: 30px;
+  }
+}
+
+/* Minimal PrimeNG DatePicker theming - Match app styling */
+:host ::ng-deep .minimal-datepicker {
   .p-inputtext {
-    height: 36px;
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
     border-radius: 8px;
     background: $panel;
     color: $text;
     border: 1px solid $border;
-    padding: 0 10px 0 36px; /* room for icon */
+    padding: 0 10px 0 32px;
+    font-size: 14px;
+    font-weight: 400;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    box-sizing: border-box;
+    
+    &:hover {
+      border-color: rgba(214, 221, 230, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: $accent-border;
+      box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+    }
   }
+  
   .p-datepicker-trigger {
+    color: $muted;
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: $text;
+    }
+  }
+  
+  .mobile-date-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 32px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid $border;
+    background: $panel;
     color: $text;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 0 12px;
+    gap: 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    cursor: pointer;
+    text-align: left;
+  }
+  
+  .mobile-date-trigger:hover {
+    border-color: rgba(214, 221, 230, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  .mobile-date-trigger:focus-visible {
+    outline: none;
+    border-color: $accent-border;
+    box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  .mobile-date-trigger__text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .mobile-date-trigger__text--placeholder {
+    color: $muted;
+  }
+  
+  .mobile-date-trigger__icon {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    color: $muted;
+  }
+  
+  .mobile-date-trigger__icon svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
   }
 }
 
-:host ::ng-deep .pbp-datepicker-panel {
-  /* Make the calendar panel fully readable on dark bg */
-  background: #101821; /* solid dark, no transparency */
-  border: 1px solid rgba(214, 221, 230, 0.25);
-  color: #e6edf5;
-  border-radius: 12px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
-  mix-blend-mode: normal;
-  z-index: 10000 !important; // ensure above cards/blur layers
+:host ::ng-deep .minimal-datepicker-panel {
+  background: #0f1b26;
+  border: 1px solid $border;
+  color: $text;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 10001 !important;
+  position: fixed !important;
+  
   .p-datepicker-header {
-    background: #0f1b26;
-    color: #d6dde6;
-    border-bottom: 1px solid rgba(214, 221, 230, 0.18);
+    background: $panel;
+    color: $text;
+    border-bottom: 1px solid $border;
+    padding: 12px;
   }
+  
   .p-datepicker-calendar {
-    th { color: #9aa7b5; }
-    td > span {
-      color: #d6dde6;
-      border-radius: 10px;
+    padding: 12px;
+    
+    th { 
+      color: $muted; 
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
+    
+    td > span {
+      color: $text;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+      font-weight: 400;
+    }
+    
     td > span.p-highlight {
       background: $accent;
       color: #000a14;
+      font-weight: 500;
     }
+    
     td > span:not(.p-highlight):hover {
-      background: rgba(255,255,255,0.08);
+      background: rgba(167, 238, 67, 0.1);
+      color: $accent;
     }
   }
+  
   .p-datepicker-buttonbar,
   .p-timepicker {
-    background: #0f1b26;
-    border-top: 1px solid rgba(214, 221, 230, 0.18);
+    background: $panel;
+    border-top: 1px solid $border;
+    padding: 12px;
   }
+  
   .p-timepicker {
     .p-hour-picker,
     .p-minute-picker {
       .p-link {
-        color: #d6dde6;
+        color: $text;
+        border-radius: 6px;
+        transition: background 0.2s ease;
+        
         &:hover {
-          background: rgba(255, 255, 255, 0.08);
+          background: rgba(167, 238, 67, 0.1);
+          color: $accent;
         }
       }
     }
   }
+  
   .p-datepicker-buttonbar {
-    padding: 8px 12px;
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+    
     .p-button {
       background: $accent;
       color: #000a14;
       border: 1px solid $accent-border;
-      font-weight: 600;
+      font-weight: 500;
       padding: 6px 12px;
       border-radius: 6px;
       min-width: 60px;
+      transition: background 0.2s ease;
+      
       &:hover {
         background: rgba(167, 238, 67, 0.8);
       }
+      
       &:focus {
-        outline: 2px solid rgba(167, 238, 67, 0.5);
-        outline-offset: 2px;
+        outline: 1px solid rgba(167, 238, 67, 0.5);
+        outline-offset: 1px;
       }
     }
+    
     .p-button.p-button-secondary {
       background: transparent;
-      color: #d6dde6;
-      border: 1px solid rgba(214, 221, 230, 0.3);
+      color: $text;
+      border: 1px solid $border;
+      
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(214, 221, 230, 0.25);
       }
+    }
+  }
+}
+
+/* Global select options styling for dark theme */
+:host ::ng-deep {
+  select {
+    option {
+      background: #0f1b26 !important;
+      color: $text !important;
+      padding: 8px 12px;
     }
   }
 }

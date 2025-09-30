@@ -67,144 +67,100 @@
       </div>
 
       <div class="filters">
-        <div class="filters__row">
-          <div class="pills">
-            <button class="pill" [class.pill--active]="sportFilter==='tennis'" (click)="selectSport('tennis')">🎾 Tennis</button>
-            <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="selectSport('football')">⚽ Football</button>
-            <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="selectSport('basketball')">🏀 Basketball</button>
-            <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="selectSport('padel')">🏓 Padel</button>
-            <button class="pill" [class.pill--active]="sportFilter==='all'" (click)="selectSport('all')">All Sports</button>
-            <button
-              class="pill pill--more"
-              (click)="toggleMoreSports($event)"
-            >
-              +4 more
-            </button>
-            <div class="sep"></div>
-            <button class="pill" [class.pill--active]="venueFilter==='all'" (click)="venueFilter='all'">All Types</button>
-            <button class="pill" [class.pill--active]="venueFilter==='indoor'" (click)="venueFilter='indoor'">🏢 Indoor</button>
-            <button class="pill" [class.pill--active]="venueFilter==='outdoor'" (click)="venueFilter='outdoor'">🌤️ Outdoor</button>
-          </div>
-          <!-- Extra sports should appear directly under main sports on mobile -->
-          <div class="more-inline" *ngIf="moreSportsOpen">
-            <button class="pill" *ngFor="let s of additionalSports" [class.pill--active]="sportFilter===s.key" (click)="selectSport(s.key)">{{ s.label }}</button>
-            <button class="pill" (click)="selectSport('all')">Show all</button>
+        <!-- Sports and Venue Filters -->
+        <div class="filters__section">
+          <div class="filters__group">
+            <div class="filters__label">Sports</div>
+            <div class="pills">
+              <!-- First row: All Sports, Tennis, Football -->
+              <button class="pill" [class.pill--active]="sportFilter==='all'" (click)="selectSport('all')">All Sports</button>
+              <button class="pill" [class.pill--active]="sportFilter==='tennis'" (click)="selectSport('tennis')">🎾 Tennis</button>
+              <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="selectSport('football')">⚽ Football</button>
+              
+              <!-- Second row: Basketball, Padel, +4 more -->
+              <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="selectSport('basketball')">🏀 Basketball</button>
+              <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="selectSport('padel')">🏓 Padel</button>
+              <button class="pill pill--more" (click)="toggleMoreSports($event)">+4 more</button>
+              
+              <!-- Additional sports when expanded -->
+              <div class="more-inline" *ngIf="moreSportsOpen">
+                <button class="pill" *ngFor="let s of additionalSports" [class.pill--active]="sportFilter===s.key" (click)="selectSport(s.key)">{{ s.label }}</button>
+              </div>
+            </div>
           </div>
 
-          <div class="sort">
-            <span class="sort__label">Sort by</span>
-            <div class="sort__select-wrapper">
-              <select class="sort__select" [(ngModel)]="sortBy">
-                <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
-              </select>
-              <span aria-hidden="true" class="sort__caret">▾</span>
+          <div class="filters__group">
+            <div class="filters__label">Venue Type</div>
+            <div class="pills">
+              <button class="pill" [class.pill--active]="venueFilter==='all'" (click)="venueFilter='all'">All Types</button>
+              <button class="pill" [class.pill--active]="venueFilter==='indoor'" (click)="venueFilter='indoor'">🏢 Indoor</button>
+              <button class="pill" [class.pill--active]="venueFilter==='outdoor'" (click)="venueFilter='outdoor'">🌤️ Outdoor</button>
+            </div>
+          </div>
+
+          <div class="filters__group">
+            <div class="filters__label">Heated</div>
+            <div class="pills">
+              <button class="pill" [class.pill--active]="heatedFilter==='all'" (click)="heatedFilter='all'">All Courts</button>
+              <button class="pill" [class.pill--active]="heatedFilter==='heated'" (click)="heatedFilter='heated'">🔥 Heated</button>
+              <button class="pill" [class.pill--active]="heatedFilter==='unheated'" (click)="heatedFilter='unheated'">❄️ Unheated</button>
             </div>
           </div>
         </div>
 
-        <div class="filters__row2">
-          <div class="field">
-            <div class="label">Date</div>
-            <div class="field__controls field__controls--date">
-              <button class="btn btn--accent" (click)="setToday()">Today</button>
-              <p-datepicker
-                [(ngModel)]="selectedDate"
-                inputId="date"
-                showIcon="true"
-                [iconDisplay]="isTouch ? 'button' : 'input'"
-                [showButtonBar]="true"
-                [touchUI]="isTouch"
-                [readonlyInput]="isTouch"
-                [appendTo]="isTouch ? null : 'body'"
-                [hideOnDateTimeSelect]="!isTouch"
-                [focusTrap]="isTouch"
-                styleClass="pbp-datepicker"
-                panelStyleClass="pbp-datepicker-panel"
-              ></p-datepicker>
-            </div>
-          </div>
-          <div class="field">
-            <div class="label">Time</div>
-            <div class="field__controls field__controls--time">
-              <!-- HH:MM masked inputs everywhere (mobile + desktop) -->
-              <div class="time-input-wrapper">
-                <svg class="time-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-                <input
-                  pInputMask
-                  mask="99:99"
-                  slotChar="HH:MM"
-                  inputmode="numeric"
-                  class="input time-mask"
-                  placeholder="From"
-                  [(ngModel)]="timeFromStr"
-                  (onComplete)="onTimeMaskComplete('from')"
+        <!-- Minimal Filter Controls -->
+        <div class="filters__section filters__section--minimal">
+          <div class="filter-row">
+            <!-- Date Filter -->
+            <div class="filter-item">
+              <label class="filter-label">Date</label>
+              <div class="date-controls">
+                <button class="today-btn" (click)="setToday()">Today</button>
+                <input 
+                  type="date" 
+                  class="date-input"
+                  [(ngModel)]="selectedDateStr"
+                  (change)="onDateChange($event)"
                 />
-                <p-datepicker
-                  #fromPicker
-                  [(ngModel)]="timeFrom"
-                  [timeOnly]="true"
-                  hourFormat="24"
-                  showIcon="true"
-                  [iconDisplay]="'button'"
-                  [touchUI]="false"
-                  [readonlyInput]="true"
-                  [appendTo]="'body'"
-                  [hideOnDateTimeSelect]="true"
-                  [showButtonBar]="true"
-                  styleClass="pbp-datepicker pbp-time-trigger"
-                  panelStyleClass="pbp-datepicker-panel"
-                  (ngModelChange)="onTimePickerChange($event, 'from')"
-                  (onSelect)="onTimeSelect($event, 'from')"
-                  (onHide)="onTimePickerHide('from')"
-                ></p-datepicker>
               </div>
-              <div class="time-input-wrapper">
-                <svg class="time-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-                <input
-                  pInputMask
-                  mask="99:99"
-                  slotChar="HH:MM"
-                  inputmode="numeric"
-                  class="input time-mask"
-                  placeholder="To"
-                  [(ngModel)]="timeToStr"
-                  (onComplete)="onTimeMaskComplete('to')"
-                />
-                <p-datepicker
-                  #toPicker
-                  [(ngModel)]="timeTo"
-                  [timeOnly]="true"
-                  hourFormat="24"
-                  showIcon="true"
-                  [iconDisplay]="'button'"
-                  [touchUI]="false"
-                  [readonlyInput]="true"
-                  [appendTo]="'body'"
-                  [hideOnDateTimeSelect]="true"
-                  [showButtonBar]="true"
-                  styleClass="pbp-datepicker pbp-time-trigger"
-                  panelStyleClass="pbp-datepicker-panel"
-                  (ngModelChange)="onTimePickerChange($event, 'to')"
-                  (onSelect)="onTimeSelect($event, 'to')"
-                  (onHide)="onTimePickerHide('to')"
-                ></p-datepicker>
-              </div>
-              <button class="btn" type="button" (click)="clearTime()">Clear</button>
             </div>
-          </div>
-          <div class="field">
-            <div class="label">City</div>
-            <select class="input">
-              <option>All cities</option>
-              <option>Downtown</option>
-              <option>North District</option>
-            </select>
+
+            <!-- Time Filter -->
+            <div class="filter-item">
+              <label class="filter-label">Time</label>
+              <div class="time-controls">
+                <select class="minimal-select" [(ngModel)]="timeFromStr" (change)="onTimeChange('from', $event)">
+                  <option value="">From</option>
+                  <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.label }}</option>
+                </select>
+                <select class="minimal-select" [(ngModel)]="timeToStr" (change)="onTimeChange('to', $event)">
+                  <option value="">To</option>
+                  <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.label }}</option>
+                </select>
+                <button class="clear-btn" type="button" (click)="clearTime()">×</button>
+              </div>
+            </div>
+
+            <!-- City Filter -->
+            <div class="filter-item">
+              <label class="filter-label">City</label>
+              <select class="minimal-select">
+                <option>All cities</option>
+                <option>Downtown</option>
+                <option>North District</option>
+                <option>East Side</option>
+                <option>West End</option>
+              </select>
+            </div>
+
+            <!-- Sort Filter -->
+            <div class="filter-item">
+              <label class="filter-label">Sort</label>
+              <select class="minimal-select" [(ngModel)]="sortBy">
+                <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
+
           </div>
         </div>
       </div>
