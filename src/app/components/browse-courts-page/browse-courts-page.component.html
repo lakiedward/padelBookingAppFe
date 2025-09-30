@@ -1,0 +1,189 @@
+<div class="page page-gradient-bg bg-admin-like">
+  <header class="header">
+
+    <div class="container header__inner">
+      <div class="brand">
+        <div class="logo-mark">
+          <svg class="logo-svg" fill="none" viewBox="0 0 32 32" aria-hidden="true">
+            <g>
+              <circle cx="16" cy="16" r="12" fill="#a7ee43"></circle>
+              <path d="M10 18c3 3 9 3 12-3" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"></path>
+              <circle cx="20" cy="12" r="2" fill="black"></circle>
+            </g>
+          </svg>
+        </div>
+        <div class="brand__text">
+          <div class="brand__title">PLAYORA</div>
+          <div class="brand__subtitle">Sports Club Management Platform</div>
+        </div>
+      </div>
+
+      <nav class="nav nav--desktop">
+        <a class="nav__link nav__link--active" href="javascript:void(0)">Courts</a>
+        <a class="nav__link" href="javascript:void(0)">Calendar</a>
+        <a class="nav__link nav__link--muted" href="javascript:void(0)">About</a>
+        <a class="nav__link nav__link--muted" href="javascript:void(0)">Contact</a>
+      </nav>
+
+      <div class="actions actions--desktop">
+        <span class="user-mail">user@playora.com</span>
+        <button class="btn" (click)="logout()">Logout</button>
+      </div>
+
+      <button class="btn-icon nav-toggle" aria-label="Toggle menu" (click)="toggleMobile()">
+        <svg *ngIf="!mobileOpen" viewBox="0 0 24 24" class="icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 6H20M4 12H20M4 18H20" />
+        </svg>
+        <svg *ngIf="mobileOpen" viewBox="0 0 24 24" class="icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6L18 18M6 18L18 6" />
+        </svg>
+      </button>
+    </div>
+
+    <div *ngIf="mobileOpen" class="drawer">
+      <div class="drawer__inner">
+        <a class="drawer__link drawer__link--active">Courts</a>
+        <a class="drawer__link">Calendar</a>
+        <a class="drawer__link drawer__link--muted">About</a>
+        <a class="drawer__link drawer__link--muted">Contact</a>
+        <div class="divider"></div>
+        <div class="drawer__mail">user@playora.com</div>
+        <button class="btn btn--block" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="glow glow--hero-a"></div>
+    <div class="glow glow--hero-b"></div>
+    <div class="glow glow--hero-c"></div>
+
+    <div class="container hero__inner">
+      <div class="hero__head">
+        <h1 class="hero__title">
+          <span class="muted">Find Your Perfect </span><span class="accent">Court</span>
+        </h1>
+        <p class="hero__subtitle">Discover and book premium sports courts at top facilities.</p>
+      </div>
+
+      <div class="filters">
+        <!-- Sports and Venue Filters -->
+        <div class="filters__section">
+          <div class="filters__group">
+            <div class="filters__label">Sports</div>
+            <div class="pills">
+              <!-- First row: All Sports, Tennis, Football -->
+              <button class="pill" [class.pill--active]="sportFilter==='all'" (click)="selectSport('all')">All Sports</button>
+              <button class="pill" [class.pill--active]="sportFilter==='tennis'" (click)="selectSport('tennis')">🎾 Tennis</button>
+              <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="selectSport('football')">⚽ Football</button>
+              
+              <!-- Second row: Basketball, Padel, +4 more -->
+              <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="selectSport('basketball')">🏀 Basketball</button>
+              <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="selectSport('padel')">🏓 Padel</button>
+              <button class="pill pill--more" (click)="toggleMoreSports($event)">+4 more</button>
+              
+              <!-- Additional sports when expanded -->
+              <div class="more-inline" *ngIf="moreSportsOpen">
+                <button class="pill" *ngFor="let s of additionalSports" [class.pill--active]="sportFilter===s.key" (click)="selectSport(s.key)">{{ s.label }}</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="filters__group">
+            <div class="filters__label">Venue Type</div>
+            <div class="pills">
+              <button class="pill" [class.pill--active]="venueFilter==='all'" (click)="venueFilter='all'">All Types</button>
+              <button class="pill" [class.pill--active]="venueFilter==='indoor'" (click)="venueFilter='indoor'">🏢 Indoor</button>
+              <button class="pill" [class.pill--active]="venueFilter==='outdoor'" (click)="venueFilter='outdoor'">🌤️ Outdoor</button>
+            </div>
+          </div>
+
+          <div class="filters__group">
+            <div class="filters__label">Heated</div>
+            <div class="pills">
+              <button class="pill" [class.pill--active]="heatedFilter==='all'" (click)="heatedFilter='all'">All Courts</button>
+              <button class="pill" [class.pill--active]="heatedFilter==='heated'" (click)="heatedFilter='heated'">🔥 Heated</button>
+              <button class="pill" [class.pill--active]="heatedFilter==='unheated'" (click)="heatedFilter='unheated'">❄️ Unheated</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Minimal Filter Controls -->
+        <div class="filters__section filters__section--minimal">
+          <div class="filter-row">
+            <!-- Date Filter -->
+            <div class="filter-item">
+              <label class="filter-label">Date</label>
+              <div class="date-controls">
+                <button class="today-btn" (click)="setToday()">Today</button>
+                <input 
+                  type="date" 
+                  class="date-input"
+                  [(ngModel)]="selectedDateStr"
+                  (change)="onDateChange($event)"
+                />
+              </div>
+            </div>
+
+            <!-- Time Filter -->
+            <div class="filter-item">
+              <label class="filter-label">Time</label>
+              <div class="time-controls">
+                <select class="minimal-select" [(ngModel)]="timeFromStr" (change)="onTimeChange('from', $event)">
+                  <option value="">From</option>
+                  <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.label }}</option>
+                </select>
+                <select class="minimal-select" [(ngModel)]="timeToStr" (change)="onTimeChange('to', $event)">
+                  <option value="">To</option>
+                  <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.label }}</option>
+                </select>
+                <button class="clear-btn" type="button" (click)="clearTime()">×</button>
+              </div>
+            </div>
+
+            <!-- City Filter -->
+            <div class="filter-item">
+              <label class="filter-label">City</label>
+              <select class="minimal-select">
+                <option>All cities</option>
+                <option>Downtown</option>
+                <option>North District</option>
+                <option>East Side</option>
+                <option>West End</option>
+              </select>
+            </div>
+
+            <!-- Sort Filter -->
+            <div class="filter-item">
+              <label class="filter-label">Sort</label>
+              <select class="minimal-select" [(ngModel)]="sortBy">
+                <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="count">
+        <span class="count__num">{{ filtered.length }}</span> courts found
+      </div>
+
+      <div class="grid">
+        <app-court-listing-card
+          *ngFor="let c of filtered; index as i"
+          [image]="c.image"
+          [emoji]="c.emoji"
+          [title]="c.title"
+          [club]="c.club"
+          [location]="c.location"
+          [price]="c.price"
+          unit="per hour"
+          [tags]="c.tags"
+          [availableDate]="c.availableDate || '—'"
+          [slots]="c.slots"
+        />
+      </div>
+    </div>
+  </section>
+</div>
