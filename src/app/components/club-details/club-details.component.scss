@@ -1,6 +1,167 @@
 .club-details {
   position: relative;
 
+  // Mobile Header
+  .mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(15, 27, 38, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(214, 221, 230, 0.15);
+    padding: 16px;
+    justify-content: space-between;
+    align-items: center;
+
+    .logo {
+      .logo-text {
+        color: #a7ee43;
+        font-weight: 700;
+        font-size: 24px;
+        letter-spacing: 0.75px;
+      }
+    }
+
+    .mobile-menu-btn {
+      background: none;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      color: #d6dde6;
+
+      .hamburger {
+        display: flex;
+        flex-direction: column;
+        width: 24px;
+        height: 18px;
+        justify-content: space-between;
+
+        span {
+          display: block;
+          height: 2px;
+          background: currentColor;
+          border-radius: 1px;
+          transition: all 0.3s ease;
+        }
+
+        &.active {
+          span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+          }
+          span:nth-child(2) {
+            opacity: 0;
+          }
+          span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+          }
+        }
+      }
+    }
+  }
+
+  // Mobile Menu Overlay
+  .mobile-menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 27, 38, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+
+    &.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-menu {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #0f1b26;
+      padding: 80px 16px 16px;
+      overflow-y: auto;
+
+      .mobile-menu-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+
+        .logo {
+          .logo-text {
+            color: #a7ee43;
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 0.75px;
+          }
+        }
+
+        .close-btn {
+          background: none;
+          border: none;
+          color: #d6dde6;
+          font-size: 32px;
+          cursor: pointer;
+          padding: 8px;
+          line-height: 1;
+        }
+      }
+
+      .mobile-menu-content {
+        .menu-title {
+          color: #d6dde6;
+          font-weight: 700;
+          font-size: 18px;
+          margin-bottom: 8px;
+        }
+
+        .menu-subtitle {
+          color: #8aa0b5;
+          font-size: 14px;
+          margin-bottom: 32px;
+        }
+
+        .mobile-nav {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+
+          .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-radius: 12px;
+            color: #d6dde6;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.2s ease;
+
+            &.active {
+              background: #a7ee43;
+              color: #000a14;
+            }
+
+            &:hover:not(.active) {
+              background: rgba(214, 221, 230, 0.1);
+            }
+          }
+        }
+      }
+    }
+  }
+
   .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -73,6 +234,12 @@
       box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.15) inset;
       outline: none;
     }
+  }
+
+  /* Show red border for invalid textareas only after save attempt */
+  form.submitted .textarea.ng-invalid {
+    border-color: #ef4444; /* red */
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) inset;
   }
 
   .section { margin-top: 24px; }
@@ -152,7 +319,7 @@
 
   .sports {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 
     button {
@@ -176,7 +343,7 @@
 
   .media-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 24px;
   }
 
@@ -208,6 +375,21 @@
       border-style: dashed; /* discontinuous */
       box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.15) inset;
       outline: none;
+    }
+
+    /* Drag over state */
+    .drop.drag-over {
+      border-color: #a7ee43;
+      border-style: dashed;
+      background: rgba(167, 238, 67, 0.1);
+      box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25) inset;
+      transform: scale(1.02);
+    }
+
+    /* Invalid state for required images after submit */
+    .drop.invalid {
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) inset;
     }
 
     /* Ensure different aspect media keep fixed container height */
@@ -275,14 +457,17 @@
 
   .footer {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 16px;
     margin-top: 24px;
     padding-top: 16px;
     border-top: 1px solid rgba(214, 221, 230, 0.15);
-    .hint { color: #6b7a8b; font-size: 14px; }
+    .hint {
+      color: #6b7a8b;
+      font-size: 14px;
+      text-align: center;
+    }
     .save-btn {
-      margin-left: auto;
       background: #a7ee43;
       border: 1px solid #8ae22a;
       color: #000a14;
@@ -290,6 +475,7 @@
       padding: 12px 24px;
       cursor: pointer;
       font-weight: 700;
+      width: 100%;
     }
   }
 }
@@ -319,6 +505,12 @@
     border-color: #a7ee43;
     box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.12) inset;
   }
+
+  /* Show red border for invalid inputs only after save attempt */
+  form.submitted .p-inputtext.ng-invalid {
+    border-color: #ef4444 !important; /* red */
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) inset;
+  }
 }
 
 
@@ -333,6 +525,20 @@
     overflow: hidden;
     border: 1px solid rgba(214, 221, 230, 0.15);
     background: rgba(15, 27, 38, 0.85);
+  }
+  .map.invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18) inset;
+  }
+  .error-text {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #ef4444; /* stronger red */
+    font-size: 14px;
+    font-weight: 700;
   }
   .saved-locations {
     margin-top: 12px;
@@ -396,4 +602,209 @@
   }
   .p-select-items .p-select-option { color: #e2e8f0; }
   .p-select-items .p-select-option.p-highlight { background: rgba(167, 238, 67, 0.12); color: #a7ee43; }
+}
+
+// Mobile Responsive Styles
+@media (max-width: 768px) {
+  .club-details {
+    // Show mobile header
+    .mobile-header {
+      display: flex;
+    }
+
+    // Show mobile menu
+    .mobile-menu-overlay {
+      display: block;
+    }
+
+    // Add top padding to form to account for fixed header
+    form {
+      padding-top: 80px;
+    }
+
+    // Stack grid items vertically on mobile
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    // Adjust sports grid for mobile
+    .sports {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    // Stack media cards vertically
+    .media-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    // Adjust media card height for mobile
+    .media-card .drop {
+      min-height: 240px;
+      max-height: 240px;
+      padding: 24px;
+    }
+
+    // Adjust section spacing
+    .section {
+      margin-top: 16px;
+    }
+
+    // Adjust field spacing
+    .field {
+      margin-bottom: 16px;
+    }
+
+    // Adjust textarea height
+    .textarea {
+      min-height: 120px;
+    }
+
+    // Adjust map height for mobile
+    .map {
+      height: 200px;
+    }
+
+    // Adjust location section
+    .location-section .grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    // Make add location button full width on mobile
+    .add-location-btn {
+      width: 100%;
+      min-width: auto;
+    }
+  }
+}
+
+// Tablet styles
+@media (min-width: 769px) and (max-width: 1024px) {
+  .club-details {
+    // Hide mobile header on tablet
+    .mobile-header {
+      display: none;
+    }
+
+    // Hide mobile menu on tablet
+    .mobile-menu-overlay {
+      display: none;
+    }
+
+    // Adjust sports grid for tablet
+    .sports {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    // Keep media grid as 2 columns on tablet
+    .media-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    // Adjust footer for tablet
+    .footer {
+      flex-direction: row;
+      align-items: center;
+
+      .hint {
+        text-align: left;
+      }
+
+      .save-btn {
+        width: auto;
+        margin-left: auto;
+      }
+    }
+  }
+}
+
+// Desktop styles
+@media (min-width: 1025px) {
+  .club-details {
+    // Hide mobile header on desktop
+    .mobile-header {
+      display: none;
+    }
+
+    // Hide mobile menu on desktop
+    .mobile-menu-overlay {
+      display: none;
+    }
+
+    // Restore desktop grid
+    .grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    // Restore desktop sports grid
+    .sports {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    // Restore desktop media grid
+    .media-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    // Restore desktop footer
+    .footer {
+      flex-direction: row;
+      align-items: center;
+
+      .hint {
+        text-align: left;
+      }
+
+      .save-btn {
+        width: auto;
+        margin-left: auto;
+      }
+    }
+  }
+}
+
+
+/* Preview section title style */
+.club-details .preview-title {
+  margin: 24px 0 8px;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Preview header with Edit button */
+.club-details .preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 12px;
+}
+
+.club-details .edit-btn {
+  background: #a7ee43;
+  border: 1px solid #8ae22a;
+  color: #000a14;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.club-details .edit-btn:hover {
+  filter: brightness(0.95);
+}
+
+.club-details .no-data {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 12px;
 }

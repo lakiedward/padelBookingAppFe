@@ -92,12 +92,10 @@ export class LoginComponent implements AfterViewInit {
 
   onForgotPassword() {
     console.log('Navigate to forgot password');
-    // TODO: Implement navigation to forgot password component
   }
 
   onGoogleSignIn() {
     if (this.loading) return;
     console.log('Continue with Google');
-    // TODO: Implement Google OAuth flow
   }
 }

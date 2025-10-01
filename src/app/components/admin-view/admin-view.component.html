@@ -11,21 +11,34 @@
     <div class="menu-separator"></div>
 
     <nav class="menu">
-      <button (click)="select('club-details')" [class.active]="selectedMenu === 'club-details'">
-        <span class="icon">+</span>
-        <span>Club Details</span>
+      <button (click)="select('club-management')" [class.active]="selectedMenu === 'club-management'">
+        <span>Club Management</span>
       </button>
       <button (click)="select('courts')" [class.active]="selectedMenu === 'courts'">
-        <span class="icon">■</span>
-        <span>Courts & Scheduling</span>
+        <span>Courts</span>
+      </button>
+      <button (click)="select('events')" [class.active]="selectedMenu === 'events'">
+        <span>Events</span>
       </button>
     </nav>
   </aside>
 
   <header class="topbar">
     <div class="page">
-      <div class="name">{{ selectedMenu === 'club-details' ? 'Club Details' : 'Courts & Scheduling' }}</div>
-      <div class="desc">{{ selectedMenu === 'club-details' ? 'Manage club profile and branding' : 'Configure courts and booking schedule' }}</div>
+      <div class="name">
+        {{
+          selectedMenu === 'club-management' ? 'Club Management' :
+          selectedMenu === 'courts' ? 'Courts' :
+          'Events'
+        }}
+      </div>
+      <div class="desc">
+        {{
+          selectedMenu === 'club-management' ? 'Manage club profile and branding' :
+          selectedMenu === 'courts' ? 'Configure courts and booking schedule' :
+          'Create and manage club events'
+        }}
+      </div>
     </div>
     <div class="spacer"></div>
     <button class="admin-chip">
@@ -34,13 +47,14 @@
   </header>
 
   <main class="content">
-    <section class="content-card" *ngIf="selectedMenu === 'club-details'">
-      <app-club-details></app-club-details>
+    <section class="content-card" *ngIf="selectedMenu === 'club-management'">
+      <app-club-details (courtsRequested)="onCourtsRequestedFromChild()"></app-club-details>
     </section>
     <section class="content-card empty" *ngIf="selectedMenu === 'courts'">
-      <p>Courts & Scheduling — coming soon</p>
+      <p>Courts — coming soon</p>
+    </section>
+    <section class="content-card empty" *ngIf="selectedMenu === 'events'">
+      <p>Events — coming soon</p>
     </section>
   </main>
 </div>
-
-

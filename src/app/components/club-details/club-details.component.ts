@@ -1,9 +1,16 @@
-import { Component, ElementRef, ViewChild, signal, OnDestroy, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, ElementRef, ViewChild, signal, OnDestroy, AfterViewInit, Inject, PLATFORM_ID, Output, EventEmitter } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
 import { PasswordModule } from 'primeng/password';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { MapService } from '../../services/map.service';
+import { ClubService } from '../../services/club.service';
+import { ClubDetails, SportKey, SPORT_OPTIONS } from '../../models/club.models';
+import { ClubPreviewComponent } from '../club-preview/club-preview.component';
 
 interface SavedLocation {
   address: string;
@@ -14,26 +21,30 @@ interface SavedLocation {
   @Component({
   selector: 'app-club-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputTextModule, ButtonModule, PasswordModule],
+  imports: [CommonModule, ReactiveFormsModule, InputTextModule, ButtonModule, RippleModule, PasswordModule, ToastModule, ClubPreviewComponent],
   templateUrl: './club-details.component.html',
-  styleUrl: './club-details.component.scss'
+  styleUrl: './club-details.component.scss',
+  providers: [MessageService]
 })
 export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   form: FormGroup;
   private readonly isBrowser: boolean;
+  submitted = false;
 
   @ViewChild('profileInput') profileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('wallpaperInput') wallpaperInput?: ElementRef<HTMLInputElement>;
   @ViewChild('mapContainer') mapContainer?: ElementRef<HTMLDivElement>;
 
-  // upload state and previews (signals for zoneless change detection)
   isUploadingProfile = signal(false);
   isUploadingWallpaper = signal(false);
   profilePreviewUrl = signal<string | null>(null);
   wallpaperPreviewUrl = signal<string | null>(null);
 
-  // map state
-  private map?: any; // Leaflet map (typed as any to avoid requiring type deps)
+  isDragOverProfile = signal(false);
+  isDragOverWallpaper = signal(false);
+
+  private map?: any;
+  private mapInitialized = false;
   private marker?: any;
   currentLat = signal<number | null>(null);
   currentLng = signal<number | null>(null);
@@ -41,177 +52,233 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   savedLocations: SavedLocation[] = [];
   geocodeDebounce?: any;
 
-  sports = [
-    { key: 'tennis', icon: '', label: 'Tennis', selected: true },
-    { key: 'padel', icon: '', label: 'Padel' },
-    { key: 'football', icon: '', label: 'Football' },
-    { key: 'basketball', icon: '', label: 'Basketball' },
-    { key: 'volleyball', icon: '', label: 'Volleyball' },
-    { key: 'badminton', icon: '', label: 'Badminton' },
-    { key: 'squash', icon: '', label: 'Squash' },
-    { key: 'pingpong', icon: '', label: 'Ping Pong' },
-    { key: 'handball', icon: '', label: 'Handball' }
-  ];
+  sports = SPORT_OPTIONS;
+
+  selectedSports = new Set<SportKey>(['tennis']);
 
 
-  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object) {
+  isEditing = signal(true);
+
+  @Output() courtsRequested = new EventEmitter<void>();
+
+  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, public clubService: ClubService, private messageService: MessageService, private host: ElementRef<HTMLElement>) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required]],
+      phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9\s\-().]{7,20}$/)]],
       name: ['', Validators.required],
       address: ['', Validators.required],
       location: ['', Validators.required],
-      description: [''],
+      description: ['', Validators.required],
     });
 
+    const last = this.clubService.lastSaved();
+    if (last) {
+      this.isEditing.set(false);
+    }
 
-    // Watch address field for geocoding
     this.form.get('address')!.valueChanges.subscribe(value => {
       if (this.geocodeDebounce) clearTimeout(this.geocodeDebounce);
-      this.geocodeDebounce = setTimeout(() => this.forwardGeocode(String(value || '')), 500);
+      this.geocodeDebounce = setTimeout(async () => {
+        const query = String(value || '');
+        if (!query) return;
+        this.isGeocoding.set(true);
+        try {
+          const res = await this.mapService.forwardGeocode(query);
+          if (res) {
+            this.mapService.setPosition(res.lat, res.lon);
+            this.currentLat.set(res.lat);
+            this.currentLng.set(res.lon);
+            this.form.patchValue({ location: res.display }, { emitEvent: false });
+          }
+        } finally {
+          this.isGeocoding.set(false);
+        }
+      }, 500);
     });
   }
 
   ngAfterViewInit(): void {
     if (!this.isBrowser) return;
-    // Dynamically load Leaflet CSS/JS if not present to minimize project changes
-    this.injectLeafletAssets().then(() => {
-      this.initMap();
-      this.tryInitFromGeolocation();
-    }).catch(err => console.error('Leaflet load error', err));
+    this.initMapOnce();
   }
 
-  private async injectLeafletAssets(): Promise<void> {
-    if (!this.isBrowser) return;
-    const cssId = 'leaflet-css';
-    const jsId = 'leaflet-js';
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement('link');
-      link.id = cssId;
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
-    }
-    if (!document.getElementById(jsId)) {
-      await new Promise<void>((resolve, reject) => {
-        const script = document.createElement('script');
-        script.id = jsId;
-        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-        script.onload = () => resolve();
-        script.onerror = () => reject();
-        document.body.appendChild(script);
-      });
-    }
-  }
-
-  private initMap(): void {
-    if (!this.isBrowser) return;
-    const L = (window as any).L;
-    if (!L || !this.mapContainer) return;
-    this.map = L.map(this.mapContainer.nativeElement, { zoomControl: true }).setView([45.9432, 24.9668], 6); // Romania center
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(this.map);
-
-    this.marker = L.marker([45.9432, 24.9668], { draggable: true }).addTo(this.map);
-    this.marker.on('dragend', () => {
-      const pos = this.marker.getLatLng();
-      this.updateFromCoords(pos.lat, pos.lng, true);
-    });
-    this.map.on('click', (e: any) => {
-      this.updateFromCoords(e.latlng.lat, e.latlng.lng, true);
+  private initMapOnce() {
+    if (this.mapInitialized) return;
+    setTimeout(() => {
+      if (!this.isBrowser || !this.mapContainer) return;
+      this.mapService
+        .loadLeafletAssets()
+        .then(() => {
+          if (!this.mapContainer || this.mapInitialized) return;
+          this.mapService.initMap(this.mapContainer.nativeElement, (lat, lon) => {
+            this.currentLat.set(lat);
+            this.currentLng.set(lon);
+            this.isGeocoding.set(true);
+            this.mapService
+              .reverseGeocode(lat, lon)
+              .then(display => {
+                this.form.patchValue({ address: display, location: display }, { emitEvent: false });
+              })
+              .finally(() => this.isGeocoding.set(false));
+          });
+          this.mapService.tryInitFromGeolocation((lat, lon) => {
+            this.currentLat.set(lat);
+            this.currentLng.set(lon);
+            this.isGeocoding.set(true);
+            this.mapService
+              .reverseGeocode(lat, lon)
+              .then(display => {
+                this.form.patchValue({ address: display, location: display }, { emitEvent: false });
+              })
+              .finally(() => this.isGeocoding.set(false));
+          });
+          this.mapInitialized = true;
+        })
+        .catch(err => console.error('Leaflet load error', err));
     });
   }
 
-  private async forwardGeocode(query: string): Promise<void> {
-    if (!this.isBrowser) return;
-    if (!query || query.trim().length < 3) return;
-    try {
-      this.isGeocoding.set(true);
-      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1`, {
-        headers: { 'Accept-Language': 'en', 'User-Agent': 'PadelBookingAppFe/1.0 (contact@example.com)' }
-      });
-      const data = await resp.json();
-      if (Array.isArray(data) && data[0]) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
-        this.setMapPosition(lat, lon);
-        // Keep location text in sync with a readable display name
-        this.form.patchValue({ location: data[0].display_name }, { emitEvent: false });
-      }
-    } catch (e) {
-      console.warn('Geocoding failed', e);
-    } finally {
-      this.isGeocoding.set(false);
+  onEditCourtsRequested() {
+    this.courtsRequested.emit();
+  }
+
+  toggleSportSelection(key: SportKey) {
+    if (this.selectedSports.has(key)) {
+      this.selectedSports.delete(key);
+    } else {
+      this.selectedSports.add(key);
     }
   }
 
-  private async reverseGeocode(lat: number, lon: number): Promise<void> {
-    if (!this.isBrowser) return;
-    try {
-      this.isGeocoding.set(true);
-      const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
-        headers: { 'Accept-Language': 'en', 'User-Agent': 'PadelBookingAppFe/1.0 (contact@example.com)' }
-      });
-      const data = await resp.json();
-      const display = data?.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-      this.form.patchValue({ address: display, location: display }, { emitEvent: false });
-    } catch (e) {
-      console.warn('Reverse geocoding failed', e);
-    } finally {
-      this.isGeocoding.set(false);
-    }
+  isSelected(key: SportKey): boolean {
+    return this.selectedSports.has(key);
   }
 
-  private setMapPosition(lat: number, lon: number): void {
-    if (!this.isBrowser) return;
-    this.currentLat.set(lat);
-    this.currentLng.set(lon);
-    const L = (window as any).L;
-    if (this.map) this.map.setView([lat, lon], Math.max(this.map.getZoom(), 14));
-    if (this.marker && L) {
-      this.marker.setLatLng([lat, lon]);
-    }
-  }
-
-  private updateFromCoords(lat: number, lon: number, doReverse = false): void {
-    this.setMapPosition(lat, lon);
-    if (doReverse) this.reverseGeocode(lat, lon);
-  }
-
-  private tryInitFromGeolocation(): void {
-    if (!this.isBrowser) return;
-    if (!('geolocation' in navigator)) return;
-    try {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          this.setMapPosition(lat, lon);
-          // Update address, country, and city from coordinates
-          this.reverseGeocode(lat, lon);
-        },
-        (err) => {
-          console.warn('Geolocation error', err);
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 300000 }
-      );
-    } catch (e) {
-      console.warn('Geolocation not available', e);
-    }
-  }
-
-
-  toggleSportSelection(key: string) {
-    const index = this.sports.findIndex(s => s.key === key);
-    if (index === -1) return;
-    this.sports[index] = { ...this.sports[index], selected: !this.sports[index].selected };
+  labelFromKey(key: SportKey): string {
+    if (!key) return '';
+    return key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
   }
 
   save() {
-    if (this.form.invalid) return;
-    console.log('Save club:', this.form.value, 'savedLocations:', this.savedLocations);
+    this.submitted = true;
+    this.form.markAllAsTouched();
+    this.form.updateValueAndValidity({ onlySelf: false, emitEvent: false });
+
+    const { missing, invalid } = this.buildValidationIssues();
+    const hasBlockingIssues = this.form.invalid || missing.length > 0 || invalid.length > 0;
+    if (hasBlockingIssues) {
+      const parts: string[] = [];
+      if (missing.length > 0) parts.push(`Missing: ${missing.join(', ')}`);
+      if (invalid.length > 0) parts.push(`Invalid format: ${invalid.join(', ')}`);
+      const detail = parts.join(' • ');
+      this.messageService.add({ key: 'error', severity: 'error', summary: 'Validation Error', detail, life: 5000 });
+      return;
+    }
+    const v = this.form.value;
+    const selectedSports: SportKey[] = Array.from(this.selectedSports);
+    const details: ClubDetails = {
+      id: undefined,
+      name: v.name,
+      email: v.email,
+      phone: v.phone,
+      description: v.description || null,
+      locations: this.savedLocations.map(l => ({ address: l.address, lat: l.lat, lng: l.lng })),
+      sports: selectedSports,
+      profileImageUrl: this.profilePreviewUrl(),
+      wallpaperImageUrl: this.wallpaperPreviewUrl(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.clubService.saveClub(details);
+    try {
+      const container = this.host.nativeElement.closest('.content') as HTMLElement | null;
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        this.host.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+      }
+    } catch {}
+    this.isEditing.set(false);
+    console.log('Club saved', details);
+    this.messageService.add({ key: 'success', severity: 'success', summary: 'Saved', detail: 'Club saved successfully', life: 3000 });
+  }
+
+  showError() {
+    this.submitted = true;
+    this.form.markAllAsTouched();
+    const { missing, invalid } = this.buildValidationIssues();
+    if (missing.length === 0 && invalid.length === 0) {
+      this.messageService.add({ severity: 'info', summary: 'No Errors', detail: 'All fields look good.', life: 2500 });
+      return;
+    }
+    const parts: string[] = [];
+    if (missing.length > 0) parts.push(`Missing: ${missing.join(', ')}`);
+    if (invalid.length > 0) parts.push(`Invalid format: ${invalid.join(', ')}`);
+    const detail = parts.join(' • ');
+    this.messageService.add({ severity: 'error', summary: 'Validation Error', detail, life: 5000 });
+  }
+
+  private buildValidationIssues(): { missing: string[]; invalid: string[] } {
+    const missing: string[] = [];
+    const invalid: string[] = [];
+    const controls = this.form.controls;
+    const isEmpty = (v: any) => (typeof v === 'string' ? v.trim() === '' : v == null);
+
+    if (isEmpty(controls['name'].value)) missing.push('Name');
+    if (isEmpty(controls['email'].value)) missing.push('Email');
+    if (isEmpty(controls['phone'].value)) missing.push('Phone');
+    if (isEmpty(controls['address'].value)) missing.push('Address');
+    if (isEmpty(controls['location'].value)) missing.push('Location');
+    if (isEmpty(controls['description'].value)) missing.push('Description');
+
+    if (this.savedLocations.length === 0) missing.push('Added Location');
+    if (!this.profilePreviewUrl()) missing.push('Profile Image');
+    if (!this.wallpaperPreviewUrl()) missing.push('Wallpaper Image');
+
+    if (!isEmpty(controls['email'].value) && controls['email'].invalid && controls['email'].errors?.['email']) {
+      invalid.push('Email');
+    }
+    if (!isEmpty(controls['phone'].value) && controls['phone'].invalid && controls['phone'].errors?.['pattern']) {
+      invalid.push('Phone');
+    }
+
+    return { missing, invalid };
+  }
+
+  startEdit() {
+    const saved = this.clubService.lastSaved();
+    if (saved) {
+      this.applyDetailsToForm(saved);
+    }
+    this.submitted = false;
+    this.isEditing.set(true);
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    this.initMapOnce();
+  }
+
+  private applyDetailsToForm(details: ClubDetails) {
+    this.form.patchValue({
+      name: details.name || '',
+      email: details.email || '',
+      phone: details.phone || '',
+      description: details.description || '',
+      address: details.locations && details.locations[0] ? details.locations[0].address : '',
+      location: details.locations && details.locations[0] ? details.locations[0].address : ''
+    }, { emitEvent: false });
+
+    this.savedLocations = (details.locations || []).map(l => ({ address: l.address, lat: l.lat, lng: l.lng }));
+
+    this.selectedSports = new Set<SportKey>(details.sports || []);
+
+    
+    const prevProfile = this.profilePreviewUrl();
+    const prevWallpaper = this.wallpaperPreviewUrl();
+    if (prevProfile && prevProfile.startsWith('blob:')) URL.revokeObjectURL(prevProfile);
+    if (prevWallpaper && prevWallpaper.startsWith('blob:')) URL.revokeObjectURL(prevWallpaper);
+
+    this.profilePreviewUrl.set(details.profileImageUrl || null);
+    this.wallpaperPreviewUrl.set(details.wallpaperImageUrl || null);
   }
 
   onAddLocation() {
@@ -311,15 +378,98 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     return new Promise((resolve) => setTimeout(resolve, 1200));
   }
 
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const target = event.currentTarget as HTMLElement;
+    if (target.classList.contains('profile')) {
+      this.isDragOverProfile.set(true);
+    } else if (target.classList.contains('wallpaper')) {
+      this.isDragOverWallpaper.set(true);
+    }
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.isDragOverProfile.set(false);
+    this.isDragOverWallpaper.set(false);
+  }
+
+  onProfileDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.isDragOverProfile.set(false);
+
+    if (this.isUploadingProfile()) return;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (this.isValidImageFile(file)) {
+        this.handleProfileFile(file);
+      }
+    }
+  }
+
+  onWallpaperDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.isDragOverWallpaper.set(false);
+
+    if (this.isUploadingWallpaper()) return;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (this.isValidImageFile(file)) {
+        this.handleWallpaperFile(file);
+      }
+    }
+  }
+
+  private isValidImageFile(file: File): boolean {
+    return file.type.startsWith('image/');
+  }
+
+  private handleProfileFile(file: File) {
+    const previousUrl = this.profilePreviewUrl();
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+    this.profilePreviewUrl.set(URL.createObjectURL(file));
+    this.isUploadingProfile.set(true);
+    this.simulateUpload(file)
+      .catch(() => {})
+      .finally(() => {
+        this.isUploadingProfile.set(false);
+      });
+  }
+
+  private handleWallpaperFile(file: File) {
+    const previousUrl = this.wallpaperPreviewUrl();
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+    this.wallpaperPreviewUrl.set(URL.createObjectURL(file));
+    this.isUploadingWallpaper.set(true);
+    this.simulateUpload(file)
+      .catch(() => {})
+      .finally(() => {
+        this.isUploadingWallpaper.set(false);
+      });
+  }
+
+
   ngOnDestroy() {
     const profileUrl = this.profilePreviewUrl();
     const wallpaperUrl = this.wallpaperPreviewUrl();
     if (profileUrl) URL.revokeObjectURL(profileUrl);
     if (wallpaperUrl) URL.revokeObjectURL(wallpaperUrl);
-    if (this.map) {
-      try { this.map.remove(); } catch {}
+    if (this.geocodeDebounce) {
+      clearTimeout(this.geocodeDebounce);
+      this.geocodeDebounce = undefined;
     }
+    this.mapService.destroy();
   }
 }
-
-

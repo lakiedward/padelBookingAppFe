@@ -8,11 +8,9 @@
     'sidebar topbar'
     'sidebar content';
 
-  /* Ensure content sits above the global gradient pseudo-elements */
   isolation: isolate;
 }
 
-/* Position content layers above background */
 .admin-container > .sidebar,
 .admin-container > .topbar,
 .admin-container > .content {
@@ -20,7 +18,6 @@
   z-index: 2;
 }
 
-/* Create a lower stacking context for the gradient background from .page-gradient-bg */
 .admin-container.page-gradient-bg::before,
 .admin-container.page-gradient-bg::after {
   z-index: 0;
@@ -148,5 +145,4 @@
 }
 
 .content-card.empty { color: #9fb0c0; text-align: center; padding: 80px; }
-
 
