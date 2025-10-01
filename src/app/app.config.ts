@@ -18,11 +18,23 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withFetch()),
     provideClientHydration(withEventReplay()),
+<<<<<<< HEAD
     provideAnimationsAsync(),
     providePrimeNG({
       ripple: true,
       theme: {
         preset: Aura
+=======
+    provideAnimations(),
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+        options: {
+          cssLayer: {
+            name: 'primeng'
+          }
+        }
+>>>>>>> origin/main
       }
     })
   ]
