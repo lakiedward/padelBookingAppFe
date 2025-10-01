@@ -76,6 +76,10 @@ export class AuthService {
     return this.hasRole('ROLE_ADMIN');
   }
 
+  isUser(): boolean {
+    return this.hasRole('ROLE_USER');
+  }
+
   getToken(): string | null {
     return typeof window !== 'undefined' && typeof localStorage !== 'undefined'
       ? localStorage.getItem('token')

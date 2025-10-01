@@ -7,9 +7,109 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  overflow: hidden; /* Remove scroll x and y from entire page */
+  /* Allow vertical scrolling; hide only horizontal overflow */
+  overflow-x: hidden;
+  overflow-y: auto;
   height: 100%;
   width: 100%;
+}
+
+/* Shared calendar day styles: month (desktop/mobile) and day views */
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid rgba(214, 221, 230, 0.15);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cal-day__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cal-day__title {
+  color: #d6dde6;
+  font-weight: 600;
+  font-size: 12px; /* mobile default */
+}
+
+@media (min-width: 768px) {
+  .cal-day__title { font-size: 11px; }
+}
+
+.cal-day__badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #a7ee43;
+  color: #000a14;
+  font-weight: 700;
+  font-size: 13px; /* mobile */
+}
+
+@media (min-width: 768px) {
+  .cal-day__badge { font-size: 12px; }
+}
+
+.cal-day__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cal-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* enable ellipsis */
+}
+
+.cal-event__icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.cal-event__text {
+  color: #d6dde6;
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* default for month cells */
+  font-size: 16px; /* mobile default */
+}
+
+@media (min-width: 768px) {
+  .cal-event__text { font-size: 14px; }
+}
+
+/* Day view: allow two-line clamp for names */
+.cal--day .cal-event__text {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Month cells remain single line with ellipsis */
+.cal--month .cal-event__text {
+  white-space: nowrap;
+}
+
+.cal-day__footer {
+  margin-top: 2px;
+  color: #9aa7b5;
+  font-size: 12px;
 }
 
 /* Custom scrollbars to match design (dark track, subtle thumb, Playora green on hover/active) */
@@ -63,6 +163,7 @@ html {
     radial-gradient(clamp(220px, 28vw, 520px) clamp(220px, 28vw, 520px) at 74% 78%, rgba(214, 221, 230, 0.18), rgba(0, 0, 0, 0) 65%),
     linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
   z-index: 0;
+  pointer-events: none; /* never block interactions */
 }
 .page-gradient-bg::after {
   content: '';
@@ -70,6 +171,7 @@ html {
   inset: 0;
   background: radial-gradient(80% 80% at 50% 30%, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
   z-index: 1;
+  pointer-events: none; /* never block interactions */
 }
 
 @media (max-width: 640px) {
