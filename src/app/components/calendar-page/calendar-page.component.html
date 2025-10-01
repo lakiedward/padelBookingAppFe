@@ -76,7 +76,6 @@
           <button class="btn" (click)="goNext()">Next</button>
         </div>
         <div class="toolbar__right">
-          <span class="label">View:</span>
           <button class="pill" [class.pill--active]="viewMode() === 'month'" (click)="setView('month')">Month</button>
           <button class="pill" [class.pill--active]="viewMode() === 'week'" (click)="setView('week')">Week</button>
           <button class="pill" [class.pill--active]="viewMode() === 'day'" (click)="setView('day')">Day</button>
@@ -102,11 +101,13 @@
                   <span *ngSwitchDefault class="cal-day__badge">{{ reservationsByDay(c.date).length }}</span>
                 </ng-container>
               </div>
-              <div class="cal-day__num">{{ c.date.getDate() }}</div>
-              <div class="cal-day__body">
-                <div class="cal-event" *ngFor="let r of (reservationsByDay(c.date) | slice:0:3)">
-                  <span class="cal-event__icon">{{ r.sport }}</span>
-                  <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+              <div class="cal-day__content">
+                <div class="cal-day__num">{{ c.date.getDate() }}</div>
+                <div class="cal-day__body">
+                  <div class="cal-event" *ngFor="let r of (reservationsByDay(c.date) | slice:0:3)">
+                    <span class="cal-event__icon">{{ r.sport }}</span>
+                    <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                  </div>
                 </div>
               </div>
               <div class="cal-day__footer" *ngIf="reservationsByDay(c.date).length > 3">+{{ reservationsByDay(c.date).length - 3 }} more</div>
@@ -132,11 +133,13 @@
                       <span *ngSwitchDefault class="cal-day__badge">{{ reservationsByDay(day.date).length }}</span>
                     </ng-container>
                   </div>
-                  <div class="cal-day__num">{{ day.date.getDate() }}</div>
-                  <div class="cal-day__body">
-                    <div class="cal-event" *ngFor="let r of (reservationsByDay(day.date) | slice:0:1)">
-                      <span class="cal-event__icon">{{ r.sport }}</span>
-                      <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                  <div class="cal-day__content">
+                    <div class="cal-day__num">{{ day.date.getDate() }}</div>
+                    <div class="cal-day__body">
+                      <div class="cal-event" *ngFor="let r of (reservationsByDay(day.date) | slice:0:1)">
+                        <span class="cal-event__icon">{{ r.sport }}</span>
+                        <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                      </div>
                     </div>
                   </div>
                   <div class="cal-day__footer" *ngIf="reservationsByDay(day.date).length > 1">+{{ reservationsByDay(day.date).length - 1 }} more</div>
@@ -155,6 +158,26 @@
           </div>
           <div class="week-cols">
             <div class="week-col" *ngFor="let d of weekDays()" [class.week-col--today]="isToday(d)">
+              <div class="week-col__label">{{ weekdayShort(d) }} {{ d.getDate() }}</div>
+              <!-- Desktop: month-like day box inside week view -->
+              <div class="cal-day cal--week" [class.cal-day--today]="isToday(d)">
+                <div class="cal-day__header">
+                  <div class="cal-day__title">{{ weekdayShort(d) }}</div>
+                  <ng-container [ngSwitch]="reservationsByDay(d).length">
+                    <span *ngSwitchCase="0"></span>
+                    <span *ngSwitchDefault class="cal-day__badge">{{ reservationsByDay(d).length }}</span>
+                  </ng-container>
+                </div>
+                <div class="cal-day__content">
+                  <div class="cal-day__num">{{ d.getDate() }}</div>
+                  <div class="cal-day__body">
+                    <div class="cal-event" *ngFor="let r of reservationsByDay(d)">
+                      <span class="cal-event__icon">{{ r.sport }}</span>
+                      <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="res-item" *ngFor="let r of reservationsByDay(d)">
                 <div class="res-item__left">
                   <div class="emoji">{{ r.sport }}</div>
