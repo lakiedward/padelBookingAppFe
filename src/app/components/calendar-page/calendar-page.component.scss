@@ -102,10 +102,68 @@ $white: #fff;
 .week-dates { color: $muted; font-size: 12px; }
 .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
 
+/* Calendar day cells */
+.cal-day { border: 1px solid $border; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 4px; min-height: 70px; display: flex; flex-direction: column; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+.cal-day:hover { background: rgba(255,255,255,0.08); border-color: rgba(214, 221, 230, 0.25); }
+.cal-day--faded { opacity: 0.6; }
+.cal-day--today { 
+  border: 2px solid $accent !important; 
+  background: rgba(167,238,67,0.15) !important;
+  box-shadow: 0 0 0 1px rgba(167,238,67,0.3), 0 4px 12px rgba(167,238,67,0.2);
+}
+.cal-day--today .cal-day__num { color: $accent; font-weight: 800; text-shadow: 0 0 8px rgba(167,238,67,0.4); }
+.cal-day__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.cal-day__title { color: rgba(255,255,255,0.7); font-size: 9px; text-transform: uppercase; font-weight: 600; }
+.cal-day__num { color: rgba(255,255,255,0.92); font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.cal-day__badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: $accent; color: #000a14; font-size: 10px; font-weight: 800; }
+.cal-day__body { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: visible; }
+.cal-day__footer { color: $accent; font-size: 10px; font-weight: 600; margin-top: 4px; text-align: center; }
+
+/* Calendar events in month view */
+.cal-event { display: flex; align-items: flex-start; gap: 4px; padding: 4px 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(214,221,230,0.1); border-radius: 4px; cursor: pointer; transition: all 0.2s ease; min-height: 24px; }
+.cal-event:hover { background: rgba(255,255,255,0.12); border-color: rgba(214,221,230,0.2); transform: translateY(-1px); }
+.cal-event__icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.cal-event__text {
+  color: rgba(255,255,255,0.9);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  /* Allow proper wrapping inside the day box */
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  /* Clamp to max 2 lines to keep month cells tidy */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* Make sure the chip can use the full width of the day cell */
+.cal-event { width: 100%; min-width: 0; }
+
 .day-card { border: 1px solid $border; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 4px; min-height: 70px; display: flex; flex-direction: column; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
 
-/* Desktop: Consistent day card sizes across all views */
+/* Desktop: Enhanced day cells */
 @media (min-width: 769px) {
+  .cal-day { 
+    min-height: 140px; 
+    height: 140px;
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    padding: 12px; 
+  }
+  .cal-day__title { font-size: 11px; }
+  .cal-day__num { font-size: 24px; margin-bottom: 8px; }
+  .cal-day__badge { min-width: 20px; height: 20px; font-size: 11px; }
+  .cal-day__body { gap: 6px; overflow: visible; }
+  .cal-event { padding: 6px 8px; min-height: 28px; }
+  .cal-event__icon { font-size: 16px; margin-top: 2px; }
+  .cal-event__text { font-size: 13px; line-height: 1.4; }
+  .cal-day__footer { font-size: 11px; }
+  
   .day-card { 
     min-height: 120px; 
     height: 120px;
@@ -214,7 +272,7 @@ $white: #fff;
   .day-card__wd { font-size: 8px; }
   .day-card__num { font-size: 10px; }
   .day-card__events { gap: 0px; }
-  .event { font-size: 7px; }
+  .event { font-size: 7px; line-height: 1.2; word-wrap: break-word; }
   .badge { min-width: 12px; height: 14px; font-size: 7px; }
   .week-col { min-height: 100px; padding: 6px; }
   .res-item { padding: 6px; }

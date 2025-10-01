@@ -31,18 +31,18 @@ export class CalendarPageComponent {
   mobileOpen = false;
 
   // State
-  anchor = signal(new Date(2025, 8, 1)); // 1 Sep 2025 (demo)
+  anchor = signal(new Date(2025, 9, 1)); // 1 Oct 2025 (demo)
   viewMode = signal<ViewMode>('month');
 
   // Demo reservations
   readonly reservations: Reservation[] = [
-    { id: 'r1', date: '2025-09-01', start: '08:00', end: '09:00', club: 'Elite Tennis Club', court: 'Elite Tennis Court 1', sport: '🎾', city: 'Downtown' },
-    { id: 'r2', date: '2025-09-01', start: '18:00', end: '19:30', club: 'Elite Tennis Club', court: 'Elite Tennis Court 1', sport: '🎾', city: 'Downtown' },
-    { id: 'r3', date: '2025-09-03', start: '10:00', end: '11:00', club: 'Padel Pro Center', court: 'Padel Court 1', sport: '🏓', city: 'North District' },
-    { id: 'r4', date: '2025-09-05', start: '19:00', end: '20:00', club: 'Elite Sports Center', court: 'Basketball Court 1', sport: '🏀', city: 'Downtown' },
-    { id: 'r5', date: '2025-09-07', start: '09:00', end: '10:00', club: 'Elite Tennis Club', court: 'Elite Tennis Court 2', sport: '🎾', city: 'Downtown' },
-    { id: 'r6', date: '2025-09-12', start: '17:00', end: '18:00', club: 'Padel Pro Center', court: 'Padel Court 1', sport: '🏓', city: 'North District' },
-    { id: 'r7', date: '2025-09-24', start: '07:30', end: '08:30', club: 'Elite Sports Center', court: 'Basketball Court 1', sport: '🏀', city: 'Downtown' },
+    { id: 'r1', date: '2025-10-01', start: '08:00', end: '09:00', club: 'Elite Tennis Club', court: 'Elite Tennis Court 1', sport: '🎾', city: 'Downtown' },
+    { id: 'r2', date: '2025-10-01', start: '18:00', end: '19:30', club: 'Elite Tennis Club', court: 'Elite Tennis Court 1', sport: '🎾', city: 'Downtown' },
+    { id: 'r3', date: '2025-10-03', start: '10:00', end: '11:00', club: 'Padel Pro Center', court: 'Padel Court 1', sport: '🏓', city: 'North District' },
+    { id: 'r4', date: '2025-10-05', start: '19:00', end: '20:00', club: 'Elite Sports Center', court: 'Basketball Court 1', sport: '🏀', city: 'Downtown' },
+    { id: 'r5', date: '2025-10-07', start: '09:00', end: '10:00', club: 'Elite Tennis Club', court: 'Elite Tennis Court 2', sport: '🎾', city: 'Downtown' },
+    { id: 'r6', date: '2025-10-12', start: '17:00', end: '18:00', club: 'Padel Pro Center', court: 'Padel Court 1', sport: '🏓', city: 'North District' },
+    { id: 'r7', date: '2025-10-24', start: '07:30', end: '08:30', club: 'Elite Sports Center', court: 'Basketball Court 1', sport: '🏀', city: 'Downtown' },
   ];
 
   // Derived helpers

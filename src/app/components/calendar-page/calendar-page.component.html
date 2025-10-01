@@ -93,19 +93,23 @@
             <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
           </div>
           <div class="month-grid">
-            <div class="day-card" *ngFor="let c of monthMatrix(); let i = index" [class.day-card--faded]="!c.inCurrent" [class.day-card--today]="isToday(c.date)" (click)="onDayClick(c.date)">
-              <div class="day-card__head">
-                <div class="day-card__wd">{{ weekdayShort(c.date) }}</div>
-                <ng-container [ngSwitch]="(eventsByDay()[toDateKey(c.date)] || []).length">
+            <div class="cal-day cal--month" *ngFor="let c of monthMatrix(); let i = index"
+                 [class.cal-day--faded]="!c.inCurrent" [class.cal-day--today]="isToday(c.date)" (click)="onDayClick(c.date)">
+              <div class="cal-day__header">
+                <div class="cal-day__title">{{ weekdayShort(c.date) }}</div>
+                <ng-container [ngSwitch]="reservationsByDay(c.date).length">
                   <span *ngSwitchCase="0"></span>
-                  <span *ngSwitchDefault class="badge">{{ (eventsByDay()[toDateKey(c.date)] || []).length }}</span>
+                  <span *ngSwitchDefault class="cal-day__badge">{{ reservationsByDay(c.date).length }}</span>
                 </ng-container>
               </div>
-              <div class="day-card__num">{{ c.date.getDate() }}</div>
-              <div class="day-card__events">
-                <div class="event" *ngFor="let txt of (eventsByDay()[toDateKey(c.date)] || []).slice(0,3)">• {{ txt }}</div>
-                <div class="more" *ngIf="(eventsByDay()[toDateKey(c.date)] || []).length > 3">+{{ (eventsByDay()[toDateKey(c.date)] || []).length - 3 }} more</div>
+              <div class="cal-day__num">{{ c.date.getDate() }}</div>
+              <div class="cal-day__body">
+                <div class="cal-event" *ngFor="let r of (reservationsByDay(c.date) | slice:0:3)">
+                  <span class="cal-event__icon">{{ r.sport }}</span>
+                  <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                </div>
               </div>
+              <div class="cal-day__footer" *ngIf="reservationsByDay(c.date).length > 3">+{{ reservationsByDay(c.date).length - 3 }} more</div>
             </div>
           </div>
         </div>
@@ -119,19 +123,23 @@
                 <span class="week-dates">{{ formatWeekRange(week) }}</span>
               </div>
               <div class="week-grid">
-                <div class="day-card" *ngFor="let day of week" [class.day-card--faded]="!day.inCurrent" [class.day-card--today]="isToday(day.date)" (click)="onDayClick(day.date)">
-                  <div class="day-card__head">
-                    <div class="day-card__wd">{{ weekdayShort(day.date) }}</div>
-                    <ng-container [ngSwitch]="(eventsByDay()[toDateKey(day.date)] || []).length">
+                <div class="cal-day cal--month" *ngFor="let day of week"
+                     [class.cal-day--faded]="!day.inCurrent" [class.cal-day--today]="isToday(day.date)" (click)="onDayClick(day.date)">
+                  <div class="cal-day__header">
+                    <div class="cal-day__title">{{ weekdayShort(day.date) }}</div>
+                    <ng-container [ngSwitch]="reservationsByDay(day.date).length">
                       <span *ngSwitchCase="0"></span>
-                      <span *ngSwitchDefault class="badge">{{ (eventsByDay()[toDateKey(day.date)] || []).length }}</span>
+                      <span *ngSwitchDefault class="cal-day__badge">{{ reservationsByDay(day.date).length }}</span>
                     </ng-container>
                   </div>
-                  <div class="day-card__num">{{ day.date.getDate() }}</div>
-                  <div class="day-card__events">
-                    <div class="event" *ngFor="let txt of (eventsByDay()[toDateKey(day.date)] || []).slice(0,3)">• {{ txt }}</div>
-                    <div class="more" *ngIf="(eventsByDay()[toDateKey(day.date)] || []).length > 3">+{{ (eventsByDay()[toDateKey(day.date)] || []).length - 3 }} more</div>
+                  <div class="cal-day__num">{{ day.date.getDate() }}</div>
+                  <div class="cal-day__body">
+                    <div class="cal-event" *ngFor="let r of (reservationsByDay(day.date) | slice:0:1)">
+                      <span class="cal-event__icon">{{ r.sport }}</span>
+                      <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                    </div>
                   </div>
+                  <div class="cal-day__footer" *ngIf="reservationsByDay(day.date).length > 1">+{{ reservationsByDay(day.date).length - 1 }} more</div>
                 </div>
               </div>
             </div>
@@ -201,4 +209,3 @@
     </section>
   </main>
 </div>
-
