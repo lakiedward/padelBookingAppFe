@@ -14,6 +14,7 @@ import { CourtCardComponent } from '../court-card/court-card.component';
 export class ClubPreviewComponent {
   @Input() details!: ClubDetails;
   @Output() editRequested = new EventEmitter<void>();
+  @Output() deleteRequested = new EventEmitter<void>();
 
   activeCourtFilter = signal<'all' | SportKey>('all');
 

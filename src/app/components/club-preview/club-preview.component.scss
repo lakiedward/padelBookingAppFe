@@ -169,12 +169,30 @@
 .club-preview .edit-btn .icon { width: 18px; height: 18px; }
 .club-preview .edit-btn:hover { filter: brightness(0.95); }
 
-.hero .edit-on-hero {
+.hero .hero-actions {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 2;
+  display: flex;
+  gap: 8px;
 }
+
+.danger-btn {
+  background: #ff5757;
+  border: 1px solid #e24b4b;
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.danger-btn .icon { width: 18px; height: 18px; }
+.danger-btn:hover { filter: brightness(0.95); }
 
 .top-divider {
   height: 1px;

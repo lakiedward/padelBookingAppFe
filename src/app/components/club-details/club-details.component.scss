@@ -476,6 +476,31 @@
       cursor: pointer;
       font-weight: 700;
       width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: #8ae22a;
+        border-color: #7acf1f;
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        background: #6b9a2a;
+      }
+
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0, 10, 20, 0.25);
+        border-top-color: #000a14;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+      }
     }
   }
 }
@@ -602,6 +627,32 @@
   }
   .p-select-items .p-select-option { color: #e2e8f0; }
   .p-select-items .p-select-option.p-highlight { background: rgba(167, 238, 67, 0.12); color: #a7ee43; }
+}
+
+// Loading state styles
+.club-details {
+  form {
+    position: relative;
+    transition: opacity 0.2s ease;
+
+    &.saving {
+      pointer-events: none;
+      opacity: 0.8;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 10, 20, 0.1);
+        backdrop-filter: blur(2px);
+        z-index: 10;
+        border-radius: 12px;
+      }
+    }
+  }
 }
 
 // Mobile Responsive Styles

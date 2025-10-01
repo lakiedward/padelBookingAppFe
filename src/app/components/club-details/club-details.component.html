@@ -2,7 +2,7 @@
   <p-toast key="error" position="bottom-right" appendTo="body" [baseZIndex]="10000"></p-toast>
   <p-toast key="success" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
 
-  <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted">
+  <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted" [class.saving]="isSaving()">
 
     <div class="section">
       <h3>Club Details</h3>
@@ -161,13 +161,21 @@
 
     <div class="footer">
       <div class="hint">Make sure all information is accurate before saving</div>
-      <button pButton type="button" (click)="save()" class="save-btn">Save Club</button>
+      <button pButton type="button" (click)="save()" class="save-btn" [disabled]="isSaving()">
+        <ng-container *ngIf="isSaving(); else normalContent">
+          <div class="spinner" aria-label="Saving"></div>
+          <span>{{ hasExistingClub ? 'Updating Club...' : 'Creating Club...' }}</span>
+        </ng-container>
+        <ng-template #normalContent>
+          <span>{{ hasExistingClub ? 'Update Club' : 'Create Club' }}</span>
+        </ng-template>
+      </button>
     </div>
   </form>
 
   <ng-template #previewBlock>
     <ng-container *ngIf="clubService.lastSaved() as saved; else noData">
-      <app-club-preview [details]="saved" (editRequested)="startEdit()" (editCourtsRequested)="onEditCourtsRequested()"></app-club-preview>
+      <app-club-preview [details]="saved" (editRequested)="startEdit()" (editCourtsRequested)="onEditCourtsRequested()" (deleteRequested)="onDeleteClub()"></app-club-preview>
     </ng-container>
     <ng-template #noData>
       <div class="no-data">
