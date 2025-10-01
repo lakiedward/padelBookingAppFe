@@ -20,6 +20,18 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {
+    // Restore user from localStorage on init (SSR-safe)
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const stored = localStorage.getItem('user');
+      if (stored) {
+        try {
+          const parsed: User = JSON.parse(stored);
+          this.currentUserSubject.next(parsed);
+        } catch {
+          // ignore parse errors
+        }
+      }
+    }
   }
 
   login(email: string, password: string): Observable<AuthResponse> {
@@ -40,7 +52,17 @@ export class AuthService {
   private handleAuthSuccess(response: AuthResponse) {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       localStorage.setItem('token', response.token);
+      const user: User = {
+        username: response.username,
+        email: response.email,
+        roles: response.roles,
+        profileImageUrl: response.profileImageUrl
+      };
+      localStorage.setItem('user', JSON.stringify(user));
+      this.currentUserSubject.next(user);
+      return;
     }
+    // Non-browser fallback
     const user: User = {
       username: response.username,
       email: response.email,
@@ -53,6 +75,7 @@ export class AuthService {
   logout(): void {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
     }
     this.currentUserSubject.next(null);
   }
