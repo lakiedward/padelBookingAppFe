@@ -1,30 +1,28 @@
 <div class="club-details">
-  <form [formGroup]="form">
+  <p-toast key="error" position="bottom-right" appendTo="body" [baseZIndex]="10000"></p-toast>
+  <p-toast key="success" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
 
-    <div class="grid" style="margin-top: 16px;">
+  <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted">
+
+    <div class="section">
+      <h3>Club Details</h3>
+    </div>
+
+    <div class="single-row" style="margin-top: 16px;">
       <div class="field">
         <label>Club Name</label>
         <input pInputText placeholder="Enter club name" formControlName="name" />
       </div>
-      <div class="field right">
-        <label>Club Email</label>
-        <input pInputText placeholder="Enter club email" formControlName="email"/>
-      </div>
     </div>
 
-    <div class="grid phone-location-row">
+    <div class="grid email-phone-row">
       <div class="field">
-        <label>Phone Number</label>
-        <input pInputText placeholder="Enter phone number" formControlName="phone" />
+        <label>Club Email</label>
+        <input pInputText placeholder="Enter club email" formControlName="email" />
       </div>
       <div class="field right">
-        <label>Location</label>
-        <div class="location-input">
-          <input pInputText placeholder="Enter club location or select from map" formControlName="location" />
-          <button type="button" class="map-btn" aria-label="Select on map">
-            <img src="assets/icons/map-pin.png" alt="Map" />
-          </button>
-        </div>
+        <label>Phone Number</label>
+        <input pInputText placeholder="Enter phone number" formControlName="phone" />
       </div>
     </div>
 
@@ -32,12 +30,42 @@
       <label>Description</label>
       <textarea class="textarea" placeholder="Enter club description" formControlName="description"></textarea>
     </div>
+    <hr class="section-separator" />
+
+    <div class="section location-section">
+      <h3>Club Location</h3>
+      <div class="grid" style="margin-top: 12px; grid-template-columns: 1fr auto; align-items: end;">
+        <div class="field">
+          <label>Enter address</label>
+          <input pInputText placeholder="Start typing an address" formControlName="address" />
+        </div>
+        <div class="field right" style="display: flex; justify-content: flex-end;">
+          <label class="sr-only">Add Location</label>
+          <button type="button" class="add-location-btn" (click)="onAddLocation()">Add location</button>
+        </div>
+      </div>
+
+      <div #mapContainer class="map" aria-label="Location map" [class.invalid]="submitted && savedLocations.length === 0"></div>
+
+      <div class="saved-locations" *ngIf="savedLocations.length > 0">
+        <div class="loc-card" *ngFor="let loc of savedLocations; let i = index">
+          <div class="loc-main">
+            <div class="loc-title">{{ loc.address }}</div>
+            <div class="loc-sub">{{ loc.lat | number:'1.5-5' }}, {{ loc.lng | number:'1.5-5' }}</div>
+          </div>
+          <button type="button" class="remove-btn" (click)="removeLocation(i)">Remove</button>
+        </div>
+      </div>
+      <div class="error-text" *ngIf="submitted && savedLocations.length === 0">Please add at least one location.</div>
+    </div>
+
+    <hr class="section-separator" />
 
     <div class="section">
       <h3>Select Sport Category</h3>
       <div class="sports">
-        <button *ngFor="let s of sports" type="button" [class.active]="s.selected" (click)="toggleSportSelection(s.key)">
-          <div class="sport-icon" [ngSwitch]="s.key">
+        <button *ngFor="let s of sports" type="button" [class.active]="isSelected(s)" (click)="toggleSportSelection(s)">
+          <div class="sport-icon" [ngSwitch]="s">
             <img *ngSwitchCase="'tennis'" src="assets/icons/tennis.png" alt="Tennis" />
             <img *ngSwitchCase="'padel'" src="assets/icons/padel.png" alt="Padel" />
             <img *ngSwitchCase="'football'" src="assets/icons/football.png" alt="Football" />
@@ -49,17 +77,24 @@
             <img *ngSwitchCase="'handball'" src="assets/icons/handball.png" alt="Handball" />
             <img *ngSwitchDefault src="assets/icons/tennis.png" alt="Sport" />
           </div>
-          <div class="label">{{ s.label }}</div>
+          <div class="label">{{ labelFromKey(s) }}</div>
         </button>
       </div>
     </div>
 
+    <hr class="section-separator" />
     <div class="section">
       <h3>Club Media</h3>
       <div class="media-grid">
         <div class="media-card">
           <div class="title">Club Profile Picture</div>
-          <div class="drop clickable profile" (click)="onClickProfileUpload()">
+          <div class="drop clickable profile"
+               (click)="onClickProfileUpload()"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onProfileDrop($event)"
+               [class.drag-over]="isDragOverProfile()"
+               [class.invalid]="submitted && !profilePreviewUrl()">
             <input type="file" accept="image/*" hidden #profileInput (click)="$event.stopPropagation()" (change)="onProfileSelected($event)" />
 
             <ng-container *ngIf="isUploadingProfile(); else profileContent">
@@ -81,14 +116,20 @@
               <ng-template #profilePlaceholder>
                 <div class="drop-emoji"><img src="assets/icons/photo.png" alt="Upload" /></div>
                 <div class="drop-title">Upload Profile Picture</div>
-                <div class="drop-sub">Click to browse files</div>
+                <div class="drop-sub">Click to browse or drag & drop</div>
               </ng-template>
             </ng-template>
           </div>
         </div>
         <div class="media-card">
           <div class="title">Club Wallpaper</div>
-          <div class="drop clickable wallpaper" (click)="onClickWallpaperUpload()">
+          <div class="drop clickable wallpaper"
+               (click)="onClickWallpaperUpload()"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onWallpaperDrop($event)"
+               [class.drag-over]="isDragOverWallpaper()"
+               [class.invalid]="submitted && !wallpaperPreviewUrl()">
             <input type="file" accept="image/*" hidden #wallpaperInput (click)="$event.stopPropagation()" (change)="onWallpaperSelected($event)" />
 
             <ng-container *ngIf="isUploadingWallpaper(); else wallpaperContent">
@@ -110,7 +151,7 @@
               <ng-template #wallpaperPlaceholder>
                 <div class="drop-emoji"><img src="assets/icons/photo.png" alt="Upload" /></div>
                 <div class="drop-title">Upload Wallpaper</div>
-                <div class="drop-sub">Click to browse files</div>
+                <div class="drop-sub">Click to browse or drag & drop</div>
               </ng-template>
             </ng-template>
           </div>
@@ -123,6 +164,16 @@
       <button pButton type="button" (click)="save()" class="save-btn">Save Club</button>
     </div>
   </form>
+
+  <ng-template #previewBlock>
+    <ng-container *ngIf="clubService.lastSaved() as saved; else noData">
+      <app-club-preview [details]="saved" (editRequested)="startEdit()" (editCourtsRequested)="onEditCourtsRequested()"></app-club-preview>
+    </ng-container>
+    <ng-template #noData>
+      <div class="no-data">
+        <div class="preview-title">No club saved yet</div>
+        <button type="button" class="edit-btn" (click)="startEdit()">Create Club</button>
+      </div>
+    </ng-template>
+  </ng-template>
 </div>
-
-

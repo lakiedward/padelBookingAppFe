@@ -8,7 +8,19 @@
     'sidebar topbar'
     'sidebar content';
 
-  /* Background handled globally via .page-gradient-bg */
+  isolation: isolate;
+}
+
+.admin-container > .sidebar,
+.admin-container > .topbar,
+.admin-container > .content {
+  position: relative;
+  z-index: 2;
+}
+
+.admin-container.page-gradient-bg::before,
+.admin-container.page-gradient-bg::after {
+  z-index: 0;
 }
 
 .sidebar {
@@ -133,5 +145,4 @@
 }
 
 .content-card.empty { color: #9fb0c0; text-align: center; padding: 80px; }
-
 
