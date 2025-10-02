@@ -15,7 +15,8 @@ export interface RegisterRequest {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://padelbookingappbe-production.up.railway.app/api/auth';
+  private readonly apiBase = 'https://padelbookingappbe-production.up.railway.app';
+  private apiUrl = `${this.apiBase}/api/auth`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -26,7 +27,14 @@ export class AuthService {
       if (stored) {
         try {
           const parsed: User = JSON.parse(stored);
-          this.currentUserSubject.next(parsed);
+          const normalized: User = {
+            ...parsed,
+            profileImageUrl: this.toAbsoluteUrl(parsed.profileImageUrl)
+          };
+          this.currentUserSubject.next(normalized);
+          if (normalized.profileImageUrl !== parsed.profileImageUrl) {
+            localStorage.setItem('user', JSON.stringify(normalized));
+          }
         } catch {
           // ignore parse errors
         }
@@ -56,7 +64,7 @@ export class AuthService {
         username: response.username,
         email: response.email,
         roles: response.roles,
-        profileImageUrl: response.profileImageUrl
+        profileImageUrl: this.toAbsoluteUrl(response.profileImageUrl)
       };
       localStorage.setItem('user', JSON.stringify(user));
       this.currentUserSubject.next(user);
@@ -67,7 +75,7 @@ export class AuthService {
       username: response.username,
       email: response.email,
       roles: response.roles,
-      profileImageUrl: response.profileImageUrl
+      profileImageUrl: this.toAbsoluteUrl(response.profileImageUrl)
     };
     this.currentUserSubject.next(user);
   }
@@ -107,5 +115,12 @@ export class AuthService {
     return typeof window !== 'undefined' && typeof localStorage !== 'undefined'
       ? localStorage.getItem('token')
       : null;
+  }
+
+  private toAbsoluteUrl(path?: string | null): string | undefined {
+    if (!path) return undefined;
+    if (/^https?:\/\//i.test(path)) return path;
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    return `${this.apiBase}${normalized}`;
   }
 }

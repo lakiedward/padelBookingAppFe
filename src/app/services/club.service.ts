@@ -88,11 +88,20 @@ export class ClubService {
       description: res.description,
       locations: res.locations,
       sports: (res.sports || []) as any,
-      profileImageUrl: res.profileImageUrl || null,
-      wallpaperImageUrl: res.wallpaperImageUrl || null,
+      profileImageUrl: this.toAbsoluteUrl(res.profileImageUrl),
+      wallpaperImageUrl: this.toAbsoluteUrl(res.wallpaperImageUrl),
       updatedAt: typeof res.updatedAt === 'string' ? res.updatedAt : String(res.updatedAt as any)
     };
     this.lastSaved.set(mapped);
     return mapped;
   }
+
+
+  private toAbsoluteUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (/^https?:\/\//i.test(path)) return path;
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    return `${this.apiBase}${normalized}`;
+  }
+
 }
