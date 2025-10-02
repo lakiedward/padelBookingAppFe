@@ -41,8 +41,8 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="submit-btn" [disabled]="loading || registerForm.invalid">
-        <span class="spinner" *ngIf="loading" aria-hidden="true"></span>
+      <button type="submit" class="btn btn--primary btn--full" [disabled]="loading || registerForm.invalid">
+        <span class="u-spinner u-spinner--sm" *ngIf="loading" aria-hidden="true"></span>
         <span *ngIf="!loading">Sign Up</span>
       </button>
     </div>
@@ -64,10 +64,9 @@
       <h2 class="login-title">You're all set!</h2>
       <p class="login-subtitle">You've successfully registered. Ready to start booking courts?</p>
       <div class="form-actions">
-        <button type="button" class="primary-btn" (click)="onSwitchToLogin()">Sign in</button>
+        <button type="button" class="btn btn--primary" (click)="onSwitchToLogin()">Sign in</button>
       </div>
     </div>
   </ng-template>
 </div>
-
 

@@ -9,6 +9,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { MapService } from '../../services/map.service';
 import { ClubService, ClubDetailsRequest } from '../../services/club.service';
+import { finalize } from 'rxjs/operators';
 import { ClubDetails, SportKey, SPORT_OPTIONS } from '../../models/club.models';
 import { ClubPreviewComponent } from '../club-preview/club-preview.component';
 
@@ -61,6 +62,8 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isEditing = signal(true);
   isSaving = signal(false);
+  // Show centered spinner while loading existing club
+  isLoading = signal(true);
 
   @Output() courtsRequested = new EventEmitter<void>();
 
@@ -101,8 +104,11 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Load existing club from backend
-    this.clubService.getMyClub().subscribe({
+    // Load existing club from backend with spinner
+    this.isLoading.set(true);
+    this.clubService.getMyClub().pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
       next: (club) => {
         this.hasExistingClub = true;
         this.applyDetailsToForm(club);

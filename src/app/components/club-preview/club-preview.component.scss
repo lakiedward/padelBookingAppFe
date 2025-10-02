@@ -80,21 +80,7 @@
 .courts-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .courts .hint { color: #8aa0b5; font-size: 13px; }
 .courts-header .controls { display: flex; align-items: center; gap: 10px; }
-.edit-courts-btn {
-  background: #a7ee43;
-  border: 1px solid #8ae22a;
-  color: #000a14;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-}
 .edit-courts-btn .icon { width: 16px; height: 16px; }
-.edit-courts-btn:hover { filter: brightness(0.95); }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .chip {
   border-radius: 999px;
@@ -153,19 +139,7 @@
   font-size: 20px;
   font-weight: 700;
 }
-.club-preview .edit-btn {
-  background: #a7ee43;
-  border: 1px solid #8ae22a;
-  color: #000a14;
-  border-radius: 12px;
-  padding: 10px 16px;
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  cursor: pointer;
-}
+.club-preview .edit-btn { /* now using global .btn */ }
 .club-preview .edit-btn .icon { width: 18px; height: 18px; }
 .club-preview .edit-btn:hover { filter: brightness(0.95); }
 
@@ -178,21 +152,7 @@
   gap: 8px;
 }
 
-.danger-btn {
-  background: #ff5757;
-  border: 1px solid #e24b4b;
-  color: #fff;
-  border-radius: 12px;
-  padding: 10px 16px;
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  cursor: pointer;
-}
 .danger-btn .icon { width: 18px; height: 18px; }
-.danger-btn:hover { filter: brightness(0.95); }
 
 .top-divider {
   height: 1px;

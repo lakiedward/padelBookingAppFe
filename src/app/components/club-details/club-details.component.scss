@@ -1,7 +1,13 @@
 .club-details {
   position: relative;
 
-  // Mobile Header
+  .center-loading {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .mobile-header {
     display: none;
     position: fixed;
@@ -283,27 +289,9 @@
   }
   .location-section.white .loc-title { font-weight: 700; color: #0f172a; }
   .location-section.white .loc-sub { color: #334155; font-size: 12px; }
-  .location-section.white .remove-btn {
-    background: #fee2e2;
-    border: 1px solid #fecaca;
-    color: #7f1d1d;
-    border-radius: 10px;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-weight: 700;
-  }
+  /* remove button now uses global .btn --danger */
 
-  .add-location-btn {
-    margin-top: 0;
-    background: #a7ee43;
-    border: 1px solid #8ae22a;
-    color: #000a14;
-    border-radius: 12px;
-    padding: 12px 16px;
-    cursor: pointer;
-    font-weight: 700;
-    min-width: 160px;
-  }
+  /* add-location button now uses global .btn --primary */
 
   .sr-only {
     position: absolute;
@@ -434,19 +422,7 @@
     .icon-btn.danger { color: #ee6363; border-color: rgba(238, 99, 99, 0.6); }
     .icon-btn.danger:hover { background: rgba(238, 99, 99, 0.15); }
 
-    /* Centered spinner */
-    .spinner {
-      width: 28px;
-      height: 28px;
-      border: 3px solid rgba(255, 255, 255, 0.25);
-      border-top-color: #a7ee43;
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    /* dropzone spinner visuals moved to global .u-spinner */
 
     .drop-emoji { font-size: 32px; display: flex; align-items: center; justify-content: center; }
     .drop-emoji img { width: 40px; height: 40px; display: inline-block; }
@@ -467,41 +443,7 @@
       font-size: 14px;
       text-align: center;
     }
-    .save-btn {
-      background: #a7ee43;
-      border: 1px solid #8ae22a;
-      color: #000a14;
-      border-radius: 12px;
-      padding: 12px 24px;
-      cursor: pointer;
-      font-weight: 700;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-
-      &:hover:not(:disabled) {
-        background: #8ae22a;
-        border-color: #7acf1f;
-      }
-
-      &:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-        background: #6b9a2a;
-      }
-
-      .spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(0, 10, 20, 0.25);
-        border-top-color: #000a14;
-        border-radius: 50%;
-        animation: spin 0.9s linear infinite;
-      }
-    }
+    /* save button visuals moved to global .btn */
   }
 }
 
@@ -542,7 +484,7 @@
 
 
 /* Dark theme styles for location section (map and saved cards) */
-.location-section {
+  .location-section {
   .map {
     height: 320px;
     border-radius: 12px;
@@ -583,15 +525,7 @@
   }
   .loc-title { font-weight: 700; color: #e2e8f0; }
   .loc-sub { color: #8aa0b5; font-size: 12px; }
-  .remove-btn {
-    background: rgba(238, 99, 99, 0.15);
-    border: 1px solid rgba(238, 99, 99, 0.5);
-    color: #fca5a5;
-    border-radius: 10px;
-    padding: 8px 12px;
-    cursor: pointer;
-    font-weight: 700;
-  }
+  /* remove button now uses global .btn --danger */
 }
 
 /* PrimeNG Select dark styling to match inputs */
@@ -638,7 +572,7 @@
     &.saving {
       pointer-events: none;
       opacity: 0.8;
-      
+
       &::before {
         content: '';
         position: absolute;
@@ -724,11 +658,7 @@
       gap: 12px;
     }
 
-    // Make add location button full width on mobile
-    .add-location-btn {
-      width: 100%;
-      min-width: auto;
-    }
+    // For full-width buttons on mobile, use .btn--full as needed
   }
 }
 
@@ -764,10 +694,7 @@
         text-align: left;
       }
 
-      .save-btn {
-        width: auto;
-        margin-left: auto;
-      }
+      /* save button width handled via .btn classes */
     }
   }
 }
@@ -812,10 +739,7 @@
         text-align: left;
       }
 
-      .save-btn {
-        width: auto;
-        margin-left: auto;
-      }
+      /* save button width handled via .btn classes */
     }
   }
 }
@@ -838,19 +762,7 @@
   margin: 8px 0 12px;
 }
 
-.club-details .edit-btn {
-  background: #a7ee43;
-  border: 1px solid #8ae22a;
-  color: #000a14;
-  border-radius: 12px;
-  padding: 10px 16px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.club-details .edit-btn:hover {
-  filter: brightness(0.95);
-}
+/* edit button now uses global .btn */
 
 .club-details .no-data {
   display: flex;
