@@ -1,5 +1,7 @@
 <div class="club-preview" *ngIf="details as d">
-  <div class="hero" [style.background-image]="d.wallpaperImageUrl ? 'url(' + d.wallpaperImageUrl + ')' : 'none'">
+  
+
+  <div class="hero" id="preview-overview" [style.background-image]="d.wallpaperImageUrl ? 'url(' + d.wallpaperImageUrl + ')' : 'none'">
     <div class="hero-overlay"></div>
     <div class="hero-actions">
       <button type="button" class="btn btn--primary btn--sm" (click)="editRequested.emit()">
@@ -38,13 +40,13 @@
   <div class="top-divider" role="separator" aria-hidden="true"></div>
 
   <div class="container">
-    <section class="about" *ngIf="d.description">
+    <section class="about" id="preview-about" *ngIf="d.description">
       <h2>About {{ d.name }}</h2>
       <p>{{ d.description }}</p>
     </section>
 
     <div class="top-divider" role="separator" aria-hidden="true"></div>
-    <section class="contact">
+    <section class="contact" id="preview-contact">
       <h2>Contact Information</h2>
       <div class="grid">
         <div class="contact-item">
@@ -87,7 +89,7 @@
       </div>
     </section>
 
-    <section class="courts">
+    <section class="courts" id="preview-courts">
       <div class="courts-header">
         <h2>Club Courts</h2>
         <div class="controls">

@@ -19,6 +19,12 @@ interface SavedLocation {
   lng: number;
 }
 
+interface MobileNavItem {
+  id: string;
+  label: string;
+  description?: string;
+}
+
   @Component({
   selector: 'app-club-details',
   standalone: true,
@@ -59,6 +65,22 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectedSports = new Set<SportKey>(['tennis']);
 
+  mobileMenuOpen = signal(false);
+  mobileActiveSection = signal<string>('section-overview');
+  readonly adminMobileNav: MobileNavItem[] = [
+    { id: 'section-overview', label: 'Club profile', description: 'Name, contact and description' },
+    { id: 'section-location', label: 'Locations', description: 'Addresses and map positions' },
+    { id: 'section-sports', label: 'Sports catalog', description: 'Select disciplines you offer' },
+    { id: 'section-media', label: 'Media & branding', description: 'Profile and wallpaper images' },
+    { id: 'section-save', label: 'Save & actions', description: 'Review guidance before saving' },
+  ];
+  readonly userMobileNav: MobileNavItem[] = [
+    { id: 'preview-overview', label: 'Overview', description: 'Hero section and highlights' },
+    { id: 'preview-about', label: 'About', description: 'Club story and description' },
+    { id: 'preview-contact', label: 'Contact', description: 'Email, phone and addresses' },
+    { id: 'preview-courts', label: 'Courts', description: 'Available facilities by sport' },
+  ];
+  private bodyOverflowBackup: string | null = null;
 
   isEditing = signal(true);
   isSaving = signal(false);
@@ -106,6 +128,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     // Load existing club from backend with spinner
     this.isLoading.set(true);
+    this.syncActiveMobileSection('admin');
     this.clubService.getMyClub().pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
@@ -113,11 +136,13 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.hasExistingClub = true;
         this.applyDetailsToForm(club);
         this.isEditing.set(false);
+        this.syncActiveMobileSection('user');
       },
       error: (err) => {
         if (err && err.status === 404) {
           this.hasExistingClub = false;
           this.isEditing.set(true);
+          this.syncActiveMobileSection('admin');
         } else {
           console.error('Failed to load club details', err);
           this.messageService.add({ key: 'error', severity: 'error', summary: 'Error', detail: 'Failed to load club details', life: 4000 });
@@ -227,6 +252,8 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.hasExistingClub = true;
         this.applyDetailsToForm(saved);
         this.isEditing.set(false);
+        this.syncActiveMobileSection('user');
+        this.closeMobileMenu();
         const successMsg = isCreating ? 'Club created successfully!' : 'Club updated successfully!';
         this.messageService.add({ key: 'success', severity: 'success', summary: 'Success', detail: successMsg, life: 3000 });
         this.isSaving.set(false);
@@ -299,6 +326,8 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.submitted = false;
     this.isEditing.set(true);
+    this.syncActiveMobileSection('admin');
+    this.closeMobileMenu();
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
     this.initMapOnce();
   }
@@ -492,6 +521,8 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedProfileFile = null;
         this.selectedWallpaperFile = null;
         this.isEditing.set(true);
+        this.syncActiveMobileSection('admin');
+        this.closeMobileMenu();
         this.messageService.add({ key: 'success', severity: 'success', summary: 'Deleted', detail: 'Club deleted successfully', life: 3000 });
       },
       error: (err) => {
@@ -500,6 +531,75 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.messageService.add({ key: 'error', severity: 'error', summary: 'Error', detail: msg, life: 5000 });
       }
     });
+  }
+
+  mobileHeaderTitle(): string {
+    if (this.isEditing()) {
+      return this.hasExistingClub ? 'Admin - Edit club' : 'Admin - Create club';
+    }
+    const saved = this.clubService.lastSaved();
+    return saved?.name || 'Club overview';
+  }
+
+  toggleMobileMenu() {
+    if (this.mobileMenuOpen()) {
+      this.closeMobileMenu();
+      return;
+    }
+    this.syncActiveMobileSection();
+    this.mobileMenuOpen.set(true);
+    this.updateBodyScrollState(true);
+  }
+
+  closeMobileMenu() {
+    if (!this.mobileMenuOpen() && this.bodyOverflowBackup === null) {
+      return;
+    }
+    this.mobileMenuOpen.set(false);
+    this.updateBodyScrollState(false);
+  }
+
+  onMobileNav(sectionId: string) {
+    this.mobileActiveSection.set(sectionId);
+    this.scrollToSection(sectionId);
+    this.closeMobileMenu();
+  }
+
+  private scrollToSection(sectionId: string) {
+    if (!this.isBrowser) return;
+    const selector = `#${sectionId}`;
+    const target = document.getElementById(sectionId) || this.host.nativeElement.querySelector(selector);
+    if (!target) return;
+    const element = target as HTMLElement;
+    const headerOffset = window.innerWidth <= 768 ? 96 : 32;
+    const top = element.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({ top: top < 0 ? 0 : top, behavior: 'smooth' });
+  }
+
+  private syncActiveMobileSection(mode?: 'admin' | 'user') {
+    const currentMode = mode ?? (this.isEditing() ? 'admin' : 'user');
+    const items = currentMode === 'admin' ? this.adminMobileNav : this.userMobileNav;
+    const fallback = currentMode === 'admin' ? 'section-overview' : 'preview-overview';
+    const first = items.length ? items[0].id : fallback;
+    this.mobileActiveSection.set(first);
+  }
+
+  private updateBodyScrollState(lock: boolean) {
+    if (!this.isBrowser) return;
+    const body = document.body;
+    if (lock) {
+      if (this.bodyOverflowBackup === null) {
+        this.bodyOverflowBackup = body.style.overflow || '';
+      }
+      body.style.overflow = 'hidden';
+    } else {
+      if (this.bodyOverflowBackup !== null) {
+        body.style.overflow = this.bodyOverflowBackup;
+        this.bodyOverflowBackup = null;
+      } else if (body.style.overflow === 'hidden') {
+        body.style.removeProperty('overflow');
+      }
+    }
   }
 
 
@@ -512,6 +612,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       clearTimeout(this.geocodeDebounce);
       this.geocodeDebounce = undefined;
     }
+    this.closeMobileMenu();
     this.mapService.destroy();
   }
 }

@@ -2,10 +2,14 @@
   <p-toast key="error" position="bottom-right" appendTo="body" [baseZIndex]="10000"></p-toast>
   <p-toast key="success" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
 
+
+
+
+
   <ng-container *ngIf="!isLoading(); else loadingTpl">
   <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted" [class.saving]="isSaving()">
 
-    <div class="section">
+    <div class="section" id="section-overview">
       <h3>Club Details</h3>
     </div>
 
@@ -33,7 +37,7 @@
     </div>
     <hr class="section-separator" />
 
-    <div class="section location-section">
+    <div class="section location-section" id="section-location">
       <h3>Club Location</h3>
       <div class="grid" style="margin-top: 12px; grid-template-columns: 1fr auto; align-items: end;">
         <div class="field">
@@ -62,7 +66,7 @@
 
     <hr class="section-separator" />
 
-    <div class="section">
+    <div class="section" id="section-sports">
       <h3>Select Sport Category</h3>
       <div class="sports">
         <button *ngFor="let s of sports" type="button" [class.active]="isSelected(s)" (click)="toggleSportSelection(s)">
@@ -84,7 +88,7 @@
     </div>
 
     <hr class="section-separator" />
-    <div class="section">
+    <div class="section" id="section-media">
       <h3>Club Media</h3>
       <div class="media-grid">
         <div class="media-card">
@@ -160,7 +164,7 @@
       </div>
     </div>
 
-    <div class="footer">
+    <div class="footer" id="section-save">
       <div class="hint">Make sure all information is accurate before saving</div>
       <button pButton type="button" (click)="save()" class="btn btn--primary btn--full" [disabled]="isSaving()">
         <ng-container *ngIf="isSaving(); else normalContent">

@@ -15,6 +15,7 @@ type AdminMenuKey = 'club-management' | 'courts' | 'events';
 })
 export class AdminViewComponent {
   selectedMenu: AdminMenuKey = 'club-management';
+  mobileMenuOpen = false;
 
   constructor(private auth: AuthService, private router: Router) {}
 
@@ -22,9 +23,30 @@ export class AdminViewComponent {
     this.selectedMenu = menu;
   }
 
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+    // Prevent body scroll when menu is open
+    if (this.mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
+    document.body.style.overflow = '';
+  }
+
+  selectAndClose(menu: AdminMenuKey) {
+    this.select(menu);
+    this.closeMobileMenu();
+  }
+
   onCourtsRequestedFromChild() {
     this.select('courts');
   }
+
 
   onLogout() {
     this.auth.logout();

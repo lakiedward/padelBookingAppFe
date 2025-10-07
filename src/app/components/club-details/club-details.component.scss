@@ -1,171 +1,84 @@
 .club-details {
   position: relative;
 
+  .mobile-header {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15, 27, 38, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 16px;
+    border-bottom: 1px solid rgba(214, 221, 230, 0.15);
+    
+    .logo {
+      .logo-text {
+        color: #a7ee43;
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: 0.75px;
+      }
+    }
+  }
+
+  .mobile-menu-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #d6dde6;
+  }
+
+  .hamburger {
+    width: 24px;
+    height: 18px;
+    position: relative;
+    
+    span {
+      display: block;
+      height: 2px;
+      width: 100%;
+      background: #d6dde6;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      position: absolute;
+      
+      &:nth-child(1) {
+        top: 0;
+      }
+      
+      &:nth-child(2) {
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      
+      &:nth-child(3) {
+        bottom: 0;
+      }
+    }
+    
+    &.active {
+      span:nth-child(1) {
+        transform: rotate(45deg);
+        top: 7px;
+      }
+      
+      span:nth-child(2) {
+        opacity: 0;
+      }
+      
+      span:nth-child(3) {
+        transform: rotate(-45deg);
+        bottom: 7px;
+      }
+    }
+  }
+
   .center-loading {
     min-height: 50vh;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .mobile-header {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: rgba(15, 27, 38, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(214, 221, 230, 0.15);
-    padding: 16px;
-    justify-content: space-between;
-    align-items: center;
-
-    .logo {
-      .logo-text {
-        color: #a7ee43;
-        font-weight: 700;
-        font-size: 24px;
-        letter-spacing: 0.75px;
-      }
-    }
-
-    .mobile-menu-btn {
-      background: none;
-      border: none;
-      padding: 8px;
-      cursor: pointer;
-      color: #d6dde6;
-
-      .hamburger {
-        display: flex;
-        flex-direction: column;
-        width: 24px;
-        height: 18px;
-        justify-content: space-between;
-
-        span {
-          display: block;
-          height: 2px;
-          background: currentColor;
-          border-radius: 1px;
-          transition: all 0.3s ease;
-        }
-
-        &.active {
-          span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-          }
-          span:nth-child(2) {
-            opacity: 0;
-          }
-          span:nth-child(3) {
-            transform: rotate(-45deg) translate(7px, -6px);
-          }
-        }
-      }
-    }
-  }
-
-  // Mobile Menu Overlay
-  .mobile-menu-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 27, 38, 0.95);
-    backdrop-filter: blur(10px);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-
-    &.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .mobile-menu {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #0f1b26;
-      padding: 80px 16px 16px;
-      overflow-y: auto;
-
-      .mobile-menu-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 32px;
-
-        .logo {
-          .logo-text {
-            color: #a7ee43;
-            font-weight: 700;
-            font-size: 24px;
-            letter-spacing: 0.75px;
-          }
-        }
-
-        .close-btn {
-          background: none;
-          border: none;
-          color: #d6dde6;
-          font-size: 32px;
-          cursor: pointer;
-          padding: 8px;
-          line-height: 1;
-        }
-      }
-
-      .mobile-menu-content {
-        .menu-title {
-          color: #d6dde6;
-          font-weight: 700;
-          font-size: 18px;
-          margin-bottom: 8px;
-        }
-
-        .menu-subtitle {
-          color: #8aa0b5;
-          font-size: 14px;
-          margin-bottom: 32px;
-        }
-
-        .mobile-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-
-          .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            border-radius: 12px;
-            color: #d6dde6;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 16px;
-            transition: all 0.2s ease;
-
-            &.active {
-              background: #a7ee43;
-              color: #000a14;
-            }
-
-            &:hover:not(.active) {
-              background: rgba(214, 221, 230, 0.1);
-            }
-          }
-        }
-      }
-    }
   }
 
   .grid {
@@ -289,9 +202,6 @@
   }
   .location-section.white .loc-title { font-weight: 700; color: #0f172a; }
   .location-section.white .loc-sub { color: #334155; font-size: 12px; }
-  /* remove button now uses global .btn --danger */
-
-  /* add-location button now uses global .btn --primary */
 
   .sr-only {
     position: absolute;
@@ -340,89 +250,59 @@
     .drop {
       background: rgba(15, 27, 38, 0.85);
       border: 2px solid rgba(214, 221, 230, 0.25);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 32px; /* a bit bigger */
       text-align: center;
       color: #c9d5e1;
       min-height: 320px; /* bigger box */
-      max-height: 320px; /* lock height to prevent growing */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer; /* clickable hint */
-      position: relative;
-      overflow: hidden;
-      box-sizing: border-box;
       transition: border-color 0.15s ease, box-shadow 0.15s ease, border-style 0.15s ease;
     }
     .drop:hover,
-    .drop:focus-visible {
-      border-color: #a7ee43;
-      border-style: dashed; /* discontinuous */
-      box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.15) inset;
-      outline: none;
-    }
-
-    /* Drag over state */
     .drop.drag-over {
       border-color: #a7ee43;
-      border-style: dashed;
-      background: rgba(167, 238, 67, 0.1);
-      box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25) inset;
-      transform: scale(1.02);
+      box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.1) inset;
+      outline: none;
     }
-
-    /* Invalid state for required images after submit */
-    .drop.invalid {
-      border-color: #ef4444 !important;
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) inset;
-    }
-
-    /* Ensure different aspect media keep fixed container height */
-    .drop.profile { height: 320px; }
-    .drop.wallpaper { height: 320px; }
-
-    /* Preview image styles */
+    .drop.clickable { cursor: pointer; }
+    .drop.invalid { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) inset; }
+    
+    /* Upload spinner */
+    .u-spinner { margin-bottom: 12px; }
+    
+    /* Preview image */
     .preview {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 8px;
-      display: block;
+      border-radius: 12px;
     }
     .preview.wide { object-fit: cover; }
 
     /* Overlay actions on top-right of image */
     .overlay-actions {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      gap: 8px;
+      top: 12px;
+      right: 12px;
       z-index: 2;
     }
     .icon-btn {
-      width: 40px;
-      height: 40px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
       background: rgba(15, 27, 38, 0.85);
-      border: 1px solid rgba(214, 221, 230, 0.35);
-      color: #a7ee43; /* green for edit */
+      border: 1px solid rgba(214, 221, 230, 0.25);
+      color: #d6dde6;
       cursor: pointer;
-      font-size: 18px;
+      margin-left: 8px;
       transition: background 0.15s ease, border-color 0.15s ease;
     }
     .icon-btn:hover { background: rgba(15, 27, 38, 0.95); border-color: rgba(214, 221, 230, 0.6); }
-    .icon-btn img, .icon-btn svg { width: 20px; height: 20px; }
-    .icon-btn.danger { color: #ee6363; border-color: rgba(238, 99, 99, 0.6); }
-    .icon-btn.danger:hover { background: rgba(238, 99, 99, 0.15); }
-
-    /* dropzone spinner visuals moved to global .u-spinner */
+    .icon-btn.danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+    .icon-btn img { width: 18px; height: 18px; }
 
     .drop-emoji { font-size: 32px; display: flex; align-items: center; justify-content: center; }
     .drop-emoji img { width: 40px; height: 40px; display: inline-block; }
@@ -480,15 +360,11 @@
   }
 }
 
-
-
-
-/* Dark theme styles for location section (map and saved cards) */
-  .location-section {
+:host ::ng-deep {
   .map {
     height: 320px;
     border-radius: 12px;
-    margin-top: 12px;
+    margin-top: 20px;
     overflow: hidden;
     border: 1px solid rgba(214, 221, 230, 0.15);
     background: rgba(15, 27, 38, 0.85);
@@ -503,7 +379,7 @@
     border-radius: 10px;
     background: rgba(239, 68, 68, 0.12);
     border: 1px solid rgba(239, 68, 68, 0.45);
-    color: #ef4444; /* stronger red */
+    color: #ef4444;
     font-size: 14px;
     font-weight: 700;
   }
@@ -525,10 +401,10 @@
   }
   .loc-title { font-weight: 700; color: #e2e8f0; }
   .loc-sub { color: #8aa0b5; font-size: 12px; }
+
   /* remove button now uses global .btn --danger */
 }
 
-/* PrimeNG Select dark styling to match inputs */
 :host ::ng-deep {
   .p-select {
     width: 100%;
@@ -536,15 +412,9 @@
     background: rgba(15, 27, 38, 0.85);
     border: 1px solid rgba(214, 221, 230, 0.25);
     border-radius: 12px;
-    color: #e2e8f0;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
-  .p-select:not(.p-disabled):hover { border-color: rgba(214, 221, 230, 0.35); }
-  .p-select.p-focus {
-    border-color: #a7ee43 !important;
-    box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.15) inset;
-  }
-  .p-select .p-select-label {
+  .p-select-label {
     padding: 14px;
     color: #e2e8f0;
   }
@@ -552,10 +422,11 @@
     border-top-right-radius: 12px;
     border-bottom-right-radius: 12px;
     color: #c9d5e1;
+    /* remove */
   }
   .p-select-panel {
     background: #0f1b26;
-    color: #e2e8f0;
+    /* remove */
     border: 1px solid rgba(214, 221, 230, 0.25);
     border-radius: 12px;
   }
@@ -563,48 +434,118 @@
   .p-select-items .p-select-option.p-highlight { background: rgba(167, 238, 67, 0.12); color: #a7ee43; }
 }
 
-// Loading state styles
-.club-details {
-  form {
-    position: relative;
-    transition: opacity 0.2s ease;
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 27, 38, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 
-    &.saving {
-      pointer-events: none;
-      opacity: 0.8;
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
 
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 10, 20, 0.1);
-        backdrop-filter: blur(2px);
-        z-index: 10;
-        border-radius: 12px;
+  .mobile-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #0f1b26;
+    padding: 80px 16px 16px;
+    overflow-y: auto;
+
+    .mobile-menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+
+      .logo {
+        .logo-text {
+          color: #a7ee43;
+          font-weight: 700;
+          font-size: 24px;
+          letter-spacing: 0.75px;
+        }
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        color: #d6dde6;
+        font-size: 32px;
+        cursor: pointer;
+        padding: 8px;
+        line-height: 1;
+      }
+    }
+
+    .mobile-menu-content {
+      .menu-title {
+        color: #d6dde6;
+        font-weight: 700;
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .menu-subtitle {
+        color: #8aa0b5;
+        font-size: 14px;
+        margin-bottom: 32px;
+      }
+
+      .mobile-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 32px;
+
+        .nav-item {
+          display: flex;
+          align-items: center;
+          padding: 16px;
+          border-radius: 12px;
+          border: 1px solid rgba(214, 221, 230, 0.15);
+          background: transparent;
+          color: #d6dde6;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 16px;
+          transition: all 0.2s ease;
+          cursor: pointer;
+          text-align: left;
+
+          &.active { background: rgba(167, 238, 67, 0.2); border-color: #a7ee43; color: #000a14; }
+          &:hover:not(.active) { background: rgba(214, 221, 230, 0.1); }
+        }
       }
     }
   }
 }
 
 // Mobile Responsive Styles
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .club-details {
-    // Show mobile header
+    // Show mobile header on mobile
     .mobile-header {
       display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-
-    // Show mobile menu
+    
+    // Mobile menu overlay styles
     .mobile-menu-overlay {
       display: block;
-    }
-
-    // Add top padding to form to account for fixed header
-    form {
-      padding-top: 80px;
     }
 
     // Stack grid items vertically on mobile
@@ -613,7 +554,12 @@
       gap: 16px;
     }
 
-    // Adjust sports grid for mobile
+    // Single row becomes full width
+    .single-row {
+      display: block;
+    }
+
+    // Adjust sports for mobile - 2 columns
     .sports {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
@@ -647,12 +593,12 @@
       min-height: 120px;
     }
 
-    // Adjust map height for mobile
-    .map {
+    // Make map smaller on mobile
+    :host ::ng-deep .map {
       height: 200px;
     }
 
-    // Adjust location section
+    // Location input gap
     .location-section .grid {
       grid-template-columns: 1fr;
       gap: 12px;
@@ -662,22 +608,23 @@
   }
 }
 
-// Tablet styles
-@media (min-width: 769px) and (max-width: 1024px) {
+// Tablet styles (768px - 1024px)
+@media (min-width: 768px) and (max-width: 1024px) {
   .club-details {
-    // Hide mobile header on tablet
-    .mobile-header {
-      display: none;
+    // For tablet, restore some desktop layout
+    .grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    // Adjust sports for tablet - 3 columns work well
+    .sports {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     // Hide mobile menu on tablet
     .mobile-menu-overlay {
       display: none;
-    }
-
-    // Adjust sports grid for tablet
-    .sports {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     // Keep media grid as 2 columns on tablet
@@ -702,8 +649,14 @@
 // Desktop styles
 @media (min-width: 1025px) {
   .club-details {
+    // Restore desktop grid
+    .grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
     // Hide mobile header on desktop
-    .mobile-header {
+    .mobile-menu-overlay {
       display: none;
     }
 
@@ -718,7 +671,7 @@
       gap: 24px;
     }
 
-    // Restore desktop sports grid
+    // Desktop sports grid
     .sports {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 16px;
@@ -744,17 +697,15 @@
   }
 }
 
-
 /* Preview section title style */
-.club-details .preview-title {
+.preview-title {
   margin: 24px 0 8px;
   color: #ffffff;
   font-size: 20px;
   font-weight: 700;
 }
 
-/* Preview header with Edit button */
-.club-details .preview-header {
+.preview-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -763,11 +714,8 @@
 }
 
 /* edit button now uses global .btn */
-
-.club-details .no-data {
+.preview-actions {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 12px;
   margin: 8px 0 12px;
 }

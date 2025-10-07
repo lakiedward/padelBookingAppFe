@@ -1,4 +1,53 @@
 <div class="admin-container page-gradient-bg">
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div class="logo">
+      <div class="logo-text">PLAYORA</div>
+    </div>
+    <button class="mobile-menu-btn" (click)="toggleMobileMenu()" aria-label="Toggle menu">
+      <div class="hamburger" [class.active]="mobileMenuOpen">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </button>
+  </header>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" [class.active]="mobileMenuOpen" (click)="closeMobileMenu()">
+    <div class="mobile-menu" (click)="$event.stopPropagation()">
+      <div class="mobile-menu-header">
+        <div class="menu-info">
+          <div class="menu-title">Admin Panel</div>
+          <div class="menu-subtitle">Manage your sports club</div>
+        </div>
+        <button class="close-btn" (click)="closeMobileMenu()" aria-label="Close menu">&times;</button>
+      </div>
+      
+      <div class="mobile-menu-content">
+        
+        <nav class="mobile-nav">
+          <button class="nav-item" [class.active]="selectedMenu === 'club-management'" (click)="selectAndClose('club-management')">
+            Club Management
+          </button>
+          <button class="nav-item" [class.active]="selectedMenu === 'courts'" (click)="selectAndClose('courts')">
+            Courts
+          </button>
+          <button class="nav-item" [class.active]="selectedMenu === 'events'" (click)="selectAndClose('events')">
+            Events
+          </button>
+        </nav>
+        
+        <div class="mobile-menu-divider"></div>
+        
+        <button class="logout-btn-mobile" (click)="onLogout()">
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Sidebar -->
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-text">
@@ -23,6 +72,7 @@
     </nav>
   </aside>
 
+  <!-- Desktop Topbar -->
   <header class="topbar">
     <div class="page">
       <div class="name">
