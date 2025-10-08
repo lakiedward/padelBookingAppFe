@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { LoginRequest, AuthResponse, User } from '../models/auth.models';
+import { environment } from '../../environments/environment';
 
 export interface RegisterRequest {
   username: string;
@@ -15,8 +16,8 @@ export interface RegisterRequest {
   providedIn: 'root'
 })
 export class AuthService {
+  private apiUrl = `${environment.apiBaseUrl}/api/auth`;
   private readonly apiBase = 'https://padelbookingappbe-production.up.railway.app';
-  private apiUrl = `${this.apiBase}/api/auth`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 

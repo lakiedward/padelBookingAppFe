@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoginComponent } from '../login/login.component';
 import { RegisterComponent } from '../register/register.component';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, LoginComponent, RegisterComponent],
+  imports: [CommonModule, ToastModule, LoginComponent, RegisterComponent],
+  providers: [MessageService],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.scss'
 })

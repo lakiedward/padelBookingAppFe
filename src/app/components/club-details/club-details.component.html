@@ -40,7 +40,7 @@
           <label>Enter address</label>
           <input pInputText placeholder="Start typing an address" formControlName="address" />
         </div>
-        <div class="field right" style="display: flex; justify-content: flex-end;">
+        <div class="field right" style="display: flex; justify-content: flex-end; align-items: center;">
           <label class="sr-only">Add Location</label>
           <button type="button" class="btn btn--primary" (click)="onAddLocation()">Add location</button>
         </div>
@@ -162,7 +162,7 @@
 
     <div class="footer">
       <div class="hint">Make sure all information is accurate before saving</div>
-      <button pButton type="button" (click)="save()" class="btn btn--primary btn--full" [disabled]="isSaving()">
+      <button pButton type="button" (click)="save()" class="btn btn--primary btn--sm" [disabled]="isSaving()">
         <ng-container *ngIf="isSaving(); else normalContent">
           <span class="u-spinner u-spinner--sm"></span>
           <span>{{ hasExistingClub ? 'Updating Club...' : 'Creating Club...' }}</span>

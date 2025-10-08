@@ -142,6 +142,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.mapService.initMap(this.mapContainer.nativeElement, (lat, lon) => {
             this.currentLat.set(lat);
             this.currentLng.set(lon);
+            this.mapService.setPosition(lat, lon);
             this.isGeocoding.set(true);
             this.mapService
               .reverseGeocode(lat, lon)
@@ -153,6 +154,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
           this.mapService.tryInitFromGeolocation((lat, lon) => {
             this.currentLat.set(lat);
             this.currentLng.set(lon);
+            this.mapService.setPosition(lat, lon);
             this.isGeocoding.set(true);
             this.mapService
               .reverseGeocode(lat, lon)
@@ -190,7 +192,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   save() {
     if (this.isSaving()) return; // Prevent multiple saves
-    
+
     this.submitted = true;
     this.form.markAllAsTouched();
     this.form.updateValueAndValidity({ onlySelf: false, emitEvent: false });
@@ -317,7 +319,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.selectedSports = new Set<SportKey>(details.sports || []);
 
-    
+
     const prevProfile = this.profilePreviewUrl();
     const prevWallpaper = this.wallpaperPreviewUrl();
     if (prevProfile && prevProfile.startsWith('blob:')) URL.revokeObjectURL(prevProfile);

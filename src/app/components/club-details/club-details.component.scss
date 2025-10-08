@@ -433,7 +433,9 @@
 
   .footer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     gap: 16px;
     margin-top: 24px;
     padding-top: 16px;
@@ -441,7 +443,12 @@
     .hint {
       color: #6b7a8b;
       font-size: 14px;
-      text-align: center;
+      text-align: left;
+    }
+
+    /* Make only the Save/Update button a bit wider without affecting other small buttons */
+    .btn.btn--sm {
+      min-width: 140px; /* was 120px globally */
     }
     /* save button visuals moved to global .btn */
   }
@@ -485,6 +492,12 @@
 
 /* Dark theme styles for location section (map and saved cards) */
   .location-section {
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 12px;
+  }
   .map {
     height: 320px;
     border-radius: 12px;
