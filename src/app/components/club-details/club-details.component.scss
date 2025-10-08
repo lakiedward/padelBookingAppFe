@@ -381,8 +381,8 @@
     }
 
     /* Ensure different aspect media keep fixed container height */
-    .drop.profile { height: 320px; }
-    .drop.wallpaper { height: 320px; }
+    .drop.profile { height: 420px; max-height: 420px; }
+    .drop.wallpaper { height: 420px; max-height: 420px; }
 
     /* Preview image styles */
     .preview {

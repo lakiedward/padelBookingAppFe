@@ -1,0 +1,179 @@
+<div class="create-court">
+  <div class="header">
+    <div>
+      <div class="title">Create Court</div>
+      <div class="sub">Enter basic details for your new court</div>
+    </div>
+    <button type="button" class="icon-close" (click)="onCancel()" aria-label="Close">×</button>
+  </div>
+
+  <form [formGroup]="form" class="form">
+    <div class="grid-2">
+      <div class="field">
+        <label>Court Name</label>
+        <input type="text" formControlName="name" placeholder="e.g. Court 1" />
+        <div class="error" *ngIf="form.controls['name'].touched && form.controls['name'].invalid">Name is required</div>
+      </div>
+      <div class="field">
+        <label>Sport</label>
+        <select formControlName="sport">
+          <option value="" disabled>Select a sport</option>
+          <option *ngFor="let s of sports" [value]="s">{{ s | titlecase }}</option>
+        </select>
+        <div class="error" *ngIf="form.controls['sport'].touched && form.controls['sport'].invalid">Sport is required</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Tags</label>
+      <div class="tags">
+        <span class="tag" *ngFor="let t of tags; let i = index">
+          <span class="text">{{ t }}</span>
+          <button type="button" class="remove" (click)="removeTag(i)" [attr.aria-label]="'Remove tag ' + t">×</button>
+        </span>
+      </div>
+      <div class="tag-input">
+        <input type="text" formControlName="newTag" placeholder="e.g. Indoor, Outdoor, Clay" (keyup.enter)="addTag()" />
+        <button type="button" class="btn btn--primary" (click)="addTag()">+
+          <span class="sr-only">Add Tag</span>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <hr class="divider" />
+
+  <!-- Media section -->
+  <div class="section">
+    <div class="section-title">Media</div>
+    <div class="media-upload">
+      <input type="file" multiple accept="image/*" #mediaInput (change)="onMediaSelected($event)" hidden>
+      <div class="drop" (click)="mediaInput.click()">
+        <div class="drop-emoji">📷</div>
+        <div class="drop-title">Upload Images</div>
+        <div class="drop-sub">Click to browse</div>
+      </div>
+    </div>
+    <div class="media-grid" *ngIf="mediaPreviews.length">
+      <div
+        class="media-item"
+        *ngFor="let src of mediaPreviews; let i = index"
+        [class.drag-over]="dragOverMediaIndex === i"
+        draggable="true"
+        (dragstart)="onMediaDragStart(i, $event)"
+        (dragenter)="onMediaDragEnter(i, $event)"
+        (dragover)="onMediaDragOver(i, $event)"
+        (dragleave)="onMediaDragLeave(i, $event)"
+        (drop)="onMediaDrop(i, $event)"
+        (dragend)="onMediaDragEnd($event)"
+      >
+        <img [src]="src" alt="Media preview" />
+        <button type="button" class="remove" (click)="removeMedia(i)" aria-label="Remove image">×</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <div class="section-title">Availability &amp; Pricing</div>
+    <form [formGroup]="ruleForm" class="rule-form" (submit)="$event.preventDefault()">
+      <div class="mode-toggle" role="tablist" aria-label="Rule mode">
+        <button type="button" class="mode-btn" [class.active]="isWeeklyMode()" (click)="toggleMode('weekly')" role="tab" [attr.aria-selected]="isWeeklyMode()">Weekly</button>
+        <button type="button" class="mode-btn" [class.active]="isDateMode()" (click)="toggleMode('date')" role="tab" [attr.aria-selected]="isDateMode()">Specific date</button>
+      </div>
+
+      <div class="weekday-grid" *ngIf="isWeeklyMode()">
+        <button type="button" class="weekday" *ngFor="let d of weekdays" [class.active]="weekdayActive(d.n)" (click)="toggleWeekday(d.n)">{{ d.label }}</button>
+      </div>
+
+      <div class="date-row" *ngIf="isDateMode()">
+        <label class="sr-only" for="rule-date">Date</label>
+        <input id="rule-date" type="date" formControlName="date" />
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="start">Start</label>
+          <input id="start" type="time" formControlName="startTime" />
+        </div>
+        <div class="field">
+          <label for="end">End</label>
+          <input id="end" type="time" formControlName="endTime" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="slot">Slot length</label>
+          <select id="slot" formControlName="slotMinutes">
+            <option [value]="30">30 minutes</option>
+            <option [value]="45">45 minutes</option>
+            <option [value]="60">60 minutes</option>
+            <option [value]="90">90 minutes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="price">Price per slot</label>
+          <input id="price" type="number" min="0" step="1" formControlName="price" placeholder="50" />
+        </div>
+      </div>
+
+      <div class="rule-actions">
+        <div class="preview">Per selected day: <b>{{ slotsPerDayForCurrent() }}</b> slots at €{{ ruleForm.value.price || 0 }}</div>
+        <button type="button" class="btn btn--primary" (click)="addRule()">Add interval rule</button>
+      </div>
+
+      <div class="rules-list" *ngIf="rules.length">
+        <div class="rule-chip" *ngFor="let r of rules; let i = index">
+          <div class="left">
+            <span class="badge">{{ r.type === 'weekly' ? 'Weekly' : 'Date' }}</span>
+            <span class="text" *ngIf="r.type === 'weekly'">{{ weekdaysLabel(r) || '—' }} • {{ r.startTime }}–{{ r.endTime }} • {{ r.slotMinutes }}m • €{{ r.price }}</span>
+            <span class="text" *ngIf="r.type === 'date'">{{ dateLabel(r) }} • {{ r.startTime }}–{{ r.endTime }} • {{ r.slotMinutes }}m • €{{ r.price }}</span>
+          </div>
+          <button type="button" class="remove" (click)="removeRule(i)" aria-label="Remove rule">×</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="section">
+    <div class="section-title">Equipment</div>
+    <form [formGroup]="equipForm" class="equip-form" (submit)="$event.preventDefault()">
+      <div class="equip-row">
+        <div class="field">
+          <label for="equip-name">Equipment</label>
+          <input id="equip-name" type="text" formControlName="name" placeholder="e.g. Racket" />
+        </div>
+        <div class="field price-field">
+          <label for="equip-price">Price per hour</label>
+          <input id="equip-price" type="number" min="0" step="1" formControlName="pricePerHour" placeholder="10" />
+        </div>
+        <div class="field add-field">
+          <label class="sr-only" for="equip-add">Add</label>
+          <button id="equip-add" type="button" class="btn btn--primary btn--square" (click)="addEquipment()">+
+            <span class="sr-only"><Add></Add></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="equip-list" *ngIf="equipment.length">
+        <div class="equip-card" *ngFor="let e of equipment; let i = index">
+          <span class="name">{{ e.name }}</span>
+          <span class="price">€{{ e.pricePerHour }}/h</span>
+          <button type="button" class="remove" (click)="removeEquipment(i)" aria-label="Remove equipment">Remove</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="footer">
+    <div class="hint">Review details before saving</div>
+    <div class="actions">
+      <button type="button" class="btn" (click)="onCancel()">Cancel</button>
+      <button type="button" class="btn btn--primary" (click)="onSave()">Save</button>
+    </div>
+  </div>
+</div>

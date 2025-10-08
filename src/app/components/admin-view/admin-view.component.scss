@@ -157,3 +157,30 @@
 
 .content-card.empty { color: #9fb0c0; text-align: center; padding: 80px; }
 
+/* Modal styles */
+.modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.68); /* darker backdrop for stronger contrast */
+}
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(1100px, 96vw);
+  max-height: 92vh;
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 2px solid #a7ee43; /* green frame */
+  border-radius: 20px;
+  padding: 24px; /* more inner margin */
+  box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.3);
+}
