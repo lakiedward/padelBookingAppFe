@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, Output, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SportKey } from '../../models/club.models';
-import { AvailabilityRule, DateRule, WeeklyRule, Weekday, CourtCreatePayload, EquipmentItem } from '../../models/court.models';
+import { AvailabilityRule, DateRule, WeeklyRule, Weekday, CourtCreatePayload, EquipmentItem, CourtResponse } from '../../models/court.models';
+import { CourtService } from '../../services/court.service';
 
 // Types imported from models/court.models
 
@@ -13,19 +14,29 @@ import { AvailabilityRule, DateRule, WeeklyRule, Weekday, CourtCreatePayload, Eq
   templateUrl: './create-court.component.html',
   styleUrl: './create-court.component.scss'
 })
-export class CreateCourtComponent implements OnDestroy {
+export class CreateCourtComponent implements OnInit, OnDestroy {
   @Output() cancel = new EventEmitter<void>();
   @Output() saved = new EventEmitter<any>();
   @Input() sports: SportKey[] = [];
+  @Input() courtId?: number; // If provided, component is in edit mode
+  @Input() existingCourt?: CourtResponse; // Pre-loaded court data
 
   form: FormGroup;
   ruleForm: FormGroup;
   equipForm: FormGroup;
+  
+  isEditMode = false;
+  isLoading = false;
+  saveError: string | null = null;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private courtService: CourtService
+  ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
       sport: new FormControl<SportKey | ''>('', { nonNullable: true, validators: [Validators.required] }),
+      description: new FormControl<string>('', { nonNullable: true }),
       newTag: new FormControl<string>('', { nonNullable: true })
     });
     this.ruleForm = this.fb.group({
@@ -43,6 +54,29 @@ export class CreateCourtComponent implements OnDestroy {
     });
   }
 
+  ngOnInit() {
+    this.isEditMode = !!this.courtId;
+    
+    // Load existing court data if in edit mode
+    if (this.isEditMode && this.existingCourt) {
+      this.loadExistingCourt(this.existingCourt);
+    } else if (this.isEditMode && this.courtId) {
+      // Fetch court data if not provided
+      this.isLoading = true;
+      this.courtService.getCourtById(this.courtId).subscribe({
+        next: (court) => {
+          this.loadExistingCourt(court);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Failed to load court:', err);
+          this.saveError = 'Failed to load court data';
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+
   onCancel() { this.cancel.emit(); }
 
   tags: string[] = [];
@@ -50,6 +84,7 @@ export class CreateCourtComponent implements OnDestroy {
   equipment: EquipmentItem[] = [];
   mediaFiles: File[] = [];
   mediaPreviews: string[] = [];
+  existingPhotoIds: (number | null)[] = []; // Track which previews are existing photos (null = new file)
   draggingMediaIndex: number | null = null;
   dragOverMediaIndex: number | null = null;
 
@@ -187,19 +222,75 @@ export class CreateCourtComponent implements OnDestroy {
       this.form.markAllAsTouched();
       return;
     }
+    
+    this.isLoading = true;
+    this.saveError = null;
+    
     const v = this.form.value;
-    const payload: CourtCreatePayload = {
+    const details = {
       name: v.name,
       sport: v.sport,
+      description: v.description || null,
       tags: [...this.tags],
       rules: this.rules,
-      equipment: this.equipment,
-      images: this.mediaFiles
+      equipment: this.equipment
     };
-    // For now, log the create payload and images; backend saving will mimic ClubDetails multipart
-    console.log('CreateCourt: payload', payload);
-    console.log('CreateCourt: images', this.mediaFiles);
-    this.saved.emit(payload);
+
+    const operation = this.isEditMode && this.courtId
+      ? this.courtService.updateCourt(this.courtId, details, this.mediaFiles)
+      : this.courtService.createCourt(details, this.mediaFiles);
+
+    operation.subscribe({
+      next: (result) => {
+        this.isLoading = false;
+        console.log(this.isEditMode ? 'Court updated:' : 'Court created:', result);
+        this.saved.emit(result);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Failed to save court:', err);
+        this.saveError = err.error?.error || err.message || 'Failed to save court';
+      }
+    });
+  }
+
+  private loadExistingCourt(court: CourtResponse) {
+    // Populate form fields
+    this.form.patchValue({
+      name: court.name,
+      sport: court.sport as SportKey,
+      description: court.description || ''
+    });
+
+    // Load tags
+    this.tags = [...court.tags];
+
+    // Load equipment
+    this.equipment = court.equipment.map(e => 
+      this.courtService.mapEquipmentToFrontend(e)
+    );
+
+    // Load availability rules
+    this.rules = court.availabilityRules.map(r => 
+      this.courtService.mapRuleToFrontend(r)
+    );
+
+    // Load photos as preview URLs (but can't edit existing images directly)
+    // Users can only add new images in edit mode
+    if (court.photos && court.photos.length > 0) {
+      // Sort photos by orderIndex to maintain proper order
+      const sortedPhotos = [...court.photos].sort((a, b) => a.orderIndex - b.orderIndex);
+      
+      sortedPhotos.forEach(photo => {
+        if (photo.url) {
+          const absoluteUrl = this.courtService.toAbsoluteUrl(photo.url);
+          if (absoluteUrl) {
+            this.mediaPreviews.push(absoluteUrl);
+            this.existingPhotoIds.push(photo.id); // Track existing photo ID
+          }
+        }
+      });
+    }
   }
 
   private genRuleId(): string {
@@ -216,15 +307,46 @@ export class CreateCourtComponent implements OnDestroy {
       this.mediaFiles.push(f);
       const url = URL.createObjectURL(f);
       this.mediaPreviews.push(url);
+      this.existingPhotoIds.push(null); // null = new file, not an existing photo
     }
     input.value = '';
   }
 
   removeMedia(index: number) {
     const url = this.mediaPreviews[index];
-    if (url) URL.revokeObjectURL(url);
-    this.mediaPreviews.splice(index, 1);
-    this.mediaFiles.splice(index, 1);
+    const photoId = this.existingPhotoIds[index];
+    
+    // If it's an existing photo (has photoId), delete it from server immediately
+    if (photoId !== null) {
+      // Delete from server
+      this.courtService.deleteCourtPhoto(photoId).subscribe({
+        next: () => {
+          console.log(`Photo ${photoId} deleted successfully from server`);
+        },
+        error: (err) => {
+          console.error('Failed to delete photo from server:', err);
+          // Photo was removed from UI but failed to delete from server
+          // Could show a subtle notification here if needed
+        }
+      });
+      
+      // Remove from UI immediately (optimistic UI update)
+      this.mediaPreviews.splice(index, 1);
+      this.existingPhotoIds.splice(index, 1);
+    } else {
+      // It's a new file (photoId is null), just remove from memory
+      if (url && url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+      
+      // Find the corresponding index in mediaFiles (count nulls before this index)
+      const fileIndex = this.existingPhotoIds.slice(0, index).filter(id => id === null).length;
+      this.mediaFiles.splice(fileIndex, 1);
+      
+      // Remove from preview and tracking arrays
+      this.mediaPreviews.splice(index, 1);
+      this.existingPhotoIds.splice(index, 1);
+    }
   }
 
   onMediaDragStart(index: number, event: DragEvent) {
@@ -263,10 +385,49 @@ export class CreateCourtComponent implements OnDestroy {
       this.draggingMediaIndex = null;
       return;
     }
-    this.moveItem(this.mediaFiles, from, index);
+    
+    // Build a map to track which file belongs to which preview index before reordering
+    const fileMap = new Map<number, File>();
+    let fileIdx = 0;
+    for (let i = 0; i < this.existingPhotoIds.length; i++) {
+      if (this.existingPhotoIds[i] === null && fileIdx < this.mediaFiles.length) {
+        fileMap.set(i, this.mediaFiles[fileIdx]);
+        fileIdx++;
+      }
+    }
+    
+    // Reorder preview and tracking arrays
     this.moveItem(this.mediaPreviews, from, index);
+    this.moveItem(this.existingPhotoIds, from, index);
+    
+    // Rebuild mediaFiles in the new order
+    const newMediaFiles: File[] = [];
+    for (let i = 0; i < this.existingPhotoIds.length; i++) {
+      if (this.existingPhotoIds[i] === null) {
+        // This was a new file - find which file it was before reordering
+        const oldIndex = this.findOldIndex(i, from, index);
+        const file = fileMap.get(oldIndex);
+        if (file) {
+          newMediaFiles.push(file);
+        }
+      }
+    }
+    this.mediaFiles = newMediaFiles;
+    
     this.dragOverMediaIndex = null;
     this.draggingMediaIndex = null;
+  }
+  
+  // Helper to find the original index before drag-and-drop reordering
+  private findOldIndex(currentIndex: number, from: number, to: number): number {
+    if (currentIndex === to) {
+      return from;
+    } else if (from < to && currentIndex >= from && currentIndex < to) {
+      return currentIndex + 1;
+    } else if (from > to && currentIndex > to && currentIndex <= from) {
+      return currentIndex - 1;
+    }
+    return currentIndex;
   }
 
   onMediaDragEnd(_event: DragEvent) {
@@ -281,8 +442,15 @@ export class CreateCourtComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    for (const url of this.mediaPreviews) {
-      try { URL.revokeObjectURL(url); } catch {}
+    // Only revoke blob URLs (newly uploaded files), not server URLs
+    for (let i = 0; i < this.mediaPreviews.length; i++) {
+      const url = this.mediaPreviews[i];
+      const photoId = this.existingPhotoIds[i];
+      
+      // Only revoke if it's a new file (photoId is null) and it's a blob URL
+      if (photoId === null && url && url.startsWith('blob:')) {
+        try { URL.revokeObjectURL(url); } catch {}
+      }
     }
   }
 }

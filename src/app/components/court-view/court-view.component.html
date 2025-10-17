@@ -9,7 +9,14 @@
     </div>
   </div>
 
-  <div class="panels">
+  <div class="loading" *ngIf="isLoading">Loading courts...</div>
+  <div class="error" *ngIf="loadError">{{ loadError }}</div>
+
+  <div class="empty-state" *ngIf="!isLoading && !loadError && courts.length === 0">
+    <p>No courts yet. Click "Add Court" to create your first court.</p>
+  </div>
+
+  <div class="panels" *ngIf="!isLoading && courts.length > 0">
     <section class="court-panel" *ngFor="let c of courts; trackBy: trackByIndex">
       <div class="hero">
         <div class="img" [style.background-image]="c.imageUrl ? 'url(' + c.imageUrl + ')' : ''"></div>
@@ -22,7 +29,8 @@
         <div class="hero-actions desktop">
           <button type="button" class="btn btn--ghost btn--xs green-outline">Availability &amp; Pricing</button>
           <button type="button" class="btn btn--ghost btn--xs">Equipment</button>
-          <button type="button" class="btn btn--primary btn--xs">Edit</button>
+          <button type="button" class="btn btn--primary btn--xs" (click)="onEditCourt(c.id)">Edit</button>
+          <button type="button" class="btn btn--ghost btn--xs btn--danger" (click)="onDeleteCourt(c.id, c.title)">Delete</button>
         </div>
 
         <div class="hero-bottom">
@@ -32,13 +40,13 @@
               <h3>{{ c.title }}</h3>
               <p class="muted">{{ c.subtitle }}</p>
               <div class="chips">
-                <span class="chip chip--primary">
-                  <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <span class="chip chip--primary" *ngFor="let tag of c.tags.slice(0, 3); let i = index" [class.chip--primary]="i === 0">
+                  <svg class="check" *ngIf="i === 0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
                     <path d="M3 8l3 3 7-7" />
                   </svg>
-                  Indoor
+                  {{ tag }}
                 </span>
-                <span class="chip">Hard</span>
+                <span class="chip" *ngIf="c.tags.length > 3">+{{ c.tags.length - 3 }} more</span>
               </div>
               <div class="price mobile">
                 <div class="val">{{ c.price }}</div>
@@ -56,7 +64,8 @@
       <div class="hero-actions mobile">
         <button type="button" class="btn btn--ghost btn--xs green-outline wide">Availability &amp; Pricing</button>
         <button type="button" class="btn btn--ghost btn--xs">Equipment</button>
-        <button type="button" class="btn btn--primary btn--xs">Edit</button>
+        <button type="button" class="btn btn--primary btn--xs" (click)="onEditCourt(c.id)">Edit</button>
+        <button type="button" class="btn btn--ghost btn--xs btn--danger" (click)="onDeleteCourt(c.id, c.title)">Delete</button>
       </div>
 
       <div class="calendar">

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClubDetailsComponent } from '../club-details/club-details.component';
 import { CourtViewComponent } from '../court-view/court-view.component';
@@ -16,15 +16,31 @@ type AdminMenuKey = 'club-management' | 'courts' | 'events';
   templateUrl: './admin-view.component.html',
   styleUrl: './admin-view.component.scss'
 })
-export class AdminViewComponent {
+export class AdminViewComponent implements AfterViewInit {
   selectedMenu: AdminMenuKey = 'club-management';
   courtsMode: 'view' | 'create' = 'view';
   showCreateCourtModal = false;
+  editingCourtId?: number;
 
-  constructor(private auth: AuthService, private router: Router, public clubService: ClubService) {}
+  @ViewChild(CourtViewComponent) courtViewComponent?: CourtViewComponent;
+
+  constructor(
+    private auth: AuthService, 
+    private router: Router, 
+    public clubService: ClubService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngAfterViewInit() {
+    // ViewChild is now available
+    this.cdr.detectChanges();
+  }
 
   select(menu: AdminMenuKey) {
+    console.log('[AdminView] select() called with menu:', menu);
     this.selectedMenu = menu;
+    
+    // No need to manually trigger loadCourts; CourtView loads itself on insertion
   }
 
   onCourtsRequestedFromChild() {
@@ -38,15 +54,27 @@ export class AdminViewComponent {
   }
 
   onAddCourtFromView() {
+    this.editingCourtId = undefined; // Reset edit mode
+    this.showCreateCourtModal = true;
+  }
+
+  onEditCourtFromView(courtId: number) {
+    this.editingCourtId = courtId;
     this.showCreateCourtModal = true;
   }
 
   onCreateCourtCancel() {
     this.showCreateCourtModal = false;
+    this.editingCourtId = undefined;
   }
 
   onCreateCourtSaved(_: any) {
-    // In a future step, refresh courts list; for now just return to view.
     this.showCreateCourtModal = false;
+    this.editingCourtId = undefined;
+    
+    // Refresh courts list
+    if (this.courtViewComponent) {
+      this.courtViewComponent.loadCourts();
+    }
   }
 }

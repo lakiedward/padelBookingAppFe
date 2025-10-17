@@ -1,10 +1,14 @@
 <div class="create-court">
   <div class="header">
     <div>
-      <div class="title">Create Court</div>
-      <div class="sub">Enter basic details for your new court</div>
+      <div class="title">{{ isEditMode ? 'Edit Court' : 'Create Court' }}</div>
+      <div class="sub">{{ isEditMode ? 'Update court details' : 'Enter basic details for your new court' }}</div>
     </div>
     <button type="button" class="icon-close" (click)="onCancel()" aria-label="Close">×</button>
+  </div>
+
+  <div class="error-banner" *ngIf="saveError">
+    <strong>Error:</strong> {{ saveError }}
   </div>
 
   <form [formGroup]="form" class="form">
@@ -22,6 +26,11 @@
         </select>
         <div class="error" *ngIf="form.controls['sport'].touched && form.controls['sport'].invalid">Sport is required</div>
       </div>
+    </div>
+
+    <div class="field">
+      <label>Description (optional)</label>
+      <textarea formControlName="description" placeholder="Brief description of the court" rows="3"></textarea>
     </div>
 
     <div class="field">
@@ -172,8 +181,10 @@
   <div class="footer">
     <div class="hint">Review details before saving</div>
     <div class="actions">
-      <button type="button" class="btn" (click)="onCancel()">Cancel</button>
-      <button type="button" class="btn btn--primary" (click)="onSave()">Save</button>
+      <button type="button" class="btn" (click)="onCancel()" [disabled]="isLoading">Cancel</button>
+      <button type="button" class="btn btn--primary" (click)="onSave()" [disabled]="isLoading">
+        {{ isLoading ? 'Saving...' : (isEditMode ? 'Update' : 'Save') }}
+      </button>
     </div>
   </div>
 </div>

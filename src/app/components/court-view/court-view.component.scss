@@ -11,10 +11,16 @@
 .btn:hover { filter: brightness(0.98); }
 .btn--primary { background: #a7ee43; color: #000a14; border-color: rgba(167,238,67,0.4); }
 .btn--ghost { background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.2); color: #d6dde6; }
+.btn--danger { background: rgba(255, 59, 48, 0.15); border-color: rgba(255, 59, 48, 0.3); color: #ff6b6b; }
+.btn--danger:hover { background: rgba(255, 59, 48, 0.25); }
 .btn--xs { height: 32px; padding: 0 10px; font-size: 12px; border-radius: 10px; }
 .btn--sm { height: 40px; padding: 0 14px; font-size: 13px; border-radius: 12px; }
 .btn.wide { width: 100%; }
 .btn.green-outline { border-color: rgba(167,238,67,0.4); background: rgba(167,238,67,0.2); color: #a7ee43; }
+
+.loading, .error, .empty-state { padding: 40px 20px; text-align: center; color: #8aa0b5; font-size: 14px; }
+.error { color: #ff9b9b; }
+.empty-state { color: #6b7a8b; }
 
 .panels { display: grid; gap: 16px; }
 

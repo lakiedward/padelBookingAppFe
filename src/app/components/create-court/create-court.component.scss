@@ -1,5 +1,8 @@
 .create-court { display: grid; gap: 16px; }
 
+.error-banner { padding: 12px; border-radius: 10px; background: rgba(255, 59, 48, 0.1); border: 1px solid rgba(255, 59, 48, 0.3); color: #ff9b9b; font-size: 14px; }
+.error-banner strong { color: #ff6b6b; }
+
 .header { display: flex; align-items: center; gap: 12px; }
 .header .title { color: #d6dde6; font-weight: 800; font-size: 20px; }
 .header .sub { color: #6b7a8b; font-size: 12px; margin-top: 2px; }
@@ -13,8 +16,10 @@
 
 .field { display: grid; gap: 6px; }
 .field label { color: #d6dde6; font-weight: 700; font-size: 12px; }
-.field input, .field select { height: 40px; padding: 0 10px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(214,221,230,0.15); color: #fff; }
-.field input::placeholder { color: #8aa0b5; }
+.field input, .field select, .field textarea { padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(214,221,230,0.15); color: #fff; font-family: inherit; }
+.field input, .field select { height: 40px; padding: 0 10px; }
+.field textarea { resize: vertical; min-height: 80px; }
+.field input::placeholder, .field textarea::placeholder { color: #8aa0b5; }
 .field .error { color: #ff9b9b; font-size: 12px; }
 
 .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }

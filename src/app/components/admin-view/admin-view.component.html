@@ -54,7 +54,10 @@
       <app-club-details (courtsRequested)="onCourtsRequestedFromChild()"></app-club-details>
     </section>
     <section class="content-card" *ngIf="selectedMenu === 'courts'">
-      <app-court-view (addCourt)="onAddCourtFromView()"></app-court-view>
+      <app-court-view 
+        (addCourt)="onAddCourtFromView()"
+        (editCourt)="onEditCourtFromView($event)">
+      </app-court-view>
     </section>
     <section class="content-card empty" *ngIf="selectedMenu === 'events'">
       <p>Events — coming soon</p>
@@ -70,7 +73,12 @@
       aria-label="Create Court"
       (click)="$event.stopPropagation()"
     >
-      <app-create-court [sports]="clubService.lastSaved()?.sports || []" (cancel)="onCreateCourtCancel()" (saved)="onCreateCourtSaved($event)"></app-create-court>
+      <app-create-court 
+        [sports]="clubService.lastSaved()?.sports || []" 
+        [courtId]="editingCourtId"
+        (cancel)="onCreateCourtCancel()" 
+        (saved)="onCreateCourtSaved($event)">
+      </app-create-court>
     </div>
   </div>
 </div>

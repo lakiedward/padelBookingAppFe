@@ -113,9 +113,11 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return typeof window !== 'undefined' && typeof localStorage !== 'undefined'
+    const token = typeof window !== 'undefined' && typeof localStorage !== 'undefined'
       ? localStorage.getItem('token')
       : null;
+    console.log('[AuthService] getToken() called, hasToken:', !!token, 'tokenPreview:', token ? token.substring(0, 20) + '...' : 'none');
+    return token;
   }
 
   private toAbsoluteUrl(path?: string | null): string | undefined {
