@@ -44,17 +44,41 @@
     <button class="admin-chip">
       <span>Admin Panel</span>
     </button>
+    <button class="logout-btn" (click)="onLogout()">
+      <span>Logout</span>
+    </button>
   </header>
 
   <main class="content">
     <section class="content-card" *ngIf="selectedMenu === 'club-management'">
       <app-club-details (courtsRequested)="onCourtsRequestedFromChild()"></app-club-details>
     </section>
-    <section class="content-card empty" *ngIf="selectedMenu === 'courts'">
-      <p>Courts — coming soon</p>
+    <section class="content-card" *ngIf="selectedMenu === 'courts'">
+      <app-court-view 
+        (addCourt)="onAddCourtFromView()"
+        (editCourt)="onEditCourtFromView($event)">
+      </app-court-view>
     </section>
     <section class="content-card empty" *ngIf="selectedMenu === 'events'">
       <p>Events — coming soon</p>
     </section>
   </main>
+
+  <div class="modal-container" *ngIf="showCreateCourtModal">
+    <div class="modal-overlay" (click)="onCreateCourtCancel()" aria-hidden="true"></div>
+    <div
+      class="modal-content"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Create Court"
+      (click)="$event.stopPropagation()"
+    >
+      <app-create-court 
+        [sports]="clubService.lastSaved()?.sports || []" 
+        [courtId]="editingCourtId"
+        (cancel)="onCreateCourtCancel()" 
+        (saved)="onCreateCourtSaved($event)">
+      </app-create-court>
+    </div>
+  </div>
 </div>

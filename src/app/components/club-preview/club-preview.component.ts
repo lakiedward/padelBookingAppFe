@@ -1,21 +1,337 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClubDetails, SportKey } from '../../models/club.models';
-import { Court } from '../../models/court.models';
-import { CourtCardComponent } from '../court-card/court-card.component';
+import { CourtSummaryResponse, CourtResponse, BackendAvailabilityRuleType } from '../../models/court.models';
+import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
+import { CourtService } from '../../services/court.service';
+import { Time24Pipe } from '../../pipes/time24.pipe';
+
+interface CourtListingData {
+  id: string;
+  image: string;
+  emoji: string;
+  title: string;
+  club: string;
+  location: string;
+  price: string;
+  unit: string;
+  tags: string[];
+  availableDate: string;
+  slots: string[];
+  sport: SportKey;
+}
 
 @Component({
   selector: 'app-club-preview',
   standalone: true,
-  imports: [CommonModule, CourtCardComponent],
+  imports: [CommonModule, CourtListingCardComponent],
   templateUrl: './club-preview.component.html',
   styleUrl: './club-preview.component.scss'
 })
-export class ClubPreviewComponent {
+export class ClubPreviewComponent implements OnInit {
   @Input() details!: ClubDetails;
   @Output() editRequested = new EventEmitter<void>();
+  @Output() deleteRequested = new EventEmitter<void>();
+  @Output() editCourtsRequested = new EventEmitter<void>();
 
   activeCourtFilter = signal<'all' | SportKey>('all');
+  realCourts = signal<CourtListingData[]>([]);
+  isLoadingCourts = signal(false);
+  courtsLoadError = signal<string | null>(null);
+  
+  private time24Pipe = new Time24Pipe();
+
+  constructor(private courtService: CourtService) {}
+
+  ngOnInit(): void {
+    console.log('[ClubPreview] ngOnInit called - loading courts');
+    console.log('[ClubPreview] Club details:', this.details);
+    console.log('[ClubPreview] Club sports:', this.details?.sports);
+    console.log('[ClubPreview] Active filter:', this.activeCourtFilter());
+    this.loadRealCourts();
+  }
+
+  private loadRealCourts(): void {
+    this.isLoadingCourts.set(true);
+    this.courtsLoadError.set(null);
+    
+    this.courtService.getCourts().subscribe({
+      next: (courts) => {
+        console.log('[ClubPreview] Real courts loaded:', courts);
+        console.log('[ClubPreview] Number of courts:', courts.length);
+        
+        if (courts.length === 0) {
+          this.realCourts.set([]);
+          this.isLoadingCourts.set(false);
+          return;
+        }
+        
+        // Load full details for each court to get availability rules
+        const detailRequests = courts.map(court => 
+          this.courtService.getCourtById(court.id)
+        );
+        
+        // Use forkJoin to load all court details in parallel
+        import('rxjs').then(rxjs => {
+          rxjs.forkJoin(detailRequests).subscribe({
+            next: (detailedCourts) => {
+              console.log('[ClubPreview] Court details loaded:', detailedCourts);
+              const mappedCourts = detailedCourts.map(c => this.mapCourtDetailsToListing(c));
+              console.log('[ClubPreview] Mapped courts:', mappedCourts);
+              this.realCourts.set(mappedCourts);
+              this.isLoadingCourts.set(false);
+            },
+            error: (err) => {
+              console.error('[ClubPreview] Failed to load court details:', err);
+              // Fallback to summary data without prices/slots
+              const mappedCourts = courts.map(c => this.mapCourtSummaryToCourt(c));
+              this.realCourts.set(mappedCourts);
+              this.isLoadingCourts.set(false);
+            }
+          });
+        });
+      },
+      error: (err) => {
+        console.error('[ClubPreview] Failed to load courts:', err);
+        this.courtsLoadError.set('Failed to load courts');
+        this.isLoadingCourts.set(false);
+        this.realCourts.set([]);
+      }
+    });
+  }
+
+  private mapCourtSummaryToCourt(summary: CourtSummaryResponse): CourtListingData {
+    const location = this.details?.locations?.[0]?.address || this.details?.name || 'Club Location';
+    
+    // Ensure imageUrl is always a string (never null)
+    let imageUrl = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=1200&auto=format&fit=crop';
+    if (summary.primaryPhotoUrl) {
+      const absoluteUrl = this.courtService.toAbsoluteUrl(summary.primaryPhotoUrl);
+      if (absoluteUrl) {
+        imageUrl = absoluteUrl;
+      }
+    }
+    
+    const emoji = this.getSportEmoji(summary.sport as SportKey);
+    
+    // Fallback data when full details are not available
+    const price = 'N/A';
+    const availableDate = 'N/A';
+    const slots: string[] = [];
+
+    return {
+      id: String(summary.id),
+      image: imageUrl,
+      emoji: emoji,
+      title: summary.name,
+      club: summary.clubName,
+      location: location,
+      price: price,
+      unit: 'per hour',
+      tags: summary.tags || [],
+      availableDate: availableDate,
+      slots: slots,
+      sport: summary.sport as SportKey
+    };
+  }
+
+  private mapCourtDetailsToListing(court: CourtResponse): CourtListingData {
+    const location = this.details?.locations?.[0]?.address || this.details?.name || 'Club Location';
+    
+    // Get image URL
+    let imageUrl = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=1200&auto=format&fit=crop';
+    if (court.photos && court.photos.length > 0) {
+      const primaryPhoto = court.photos.find(p => p.isPrimary) || court.photos[0];
+      if (primaryPhoto && primaryPhoto.url) {
+        const absoluteUrl = this.courtService.toAbsoluteUrl(primaryPhoto.url);
+        if (absoluteUrl) {
+          imageUrl = absoluteUrl;
+        }
+      }
+    }
+    
+    const emoji = this.getSportEmoji(court.sport as SportKey);
+    
+    // Extract pricing and availability from rules
+    const { price, availableDate, slots } = this.extractAvailabilityInfo(court);
+
+    return {
+      id: String(court.id),
+      image: imageUrl,
+      emoji: emoji,
+      title: court.name,
+      club: court.clubName,
+      location: location,
+      price: price,
+      unit: 'per slot',
+      tags: court.tags || [],
+      availableDate: availableDate,
+      slots: slots,
+      sport: court.sport as SportKey
+    };
+  }
+
+  private extractAvailabilityInfo(court: CourtResponse): { price: string; availableDate: string; slots: string[] } {
+    const rules = court.availabilityRules || [];
+    
+    if (rules.length === 0) {
+      return {
+        price: 'N/A',
+        availableDate: 'No availability set',
+        slots: []
+      };
+    }
+
+    // Get minimum price from all rules
+    const prices = rules.map(r => r.price);
+    const minPrice = Math.min(...prices);
+    const price = `€${minPrice}`;
+
+    // Get today's availability
+    const today = new Date();
+    const todayDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const todayDateStr = this.formatDate(today);
+
+    // Find rules applicable for today
+    const todayRules = rules.filter(rule => {
+      if (rule.type === BackendAvailabilityRuleType.DATE && rule.date === todayDateStr) {
+        return true;
+      }
+      if (rule.type === BackendAvailabilityRuleType.WEEKLY && 
+          rule.weekdays && 
+          rule.weekdays.includes(todayDayOfWeek)) {
+        return true;
+      }
+      return false;
+    });
+
+    if (todayRules.length > 0) {
+      // Generate sample slots from today's rules (show first 3-4 slots)
+      const sampleSlots: string[] = [];
+      let totalSlots = 0;
+
+      for (const rule of todayRules) {
+        const slots = this.generateSlotsFromRule(rule);
+        totalSlots += slots.length;
+        
+        // Add first few slots to samples
+        if (sampleSlots.length < 3) {
+          const remaining = 3 - sampleSlots.length;
+          sampleSlots.push(...slots.slice(0, remaining));
+        }
+      }
+
+      // Add "+X more" if there are more slots
+      if (totalSlots > 3) {
+        sampleSlots.push(`+${totalSlots - 3} more`);
+      }
+
+      return {
+        price,
+        availableDate: 'Today',
+        slots: sampleSlots
+      };
+    }
+
+    // Check for tomorrow or next available day
+    for (let i = 1; i <= 7; i++) {
+      const futureDate = new Date(today);
+      futureDate.setDate(today.getDate() + i);
+      const futureDayOfWeek = futureDate.getDay();
+      const futureDateStr = this.formatDate(futureDate);
+
+      const futureRules = rules.filter(rule => {
+        if (rule.type === BackendAvailabilityRuleType.DATE && rule.date === futureDateStr) {
+          return true;
+        }
+        if (rule.type === BackendAvailabilityRuleType.WEEKLY && 
+            rule.weekdays && 
+            rule.weekdays.includes(futureDayOfWeek)) {
+          return true;
+        }
+        return false;
+      });
+
+      if (futureRules.length > 0) {
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const dayName = dayNames[futureDayOfWeek];
+        
+        // Generate sample slots
+        const sampleSlots: string[] = [];
+        let totalSlots = 0;
+
+        for (const rule of futureRules) {
+          const slots = this.generateSlotsFromRule(rule);
+          totalSlots += slots.length;
+          
+          if (sampleSlots.length < 3) {
+            const remaining = 3 - sampleSlots.length;
+            sampleSlots.push(...slots.slice(0, remaining));
+          }
+        }
+
+        if (totalSlots > 3) {
+          sampleSlots.push(`+${totalSlots - 3} more`);
+        }
+
+        return {
+          price,
+          availableDate: i === 1 ? 'Tomorrow' : dayName,
+          slots: sampleSlots
+        };
+      }
+    }
+
+    // No availability in the next 7 days
+    return {
+      price,
+      availableDate: 'Not available',
+      slots: []
+    };
+  }
+
+  private generateSlotsFromRule(rule: any): string[] {
+    const slots: string[] = [];
+    const startParts = rule.startTime.split(':');
+    const endParts = rule.endTime.split(':');
+    
+    const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+    const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+    const slotDuration = rule.slotMinutes || 60;
+
+    let currentMinutes = startMinutes;
+    while (currentMinutes + slotDuration <= endMinutes) {
+      const hours = Math.floor(currentMinutes / 60);
+      const minutes = currentMinutes % 60;
+      const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      slots.push(this.time24Pipe.transform(timeStr));
+      currentMinutes += slotDuration;
+    }
+
+    return slots;
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private getSportEmoji(sport: SportKey): string {
+    const emojiMap: Record<SportKey, string> = {
+      'padel': '🏓',
+      'tennis': '🎾',
+      'basketball': '🏀',
+      'football': '⚽',
+      'volleyball': '🏐',
+      'badminton': '🏸',
+      'squash': '🎾',
+      'pingpong': '🏓',
+      'handball': '🤾'
+    };
+    return emojiMap[sport] || '🏃';
+  }
 
   setCourtFilter(v: 'all' | SportKey) {
     this.activeCourtFilter.set(v);
@@ -23,36 +339,25 @@ export class ClubPreviewComponent {
 
   trackByIndex(index: number) { return index; }
 
-  private buildDemoCourts(): Court[] {
-    const loc = this.details?.locations?.[0]?.address || 'Main Sports Complex';
-    const courts: Court[] = [];
-    for (const s of this.details?.sports || []) {
-      const title = s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-      courts.push({ id: `${s}-1`, name: `Main ${title} Court`, sport: s, location: loc, tags: ['Outdoor', 'Standard'] });
-      if (s === 'padel') {
-        courts.push(
-          { id: 'padel-2', name: 'Indoor Padel Court', sport: 'padel', location: `${loc} - Indoor Hall`, tags: ['Indoor', 'Glass Walls'] },
-          { id: 'padel-3', name: 'West Padel Court', sport: 'padel', location: `${loc} - West Wing`, tags: ['Outdoor', 'Synthetic Clay'] },
-        );
-      }
-      if (s === 'tennis') {
-        courts.push({ id: 'tennis-2', name: 'Center Tennis Court', sport: 'tennis', location: loc, tags: ['Outdoor', 'Hard Court'] });
-      }
-    }
-    return courts;
-  }
-
-  @Output() editCourtsRequested = new EventEmitter<void>();
   onEditCourts() { this.editCourtsRequested.emit(); }
 
-  courtsBySport(s: SportKey | 'all'): Court[] {
-    const all = this.buildDemoCourts();
+  courtsBySport(s: SportKey | 'all'): CourtListingData[] {
+    const all = this.realCourts();
+    console.log('[ClubPreview] courtsBySport called with:', s);
+    console.log('[ClubPreview] All courts:', all);
     if (s === 'all') return all;
-    return all.filter(c => c.sport === s);
+    const filtered = all.filter(c => c.sport === s);
+    console.log('[ClubPreview] Filtered courts:', filtered);
+    return filtered;
   }
 
-  onEditCourt(court: Court) {
-    console.log('Edit court clicked:', court);
-    this.onEditCourts();
+  // Get unique sports from actual courts
+  getUniqueSportsFromCourts(): SportKey[] {
+    const courts = this.realCourts();
+    const sportsSet = new Set<SportKey>();
+    courts.forEach(c => sportsSet.add(c.sport));
+    const uniqueSports = Array.from(sportsSet);
+    console.log('[ClubPreview] Unique sports from courts:', uniqueSports);
+    return uniqueSports;
   }
 }

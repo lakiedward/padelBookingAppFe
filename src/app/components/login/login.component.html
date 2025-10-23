@@ -14,6 +14,7 @@
         class="w-full"
         name="email"
         autocomplete="username"
+        [ngClass]="{ 'input-invalid': authError }"
       />
       <small class="error-message" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || loginForm.get('email')?.dirty || submitted)">
         <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
@@ -30,7 +31,7 @@
         [feedback]="false"
         inputId="password"
         styleClass="w-full"
-        inputStyleClass="w-full"
+        [inputStyleClass]="authError ? 'w-full input-invalid' : 'w-full'"
       ></p-password>
       <small class="error-message" *ngIf="loginForm.get('password')?.invalid && (loginForm.get('password')?.touched || loginForm.get('password')?.dirty || submitted)">
         <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
@@ -46,8 +47,8 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="submit-btn" [disabled]="loading">
-        <span class="spinner" *ngIf="loading" aria-hidden="true"></span>
+      <button type="submit" class="btn btn--primary btn--full" [disabled]="loading">
+        <span class="u-spinner u-spinner--sm" *ngIf="loading" aria-hidden="true"></span>
         <span *ngIf="!loading">Sign In</span>
       </button>
     </div>

@@ -13,10 +13,6 @@
           <div class="club">{{ club }}</div>
         </div>
       </div>
-      <div class="price price--desktop">
-        <div class="value">{{ price }}</div>
-        <div class="unit">{{ unit }}</div>
-      </div>
     </div>
   </div>
 
@@ -35,11 +31,6 @@
     <div class="availability">Available on {{ availableDate || '—' }}:</div>
     <div class="slots">
       <span class="chip" *ngFor="let s of slots">{{ s }}</span>
-    </div>
-
-    <div class="price price--mobile">
-      <div class="value">{{ price }}</div>
-      <div class="unit">{{ unit }}</div>
     </div>
 
     <button class="btn-cta" (click)="onBook()">Book Court</button>

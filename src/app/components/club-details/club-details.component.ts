@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, signal, OnDestroy, AfterViewInit, Inject, PLATFORM_ID, Output, EventEmitter } from '@angular/core';
+import { Component, ElementRef, ViewChild, signal, OnDestroy, AfterViewInit, Inject, PLATFORM_ID, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -8,7 +8,8 @@ import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { MapService } from '../../services/map.service';
-import { ClubService } from '../../services/club.service';
+import { ClubService, ClubDetailsRequest } from '../../services/club.service';
+import { finalize } from 'rxjs/operators';
 import { ClubDetails, SportKey, SPORT_OPTIONS } from '../../models/club.models';
 import { ClubPreviewComponent } from '../club-preview/club-preview.component';
 
@@ -26,7 +27,7 @@ interface SavedLocation {
   styleUrl: './club-details.component.scss',
   providers: [MessageService]
 })
-export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
+export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   form: FormGroup;
   private readonly isBrowser: boolean;
   submitted = false;
@@ -39,6 +40,8 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   isUploadingWallpaper = signal(false);
   profilePreviewUrl = signal<string | null>(null);
   wallpaperPreviewUrl = signal<string | null>(null);
+  private selectedProfileFile?: File | null;
+  private selectedWallpaperFile?: File | null;
 
   isDragOverProfile = signal(false);
   isDragOverWallpaper = signal(false);
@@ -58,8 +61,13 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
 
 
   isEditing = signal(true);
+  isSaving = signal(false);
+  // Show centered spinner while loading existing club
+  isLoading = signal(true);
 
   @Output() courtsRequested = new EventEmitter<void>();
+
+  hasExistingClub = false;
 
   constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, public clubService: ClubService, private messageService: MessageService, private host: ElementRef<HTMLElement>) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -72,10 +80,7 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       description: ['', Validators.required],
     });
 
-    const last = this.clubService.lastSaved();
-    if (last) {
-      this.isEditing.set(false);
-    }
+    // Start in editing mode until backend data is loaded
 
     this.form.get('address')!.valueChanges.subscribe(value => {
       if (this.geocodeDebounce) clearTimeout(this.geocodeDebounce);
@@ -98,6 +103,30 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  ngOnInit(): void {
+    if (!this.isBrowser) { this.isLoading.set(false); return; }
+    // Load existing club from backend with spinner
+    this.isLoading.set(true);
+    this.clubService.getMyClub().pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (club) => {
+        this.hasExistingClub = true;
+        this.applyDetailsToForm(club);
+        this.isEditing.set(false);
+      },
+      error: (err) => {
+        if (err && err.status === 404) {
+          this.hasExistingClub = false;
+          this.isEditing.set(true);
+        } else {
+          console.error('Failed to load club details', err);
+          this.messageService.add({ key: 'error', severity: 'error', summary: 'Error', detail: 'Failed to load club details', life: 4000 });
+        }
+      }
+    });
+  }
+
   ngAfterViewInit(): void {
     if (!this.isBrowser) return;
     this.initMapOnce();
@@ -114,6 +143,7 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
           this.mapService.initMap(this.mapContainer.nativeElement, (lat, lon) => {
             this.currentLat.set(lat);
             this.currentLng.set(lon);
+            this.mapService.setPosition(lat, lon);
             this.isGeocoding.set(true);
             this.mapService
               .reverseGeocode(lat, lon)
@@ -125,6 +155,7 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
           this.mapService.tryInitFromGeolocation((lat, lon) => {
             this.currentLat.set(lat);
             this.currentLng.set(lon);
+            this.mapService.setPosition(lat, lon);
             this.isGeocoding.set(true);
             this.mapService
               .reverseGeocode(lat, lon)
@@ -161,6 +192,8 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
   }
 
   save() {
+    if (this.isSaving()) return; // Prevent multiple saves
+
     this.submitted = true;
     this.form.markAllAsTouched();
     this.form.updateValueAndValidity({ onlySelf: false, emitEvent: false });
@@ -175,21 +208,39 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       this.messageService.add({ key: 'error', severity: 'error', summary: 'Validation Error', detail, life: 5000 });
       return;
     }
+
+    this.isSaving.set(true);
     const v = this.form.value;
-    const selectedSports: SportKey[] = Array.from(this.selectedSports);
-    const details: ClubDetails = {
-      id: undefined,
+    const req: ClubDetailsRequest = {
       name: v.name,
       email: v.email,
       phone: v.phone,
       description: v.description || null,
       locations: this.savedLocations.map(l => ({ address: l.address, lat: l.lat, lng: l.lng })),
-      sports: selectedSports,
-      profileImageUrl: this.profilePreviewUrl(),
-      wallpaperImageUrl: this.wallpaperPreviewUrl(),
-      updatedAt: new Date().toISOString(),
+      sports: Array.from(this.selectedSports)
     };
-    this.clubService.saveClub(details);
+
+    const isCreating = !this.hasExistingClub;
+    const op$ = this.hasExistingClub
+      ? this.clubService.updateClub(req, this.selectedProfileFile || undefined, this.selectedWallpaperFile || undefined)
+      : this.clubService.createClub(req, this.selectedProfileFile || undefined, this.selectedWallpaperFile || undefined);
+
+    op$.subscribe({
+      next: (saved) => {
+        this.hasExistingClub = true;
+        this.applyDetailsToForm(saved);
+        this.isEditing.set(false);
+        const successMsg = isCreating ? 'Club created successfully!' : 'Club updated successfully!';
+        this.messageService.add({ key: 'success', severity: 'success', summary: 'Success', detail: successMsg, life: 3000 });
+        this.isSaving.set(false);
+      },
+      error: (err) => {
+        console.error('Save failed', err);
+        const msg = err?.error?.message || 'Failed to save club';
+        this.messageService.add({ key: 'error', severity: 'error', summary: 'Error', detail: msg, life: 5000 });
+        this.isSaving.set(false);
+      }
+    });
     try {
       const container = this.host.nativeElement.closest('.content') as HTMLElement | null;
       if (container) {
@@ -199,9 +250,7 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
         try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
       }
     } catch {}
-    this.isEditing.set(false);
-    console.log('Club saved', details);
-    this.messageService.add({ key: 'success', severity: 'success', summary: 'Saved', detail: 'Club saved successfully', life: 3000 });
+    // Scrolling handled above; editing state toggled on success
   }
 
   showError() {
@@ -271,7 +320,7 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
 
     this.selectedSports = new Set<SportKey>(details.sports || []);
 
-    
+
     const prevProfile = this.profilePreviewUrl();
     const prevWallpaper = this.wallpaperPreviewUrl();
     if (prevProfile && prevProfile.startsWith('blob:')) URL.revokeObjectURL(prevProfile);
@@ -313,13 +362,8 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       const previousUrl = this.profilePreviewUrl();
       if (previousUrl) URL.revokeObjectURL(previousUrl);
       this.profilePreviewUrl.set(URL.createObjectURL(file));
-      this.isUploadingProfile.set(true);
-      this.simulateUpload(file)
-        .catch(() => {})
-        .finally(() => {
-          this.isUploadingProfile.set(false);
-          input.value = '';
-        });
+      this.selectedProfileFile = file;
+      input.value = '';
     } else {
       input.value = '';
     }
@@ -332,13 +376,8 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
       const previousUrl = this.wallpaperPreviewUrl();
       if (previousUrl) URL.revokeObjectURL(previousUrl);
       this.wallpaperPreviewUrl.set(URL.createObjectURL(file));
-      this.isUploadingWallpaper.set(true);
-      this.simulateUpload(file)
-        .catch(() => {})
-        .finally(() => {
-          this.isUploadingWallpaper.set(false);
-          input.value = '';
-        });
+      this.selectedWallpaperFile = file;
+      input.value = '';
     } else {
       input.value = '';
     }
@@ -359,6 +398,7 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     const url = this.profilePreviewUrl();
     if (url) URL.revokeObjectURL(url);
     this.profilePreviewUrl.set(null);
+    this.selectedProfileFile = null;
     if (this.profileInput?.nativeElement) {
       this.profileInput.nativeElement.value = '';
     }
@@ -369,14 +409,13 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     const url = this.wallpaperPreviewUrl();
     if (url) URL.revokeObjectURL(url);
     this.wallpaperPreviewUrl.set(null);
+    this.selectedWallpaperFile = null;
     if (this.wallpaperInput?.nativeElement) {
       this.wallpaperInput.nativeElement.value = '';
     }
   }
 
-  private simulateUpload(file: File): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, 1200));
-  }
+  // Real upload occurs on save via ClubService (multipart)
 
   onDragOver(event: DragEvent) {
     event.preventDefault();
@@ -403,14 +442,14 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     event.stopPropagation();
 
     this.isDragOverProfile.set(false);
-
-    if (this.isUploadingProfile()) return;
-
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
       const file = files[0];
       if (this.isValidImageFile(file)) {
-        this.handleProfileFile(file);
+        const previousUrl = this.profilePreviewUrl();
+        if (previousUrl) URL.revokeObjectURL(previousUrl);
+        this.profilePreviewUrl.set(URL.createObjectURL(file));
+        this.selectedProfileFile = file;
       }
     }
   }
@@ -420,14 +459,14 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     event.stopPropagation();
 
     this.isDragOverWallpaper.set(false);
-
-    if (this.isUploadingWallpaper()) return;
-
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
       const file = files[0];
       if (this.isValidImageFile(file)) {
-        this.handleWallpaperFile(file);
+        const previousUrl = this.wallpaperPreviewUrl();
+        if (previousUrl) URL.revokeObjectURL(previousUrl);
+        this.wallpaperPreviewUrl.set(URL.createObjectURL(file));
+        this.selectedWallpaperFile = file;
       }
     }
   }
@@ -436,28 +475,34 @@ export class ClubDetailsComponent implements AfterViewInit, OnDestroy {
     return file.type.startsWith('image/');
   }
 
-  private handleProfileFile(file: File) {
-    const previousUrl = this.profilePreviewUrl();
-    if (previousUrl) URL.revokeObjectURL(previousUrl);
-    this.profilePreviewUrl.set(URL.createObjectURL(file));
-    this.isUploadingProfile.set(true);
-    this.simulateUpload(file)
-      .catch(() => {})
-      .finally(() => {
-        this.isUploadingProfile.set(false);
-      });
-  }
+  // Removed handleProfileFile/handleWallpaperFile helpers in favor of direct assignment
 
-  private handleWallpaperFile(file: File) {
-    const previousUrl = this.wallpaperPreviewUrl();
-    if (previousUrl) URL.revokeObjectURL(previousUrl);
-    this.wallpaperPreviewUrl.set(URL.createObjectURL(file));
-    this.isUploadingWallpaper.set(true);
-    this.simulateUpload(file)
-      .catch(() => {})
-      .finally(() => {
-        this.isUploadingWallpaper.set(false);
-      });
+  onDeleteClub() {
+    const ok = typeof window !== 'undefined' ? window.confirm('Delete this club and all related data (courts)?') : true;
+    if (!ok) return;
+    this.clubService.deleteClub().subscribe({
+      next: () => {
+        // Reset local state
+        this.clubService.lastSaved.set(null);
+        this.hasExistingClub = false;
+        this.form.reset();
+        this.savedLocations = [];
+        this.selectedSports = new Set<SportKey>(['tennis']);
+        const p = this.profilePreviewUrl(); if (p) URL.revokeObjectURL(p);
+        const w = this.wallpaperPreviewUrl(); if (w) URL.revokeObjectURL(w);
+        this.profilePreviewUrl.set(null);
+        this.wallpaperPreviewUrl.set(null);
+        this.selectedProfileFile = null;
+        this.selectedWallpaperFile = null;
+        this.isEditing.set(true);
+        this.messageService.add({ key: 'success', severity: 'success', summary: 'Deleted', detail: 'Club deleted successfully', life: 3000 });
+      },
+      error: (err) => {
+        console.error('Delete failed', err);
+        const msg = err?.error?.message || 'Failed to delete club';
+        this.messageService.add({ key: 'error', severity: 'error', summary: 'Error', detail: msg, life: 5000 });
+      }
+    });
   }
 
 

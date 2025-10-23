@@ -186,7 +186,7 @@
                     <div class="sub">{{ r.club }}<ng-container *ngIf="r.city"> • {{ r.city }}</ng-container></div>
                   </div>
                 </div>
-                <div class="time">{{ r.start }} – {{ r.end }}</div>
+                <div class="time">{{ r.start | time24 }} – {{ r.end | time24 }}</div>
               </div>
             </div>
           </div>
@@ -203,7 +203,7 @@
                   <div class="sub">{{ r.club }}<ng-container *ngIf="r.city"> • {{ r.city }}</ng-container></div>
                 </div>
               </div>
-              <div class="time">{{ r.start }} – {{ r.end }}</div>
+              <div class="time">{{ r.start | time24 }} – {{ r.end | time24 }}</div>
             </div>
           </div>
         </ng-template>

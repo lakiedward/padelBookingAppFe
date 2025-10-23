@@ -2,7 +2,8 @@
   <p-toast key="error" position="bottom-right" appendTo="body" [baseZIndex]="10000"></p-toast>
   <p-toast key="success" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
 
-  <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted">
+  <ng-container *ngIf="!isLoading(); else loadingTpl">
+  <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted" [class.saving]="isSaving()">
 
     <div class="section">
       <h3>Club Details</h3>
@@ -39,9 +40,9 @@
           <label>Enter address</label>
           <input pInputText placeholder="Start typing an address" formControlName="address" />
         </div>
-        <div class="field right" style="display: flex; justify-content: flex-end;">
+        <div class="field right" style="display: flex; justify-content: flex-end; align-items: center;">
           <label class="sr-only">Add Location</label>
-          <button type="button" class="add-location-btn" (click)="onAddLocation()">Add location</button>
+          <button type="button" class="btn btn--primary" (click)="onAddLocation()">Add location</button>
         </div>
       </div>
 
@@ -53,7 +54,7 @@
             <div class="loc-title">{{ loc.address }}</div>
             <div class="loc-sub">{{ loc.lat | number:'1.5-5' }}, {{ loc.lng | number:'1.5-5' }}</div>
           </div>
-          <button type="button" class="remove-btn" (click)="removeLocation(i)">Remove</button>
+          <button type="button" class="btn btn--danger" (click)="removeLocation(i)">Remove</button>
         </div>
       </div>
       <div class="error-text" *ngIf="submitted && savedLocations.length === 0">Please add at least one location.</div>
@@ -98,7 +99,7 @@
             <input type="file" accept="image/*" hidden #profileInput (click)="$event.stopPropagation()" (change)="onProfileSelected($event)" />
 
             <ng-container *ngIf="isUploadingProfile(); else profileContent">
-              <div class="spinner" aria-label="Uploading"></div>
+              <div class="u-spinner u-spinner--lg text-green" aria-label="Uploading"></div>
               <div class="drop-sub">Uploading...</div>
             </ng-container>
             <ng-template #profileContent>
@@ -133,7 +134,7 @@
             <input type="file" accept="image/*" hidden #wallpaperInput (click)="$event.stopPropagation()" (change)="onWallpaperSelected($event)" />
 
             <ng-container *ngIf="isUploadingWallpaper(); else wallpaperContent">
-              <div class="spinner" aria-label="Uploading"></div>
+              <div class="u-spinner u-spinner--lg text-green" aria-label="Uploading"></div>
               <div class="drop-sub">Uploading...</div>
             </ng-container>
             <ng-template #wallpaperContent>
@@ -161,19 +162,34 @@
 
     <div class="footer">
       <div class="hint">Make sure all information is accurate before saving</div>
-      <button pButton type="button" (click)="save()" class="save-btn">Save Club</button>
+      <button pButton type="button" (click)="save()" class="btn btn--primary btn--sm" [disabled]="isSaving()">
+        <ng-container *ngIf="isSaving(); else normalContent">
+          <span class="u-spinner u-spinner--sm"></span>
+          <span>{{ hasExistingClub ? 'Updating Club...' : 'Creating Club...' }}</span>
+        </ng-container>
+        <ng-template #normalContent>
+          <span>{{ hasExistingClub ? 'Update Club' : 'Create Club' }}</span>
+        </ng-template>
+      </button>
     </div>
   </form>
 
   <ng-template #previewBlock>
     <ng-container *ngIf="clubService.lastSaved() as saved; else noData">
-      <app-club-preview [details]="saved" (editRequested)="startEdit()" (editCourtsRequested)="onEditCourtsRequested()"></app-club-preview>
+      <app-club-preview [details]="saved" (editRequested)="startEdit()" (editCourtsRequested)="onEditCourtsRequested()" (deleteRequested)="onDeleteClub()"></app-club-preview>
     </ng-container>
     <ng-template #noData>
       <div class="no-data">
         <div class="preview-title">No club saved yet</div>
-        <button type="button" class="edit-btn" (click)="startEdit()">Create Club</button>
+        <button type="button" class="btn btn--primary" (click)="startEdit()">Create Club</button>
       </div>
     </ng-template>
+  </ng-template>
+  </ng-container>
+
+  <ng-template #loadingTpl>
+    <div class="center-loading" aria-busy="true" aria-live="polite">
+      <div class="u-spinner u-spinner--xl text-green"></div>
+    </div>
   </ng-template>
 </div>

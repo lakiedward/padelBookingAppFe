@@ -1,0 +1,92 @@
+<div class="courts-wrap">
+  <div class="courts-header">
+    <div class="titles">
+      <div class="title">Courts</div>
+      <div class="sub">Manage your club courts</div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn--primary" (click)="onAddCourtClick()">Add Court</button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="isLoading">Loading courts...</div>
+  <div class="error" *ngIf="loadError">{{ loadError }}</div>
+
+  <div class="empty-state" *ngIf="!isLoading && !loadError && courts.length === 0">
+    <p>No courts yet. Click "Add Court" to create your first court.</p>
+  </div>
+
+  <div class="panels" *ngIf="!isLoading && courts.length > 0">
+    <section class="court-panel" *ngFor="let c of courts; trackBy: trackByIndex">
+      <div class="hero">
+        <div class="img" [style.background-image]="c.imageUrl ? 'url(' + c.imageUrl + ')' : ''"></div>
+        <div class="hero-gradient" aria-hidden="true"></div>
+
+        <div class="badge" *ngIf="c.status === 'Active'">
+          <span class="badge-pill primary">Active</span>
+        </div>
+
+        <div class="hero-actions desktop">
+          <button type="button" class="btn btn--ghost btn--xs green-outline">Availability &amp; Pricing</button>
+          <button type="button" class="btn btn--ghost btn--xs">Equipment</button>
+          <button type="button" class="btn btn--primary btn--xs" (click)="onEditCourt(c.id)">Edit</button>
+          <button type="button" class="btn btn--ghost btn--xs btn--danger" (click)="onDeleteCourt(c.id, c.title)">Delete</button>
+        </div>
+
+        <div class="hero-bottom">
+          <div class="left">
+            <div class="icon-box" aria-hidden="true">🎾</div>
+            <div class="text">
+              <h3>{{ c.title }}</h3>
+              <p class="muted">{{ c.subtitle }}</p>
+              <div class="chips">
+                <span class="chip chip--primary" *ngFor="let tag of c.tags.slice(0, 3); let i = index" [class.chip--primary]="i === 0">
+                  <svg class="check" *ngIf="i === 0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M3 8l3 3 7-7" />
+                  </svg>
+                  {{ tag }}
+                </span>
+                <span class="chip" *ngIf="c.tags.length > 3">+{{ c.tags.length - 3 }} more</span>
+              </div>
+              <div class="price mobile">
+                <div class="val">{{ c.price }}</div>
+                <div class="note">per slot</div>
+              </div>
+            </div>
+          </div>
+          <div class="right price desktop">
+            <div class="val">{{ c.price }}</div>
+            <div class="note">per slot</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions mobile">
+        <button type="button" class="btn btn--ghost btn--xs green-outline wide">Availability &amp; Pricing</button>
+        <button type="button" class="btn btn--ghost btn--xs">Equipment</button>
+        <button type="button" class="btn btn--primary btn--xs" (click)="onEditCourt(c.id)">Edit</button>
+        <button type="button" class="btn btn--ghost btn--xs btn--danger" (click)="onDeleteCourt(c.id, c.title)">Delete</button>
+      </div>
+
+      <div class="calendar">
+        <div class="label">7-day calendar</div>
+        <div class="scroll">
+          <div class="day" *ngFor="let d of c.schedules; trackBy: trackByIndex">
+            <div class="day-title">{{ d.day }}</div>
+            <div class="slots" *ngIf="d.slots.length; else emptyDay">
+              <div class="slot" *ngFor="let s of d.slots; trackBy: trackByIndex" [class.green]="s.tone === 'green'" [class.blue]="s.tone === 'blue'" [class.gray]="!s.tone || s.tone === 'gray'">
+                <div class="label">{{ s.label }}</div>
+                <div class="note" *ngIf="s.note">{{ s.note }}</div>
+                <div class="price" *ngIf="s.price">{{ s.price }}</div>
+              </div>
+            </div>
+            <ng-template #emptyDay>
+              <div class="empty">—</div>
+            </ng-template>
+          </div>
+        </div>
+        <button type="button" class="btn btn--primary wide book">Book Court</button>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,9 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { AuthService } from '../../services/auth.service';
+import { PublicService } from '../../services/public.service';
+import { CourtService } from '../../services/court.service';
+import { CourtAvailabilityRuleResponse } from '../../models/court.models';
 
 type SportFilter =
   | 'all'
@@ -20,6 +23,7 @@ type HeatedFilter = 'all' | 'heated' | 'unheated';
 type SortBy = 'earliest' | 'price-asc' | 'price-desc';
 
 interface CourtItem {
+  courtId: number;
   image: string;
   emoji: string;
   title: string;
@@ -40,7 +44,7 @@ interface CourtItem {
   templateUrl: './browse-courts-page.component.html',
   styleUrl: './browse-courts-page.component.scss'
 })
-export class BrowseCourtsPageComponent {
+export class BrowseCourtsPageComponent implements OnInit {
   mobileOpen = false;
   sportFilter: SportFilter = 'all';
   venueFilter: VenueFilter = 'all';
@@ -77,6 +81,38 @@ export class BrowseCourtsPageComponent {
     }
   }
 
+  private ensurePhotoFromDetails(index: number, courtId: number) {
+    this.publicService.getPublicCourtById(courtId).subscribe({
+      next: (court) => {
+        const photos = (court as any).photos || [];
+        if (Array.isArray(photos) && photos.length > 0) {
+          const primary = photos.find((p: any) => p.isPrimary) || photos[0];
+          if (primary && primary.url) {
+            const absolute = this.courtService.toAbsoluteUrl(primary.url);
+            if (absolute) {
+              this.items[index].image = absolute;
+              this.cdr.detectChanges();
+            }
+          }
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  private preloadAvailabilityFromRules(index: number, courtId: number) {
+    this.publicService.getPublicCourtById(courtId).subscribe({
+      next: (court) => {
+        const fallback = this.computeFromRules(court.availabilityRules);
+        if (fallback) {
+          this.items[index].availableDate = fallback.dateStr;
+          this.items[index].slots = fallback.times;
+        }
+      },
+      error: () => {}
+    });
+  }
+
   readonly additionalSports: { key: SportFilter; label: string }[] = [
     { key: 'volleyball', label: '🏐 Volleyball' },
     { key: 'badminton', label: '🏸 Badminton' },
@@ -84,67 +120,162 @@ export class BrowseCourtsPageComponent {
     { key: 'table-tennis', label: '🏓 Table Tennis' }
   ];
 
-  // Placeholder demo data; images use remote placeholders for now.
-  items: CourtItem[] = [
-    {
-      image: 'https://images.unsplash.com/photo-1599050751798-13b6ce8ce1b7?q=80&w=1200&auto=format&fit=crop',
-      emoji: '🏀',
-      title: 'Basketball Court 1',
-      club: 'Elite Sports Center',
-      location: 'Downtown Sports Complex',
-      price: '$40',
-      tags: ['Indoor', 'Synthetic'],
-      slots: ['6:00 AM', '7:00 AM', '9:00 AM', '+6 more'],
-      sport: 'basketball'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1537824598505-99ee03483384?q=80&w=1200&auto=format&fit=crop',
-      emoji: '⚽',
-      title: 'Football Field 1',
-      club: 'Premier Football Club',
-      location: 'City Sports Park',
-      price: '$80',
-      tags: ['Outdoor', 'Grass'],
-      slots: ['6:00 AM', '8:00 AM', '10:00 AM', '+5 more'],
-      sport: 'football'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1500835556837-99ac94a94552?q=80&w=1200&auto=format&fit=crop',
-      emoji: '🎾',
-      title: 'Elite Tennis Court 2',
-      club: 'Elite Tennis Club',
-      location: 'Downtown Sports Complex',
-      price: '$45',
-      tags: ['Outdoor', 'Clay'],
-      slots: ['7:00 AM', '8:00 AM', '10:00 AM', '+5 more'],
-      sport: 'tennis'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1512163143273-bde0e3cc740e?q=80&w=1200&auto=format&fit=crop',
-      emoji: '🎾',
-      title: 'Elite Tennis Court 1',
-      club: 'Elite Tennis Club',
-      location: 'Downtown Sports Complex',
-      price: '$50',
-      tags: ['Indoor', 'Hard Court'],
-      slots: ['8:00 AM', '9:00 AM', '11:00 AM', '+6 more'],
-      sport: 'tennis'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1593111776706-b6400dd9fec4?q=80&w=1200&auto=format&fit=crop',
-      emoji: '🏓',
-      title: 'Padel Court 1',
-      club: 'Padel Pro Center',
-      location: 'North District',
-      price: '$35',
-      tags: ['Indoor', 'Artificial Turf'],
-      slots: ['9:00 AM', '11:00 AM', '1:00 PM', '+4 more'],
-      sport: 'padel'
-    }
-  ];
+  items: CourtItem[] = [];
+  isLoading = false;
 
-  constructor(private auth: AuthService, private router: Router) {
+  private isBrowser: boolean;
+
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private publicService: PublicService,
+    private courtService: CourtService,
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
     this.generateTimeOptions();
+  }
+
+  ngOnInit(): void {
+    if (!this.isBrowser) return;
+    setTimeout(() => {
+      this.loadCourts();
+    }, 0);
+  }
+
+  private loadCourts(): void {
+    this.isLoading = true;
+    this.publicService.getPublicCourts().subscribe({
+      next: (courts) => {
+        console.log('[BrowseCourts] Loaded courts from BE:', courts);
+        this.items = courts.map(c => ({
+          courtId: c.id,
+          image: this.courtService.toAbsoluteUrl(c.primaryPhotoUrl) || 'https://placehold.co/1200x800?text=Court',
+          emoji: this.emojiFor(c.sport),
+          title: c.name,
+          club: c.clubName,
+          location: c.clubName,
+          price: '',
+          tags: c.tags || [],
+          slots: [],
+          sport: (c.sport as any)
+        }));
+        this.items.forEach((it, idx) => {
+          this.preloadAvailabilityFromRules(idx, it.courtId);
+          this.loadAvailabilityFor(idx, it.courtId);
+          if (!courts[idx].primaryPhotoUrl) {
+            this.ensurePhotoFromDetails(idx, it.courtId);
+          }
+        });
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('[BrowseCourts] Failed to load courts:', err);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private computeFromRules(rules: CourtAvailabilityRuleResponse[]): { dateStr: string; times: string[] } | null {
+    if (!Array.isArray(rules) || rules.length === 0) return null;
+    const today = new Date();
+    const candidates: { date: Date; rule: CourtAvailabilityRuleResponse }[] = [];
+    for (const r of rules) {
+      if ((r as any).type === 'DATE' && r.date) {
+        const d = new Date(r.date as string);
+        if (this.isOnOrAfter(d, today)) candidates.push({ date: d, rule: r });
+      } else if ((r as any).type === 'WEEKLY' && Array.isArray(r.weekdays)) {
+        for (const wd of r.weekdays as number[]) {
+          const d = this.nextDateForWeekday(today, wd);
+          candidates.push({ date: d, rule: r });
+        }
+      }
+    }
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) => a.date.getTime() - b.date.getTime());
+    const chosen = candidates[0];
+    const dateStr = this.formatDateForInput(chosen.date);
+    const times = this.buildTimeChips(chosen.rule.startTime, chosen.rule.endTime, chosen.rule.slotMinutes);
+    return { dateStr, times };
+  }
+
+  private nextDateForWeekday(ref: Date, weekday: number): Date {
+    const d = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate());
+    const delta = (weekday - d.getDay() + 7) % 7;
+    d.setDate(d.getDate() + delta);
+    return d;
+  }
+
+  private isOnOrAfter(a: Date, b: Date): boolean {
+    const da = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime();
+    const db = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime();
+    return da >= db;
+  }
+
+  private buildTimeChips(startHHmm: string, endHHmm: string, slotMinutes: number): string[] {
+    const toMin = (s: string) => {
+      const [h, m] = s.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const toHHMM = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+    const start = toMin(startHHmm);
+    const end = toMin(endHHmm);
+    const times: string[] = [];
+    for (let t = start; t + slotMinutes <= end; t += slotMinutes) {
+      times.push(toHHMM(t));
+      if (times.length === 3) break;
+    }
+    return times;
+  }
+
+  private loadAvailabilityFor(index: number, courtId: number) {
+    this.publicService.getAvailableTimeSlotsByCourt(courtId).subscribe({
+      next: (slots) => {
+        console.log('[BrowseCourts] Timeslots for court', courtId, slots);
+        if (!Array.isArray(slots) || slots.length === 0) {
+          this.publicService.getPublicCourtById(courtId).subscribe({
+            next: (court) => {
+              const fallback = this.computeFromRules(court.availabilityRules);
+              if (fallback) {
+                this.items[index].availableDate = fallback.dateStr;
+                this.items[index].slots = fallback.times;
+              }
+            },
+            error: () => {}
+          });
+          return;
+        }
+        // Find earliest date (yyyy-MM-dd)
+        const dates = slots.map(s => s.startTime.substring(0, 10));
+        const earliest = dates.sort()[0];
+        const sameDay = slots
+          .filter(s => s.startTime.substring(0, 10) === earliest)
+          .sort((a, b) => a.startTime.localeCompare(b.startTime));
+        // Build up to 3 time chips HH:mm
+        const chips: string[] = sameDay.slice(0, 3).map(s => s.startTime.substring(11, 16));
+        if (sameDay.length > 3) chips.push(`+${sameDay.length - 3} more`);
+        this.items[index].availableDate = earliest;
+        this.items[index].slots = chips;
+      },
+      error: (err) => {
+        console.warn('[BrowseCourts] Failed to load availability for court', courtId, err);
+      }
+    });
+  }
+
+
+  private emojiFor(sport: string): string {
+    const key = (sport || '').toLowerCase();
+    if (key.includes('tennis') || key.includes('padel')) return '🎾';
+    if (key.includes('basket')) return '🏀';
+    if (key.includes('foot') || key.includes('soccer')) return '⚽';
+    if (key.includes('volley')) return '🏐';
+    if (key.includes('badminton')) return '🏸';
+    if (key.includes('table')) return '🏓';
+    return '🎾';
   }
 
   private generateTimeOptions() {

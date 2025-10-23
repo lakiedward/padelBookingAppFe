@@ -1,4 +1,5 @@
 <div class="auth-container page-gradient-bg">
+  <p-toast key="auth" position="top-right"></p-toast>
   <div class="auth-content-box">
     <ng-container *ngIf="mode === 'login'; else registerTpl">
       <app-login (switchToRegister)="switchTo('register')"></app-login>
