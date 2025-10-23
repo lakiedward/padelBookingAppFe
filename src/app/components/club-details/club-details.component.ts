@@ -104,6 +104,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (!this.isBrowser) { this.isLoading.set(false); return; }
     // Load existing club from backend with spinner
     this.isLoading.set(true);
     this.clubService.getMyClub().pipe(

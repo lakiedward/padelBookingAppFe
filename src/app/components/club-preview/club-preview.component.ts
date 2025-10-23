@@ -24,7 +24,7 @@ interface CourtListingData {
 @Component({
   selector: 'app-club-preview',
   standalone: true,
-  imports: [CommonModule, CourtListingCardComponent, Time24Pipe],
+  imports: [CommonModule, CourtListingCardComponent],
   templateUrl: './club-preview.component.html',
   styleUrl: './club-preview.component.scss'
 })

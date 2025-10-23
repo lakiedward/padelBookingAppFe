@@ -134,3 +134,16 @@ export interface BackendTimeSlot {
   price: number;
   available: boolean;
 }
+
+// Public available timeslot response
+export interface PublicAvailableTimeSlot {
+  id: number;
+  courtId: number;
+  courtName: string;
+  activityId: number;
+  activityName: string;
+  startTime: string; // ISO LocalDateTime
+  endTime: string;   // ISO LocalDateTime
+  price: number;
+  duration: number; // minutes
+}

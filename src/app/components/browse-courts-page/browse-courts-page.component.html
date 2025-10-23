@@ -165,11 +165,19 @@
         </div>
       </div>
 
-      <div class="count">
+      <div class="count" *ngIf="!isLoading">
         <span class="count__num">{{ filtered.length }}</span> courts found
       </div>
 
-      <div class="grid">
+      <div class="loading" *ngIf="isLoading" style="text-align: center; padding: 40px; color: #8aa0b5;">
+        Loading courts...
+      </div>
+
+      <div class="empty" *ngIf="!isLoading && items.length === 0" style="text-align: center; padding: 40px; color: #8aa0b5;">
+        No courts available yet. Check back soon!
+      </div>
+
+      <div class="grid" *ngIf="!isLoading && items.length > 0">
         <app-court-listing-card
           *ngFor="let c of filtered; index as i"
           [image]="c.image"
@@ -180,7 +188,7 @@
           [price]="c.price"
           unit="per hour"
           [tags]="c.tags"
-          [availableDate]="c.availableDate || '—'"
+          [availableDate]="c.availableDate || ''"
           [slots]="c.slots"
         />
       </div>
