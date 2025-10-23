@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -55,6 +55,21 @@ export class CourtService {
   }
 
   // ========== HELPER METHODS ==========
+
+  // Fetch backend time slots for a court within a date-time range
+  getTimeSlotsByRange(
+    courtId: number,
+    startTimeISO: string,
+    endTimeISO: string,
+    availableOnly = false
+  ): Observable<import('../models/court.models').BackendTimeSlot[]> {
+    const params = new HttpParams()
+      .set('startTime', startTimeISO)
+      .set('endTime', endTimeISO)
+      .set('availableOnly', String(availableOnly));
+    const url = `${this.apiBase}/api/admin/slots/timeslots/court/${courtId}/range`;
+    return this.http.get<import('../models/court.models').BackendTimeSlot[]>(url, { params });
+  }
 
   // Build FormData for multipart request
   private buildCourtFormData(details: CourtCreateRequest, images?: File[]): FormData {

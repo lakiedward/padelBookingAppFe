@@ -125,3 +125,12 @@ export interface CourtSummaryResponse {
   clubId: number;
   clubName: string;
 }
+
+// Backend time slot response (admin)
+export interface BackendTimeSlot {
+  id: number;
+  startTime: string; // ISO LocalDateTime
+  endTime: string;   // ISO LocalDateTime
+  price: number;
+  available: boolean;
+}

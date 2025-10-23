@@ -11,11 +11,14 @@ interface TimeSlot {
   note?: string;
   price?: string;
   tone?: Tone;
+  startHHmm?: string;
+  endHHmm?: string;
 }
 
 interface DaySchedule {
   day: string; // e.g., "Mon 08"
   slots: TimeSlot[];
+  dateStr: string;
 }
 
 interface CourtPanelData {
@@ -88,6 +91,9 @@ export class CourtViewComponent implements OnInit {
           next: (detailedCourts) => {
             console.log('[CourtView] Court details loaded:', detailedCourts);
             this.courts = detailedCourts.map(c => this.mapCourtToPanel(c));
+            for (const court of this.courts) {
+              this.populatePricesForCourt(court);
+            }
             this.isLoading = false;
             console.log('[CourtView] Courts array length:', this.courts.length);
             this.cdr.detectChanges();
@@ -175,6 +181,7 @@ export class CourtViewComponent implements OnInit {
       currentDate.setDate(today.getDate() + i);
       const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
       const label = `${dayNames[dayOfWeek]} ${String(currentDate.getDate()).padStart(2, '0')}`;
+      const dateStr = this.formatDate(currentDate);
       
       // Find applicable rules for this day
       const applicableRules = this.getApplicableRules(rules, currentDate, dayOfWeek);
@@ -182,7 +189,7 @@ export class CourtViewComponent implements OnInit {
       // Generate time slots from rules
       const slots = this.generateTimeSlotsFromRules(applicableRules);
       
-      schedules.push({ day: label, slots });
+      schedules.push({ day: label, slots, dateStr });
     }
     
     return schedules;
@@ -230,6 +237,8 @@ export class CourtViewComponent implements OnInit {
           note: `every ${rule.slotMinutes} min`,
           price: `€${rule.price}`,
           tone: tones[toneIndex % tones.length]
+          , startHHmm: rule.startTime
+          , endHHmm: rule.endTime
         });
         toneIndex++;
       }
@@ -246,4 +255,56 @@ export class CourtViewComponent implements OnInit {
   }
 
   trackByIndex(index: number) { return index; }
+
+  // ===== Populate real prices from backend time slots =====
+  private populatePricesForCourt(court: CourtPanelData) {
+    if (!court.schedules || court.schedules.length === 0) return;
+
+    const startDateStr = court.schedules[0].dateStr;
+    const endDateStr = court.schedules[court.schedules.length - 1].dateStr;
+    const startISO = `${startDateStr}T00:00:00`;
+    const endISO = `${endDateStr}T23:59:59`;
+
+    this.courtService.getTimeSlotsByRange(court.id, startISO, endISO, true).subscribe({
+      next: (tslots) => {
+        const byDay = new Map<string, { hhmm: string; price: number }[]>();
+        for (const t of tslots) {
+          const dayKey = t.startTime.substring(0, 10);
+          const hhmm = t.startTime.substring(11, 16);
+          const arr = byDay.get(dayKey) || [];
+          arr.push({ hhmm, price: t.price });
+          byDay.set(dayKey, arr);
+        }
+
+        for (const day of court.schedules) {
+          const items = byDay.get(day.dateStr) || [];
+          if (items.length === 0) continue;
+          for (const slot of day.slots) {
+            if (!slot.startHHmm || !slot.endHHmm) continue;
+            const startM = this.hhmmToMinutes(slot.startHHmm);
+            const endM = this.hhmmToMinutes(slot.endHHmm);
+            let minPrice: number | undefined;
+            for (const i of items) {
+              const m = this.hhmmToMinutes(i.hhmm);
+              if (m >= startM && m < endM) {
+                minPrice = minPrice === undefined ? i.price : Math.min(minPrice, i.price);
+              }
+            }
+            if (minPrice !== undefined) {
+              slot.price = `€${minPrice}`;
+            }
+          }
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.warn('[CourtView] Failed to fetch timeslot prices:', err);
+      }
+    });
+  }
+
+  private hhmmToMinutes(hhmm: string): number {
+    const [h, m] = hhmm.split(':').map(Number);
+    return h * 60 + m;
+  }
 }
