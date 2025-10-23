@@ -101,26 +101,73 @@
           </button>
         </div>
       </div>
-      <div class="filters">
-        <button type="button" class="chip" [class.active]="activeCourtFilter() === 'all'" (click)="setCourtFilter('all')">All</button>
-        <button type="button" class="chip" *ngFor="let s of d.sports; trackBy: trackByIndex" [class.active]="activeCourtFilter() === s" (click)="setCourtFilter(s)">{{ s | titlecase }}</button>
+
+      <!-- Loading state -->
+      <div *ngIf="isLoadingCourts()" class="courts-loading">
+        <div class="u-spinner u-spinner--md text-green"></div>
+        <p class="muted">Loading courts...</p>
       </div>
-      <ng-container *ngIf="activeCourtFilter() !== 'all'; else allCourts">
-        <h3 class="section-sub">{{ activeCourtFilter() | titlecase }}</h3>
-        <div class="cards">
-          <app-court-card *ngFor="let c of courtsBySport(activeCourtFilter())" [court]="c" (edit)="onEditCourt($event)"></app-court-card>
+
+      <!-- Error state -->
+      <div *ngIf="courtsLoadError() && !isLoadingCourts()" class="courts-error">
+        <p class="muted">{{ courtsLoadError() }}</p>
+      </div>
+
+      <!-- Courts display -->
+      <ng-container *ngIf="!isLoadingCourts() && !courtsLoadError()">
+        <!-- No courts message -->
+        <div *ngIf="realCourts().length === 0" class="no-courts">
+          <p class="muted">No courts available yet. Click "Edit Courts" to add your first court.</p>
         </div>
-      </ng-container>
-      <ng-template #allCourts>
-        <ng-container *ngFor="let s of d.sports; trackBy: trackByIndex">
-          <ng-container *ngIf="courtsBySport(s).length">
-            <h3 class="section-sub">{{ s | titlecase }}</h3>
+
+        <!-- Courts list with filters -->
+        <ng-container *ngIf="realCourts().length > 0">
+          <div class="filters">
+            <button type="button" class="chip" [class.active]="activeCourtFilter() === 'all'" (click)="setCourtFilter('all')">All</button>
+            <button type="button" class="chip" *ngFor="let s of getUniqueSportsFromCourts(); trackBy: trackByIndex" [class.active]="activeCourtFilter() === s" (click)="setCourtFilter(s)">{{ s | titlecase }}</button>
+          </div>
+          <ng-container *ngIf="activeCourtFilter() !== 'all'; else allCourts">
+            <h3 class="section-sub">{{ activeCourtFilter() | titlecase }}</h3>
             <div class="cards">
-              <app-court-card *ngFor="let c of courtsBySport(s)" [court]="c" (edit)="onEditCourt($event)"></app-court-card>
+              <app-court-listing-card 
+                *ngFor="let c of courtsBySport(activeCourtFilter())" 
+                [image]="c.image"
+                [emoji]="c.emoji"
+                [title]="c.title"
+                [club]="c.club"
+                [location]="c.location"
+                [price]="c.price"
+                [unit]="c.unit"
+                [tags]="c.tags"
+                [availableDate]="c.availableDate"
+                [slots]="c.slots"
+              ></app-court-listing-card>
             </div>
           </ng-container>
+          <ng-template #allCourts>
+            <ng-container *ngFor="let s of getUniqueSportsFromCourts(); trackBy: trackByIndex">
+              <ng-container *ngIf="courtsBySport(s).length">
+                <h3 class="section-sub">{{ s | titlecase }}</h3>
+                <div class="cards">
+                  <app-court-listing-card 
+                    *ngFor="let c of courtsBySport(s)" 
+                    [image]="c.image"
+                    [emoji]="c.emoji"
+                    [title]="c.title"
+                    [club]="c.club"
+                    [location]="c.location"
+                    [price]="c.price"
+                    [unit]="c.unit"
+                    [tags]="c.tags"
+                    [availableDate]="c.availableDate"
+                    [slots]="c.slots"
+                  ></app-court-listing-card>
+                </div>
+              </ng-container>
+            </ng-container>
+          </ng-template>
         </ng-container>
-      </ng-template>
+      </ng-container>
     </section>
   </div>
 </div>

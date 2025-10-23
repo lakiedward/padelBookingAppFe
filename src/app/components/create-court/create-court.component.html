@@ -20,10 +20,15 @@
       </div>
       <div class="field">
         <label>Sport</label>
-        <select formControlName="sport">
-          <option value="" disabled>Select a sport</option>
-          <option *ngFor="let s of sports" [value]="s">{{ s | titlecase }}</option>
-        </select>
+        <p-select 
+          [options]="sportOptions" 
+          formControlName="sport" 
+          placeholder="Select a sport"
+          optionLabel="label"
+          optionValue="value"
+          [style]="{'width':'100%'}"
+          styleClass="custom-dropdown">
+        </p-select>
         <div class="error" *ngIf="form.controls['sport'].touched && form.controls['sport'].invalid">Sport is required</div>
       </div>
     </div>
@@ -31,6 +36,63 @@
     <div class="field">
       <label>Description (optional)</label>
       <textarea formControlName="description" placeholder="Brief description of the court" rows="3"></textarea>
+    </div>
+
+    <div class="field characteristics-section">
+      <label>Court Characteristics</label>
+      <div class="characteristics-grid">
+        <div class="characteristic-group">
+          <label class="characteristic-label">Temperature</label>
+          <div class="toggle-buttons">
+            <button 
+              type="button" 
+              class="toggle-btn" 
+              [class.active]="!form.get('heated')?.value"
+              (click)="form.get('heated')?.setValue(false)">
+              Unheated
+            </button>
+            <button 
+              type="button" 
+              class="toggle-btn" 
+              [class.active]="form.get('heated')?.value"
+              (click)="form.get('heated')?.setValue(true)">
+              Heated
+            </button>
+          </div>
+        </div>
+        <div class="characteristic-group">
+          <label class="characteristic-label">Environment</label>
+          <div class="toggle-buttons">
+            <button 
+              type="button" 
+              class="toggle-btn" 
+              [class.active]="!form.get('indoor')?.value"
+              (click)="form.get('indoor')?.setValue(false)">
+              Outdoor
+            </button>
+            <button 
+              type="button" 
+              class="toggle-btn" 
+              [class.active]="form.get('indoor')?.value"
+              (click)="form.get('indoor')?.setValue(true)">
+              Indoor
+            </button>
+          </div>
+        </div>
+        <div class="characteristic-group surface-group">
+          <label class="characteristic-label">Surface Type</label>
+          <div class="surface-buttons">
+            <button 
+              type="button" 
+              class="surface-btn" 
+              *ngFor="let surface of surfaceTypes"
+              [class.active]="form.get('surfaceType')?.value === surface.value"
+              (click)="form.get('surfaceType')?.setValue(surface.value)">
+              {{ surface.label }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="field">
@@ -42,7 +104,7 @@
         </span>
       </div>
       <div class="tag-input">
-        <input type="text" formControlName="newTag" placeholder="e.g. Indoor, Outdoor, Clay" (keyup.enter)="addTag()" />
+        <input type="text" formControlName="newTag" placeholder="e.g. Clay, Professional" (keyup.enter)="addTag()" />
         <button type="button" class="btn btn--primary" (click)="addTag()">+
           <span class="sr-only">Add Tag</span>
         </button>
@@ -104,11 +166,31 @@
       <div class="grid-2">
         <div class="field">
           <label for="start">Start</label>
-          <input id="start" type="time" formControlName="startTime" />
+          <p-datepicker
+            inputId="start"
+            formControlName="startTime"
+            [timeOnly]="true"
+            [hourFormat]="'24'"
+            [stepMinute]="15"
+            [showIcon]="false"
+            placeholder="Select time"
+            [style]="{'width':'100%'}"
+            styleClass="custom-timepicker">
+          </p-datepicker>
         </div>
         <div class="field">
           <label for="end">End</label>
-          <input id="end" type="time" formControlName="endTime" />
+          <p-datepicker
+            inputId="end"
+            formControlName="endTime"
+            [timeOnly]="true"
+            [hourFormat]="'24'"
+            [stepMinute]="15"
+            [showIcon]="false"
+            placeholder="Select time"
+            [style]="{'width':'100%'}"
+            styleClass="custom-timepicker">
+          </p-datepicker>
         </div>
       </div>
 

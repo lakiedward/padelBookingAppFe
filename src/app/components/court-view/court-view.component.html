@@ -71,7 +71,7 @@
       <div class="calendar">
         <div class="label">7-day calendar</div>
         <div class="scroll">
-          <div class="day" *ngFor="let d of days; trackBy: trackByIndex">
+          <div class="day" *ngFor="let d of c.schedules; trackBy: trackByIndex">
             <div class="day-title">{{ d.day }}</div>
             <div class="slots" *ngIf="d.slots.length; else emptyDay">
               <div class="slot" *ngFor="let s of d.slots; trackBy: trackByIndex" [class.green]="s.tone === 'green'" [class.blue]="s.tone === 'blue'" [class.gray]="!s.tone || s.tone === 'gray'">

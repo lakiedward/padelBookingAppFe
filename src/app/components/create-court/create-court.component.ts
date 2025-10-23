@@ -4,13 +4,15 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
 import { SportKey } from '../../models/club.models';
 import { AvailabilityRule, DateRule, WeeklyRule, Weekday, CourtCreatePayload, EquipmentItem, CourtResponse } from '../../models/court.models';
 import { CourtService } from '../../services/court.service';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 
 // Types imported from models/court.models
 
 @Component({
   selector: 'app-create-court',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SelectModule, DatePickerModule],
   templateUrl: './create-court.component.html',
   styleUrl: './create-court.component.scss'
 })
@@ -37,14 +39,21 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
       name: ['', Validators.required],
       sport: new FormControl<SportKey | ''>('', { nonNullable: true, validators: [Validators.required] }),
       description: new FormControl<string>('', { nonNullable: true }),
+      heated: new FormControl<boolean>(false, { nonNullable: true }),
+      indoor: new FormControl<boolean>(false, { nonNullable: true }),
+      surfaceType: new FormControl<string>('', { nonNullable: true }),
       newTag: new FormControl<string>('', { nonNullable: true })
     });
+    // Initialize with Date objects for time fields (12:00 PM = noon)
+    const defaultStart = this.createTimeDate(12, 0);
+    const defaultEnd = this.createTimeDate(16, 0);
+    
     this.ruleForm = this.fb.group({
       mode: new FormControl<'weekly' | 'date'>('weekly', { nonNullable: true }),
       weekdays: new FormControl<Weekday[]>([], { nonNullable: true }),
       date: new FormControl<string>('', { nonNullable: true }),
-      startTime: new FormControl<string>('12:00', { nonNullable: true }),
-      endTime: new FormControl<string>('16:00', { nonNullable: true }),
+      startTime: new FormControl<Date>(defaultStart, { nonNullable: true }),
+      endTime: new FormControl<Date>(defaultEnd, { nonNullable: true }),
       slotMinutes: new FormControl<number>(60, { nonNullable: true }),
       price: new FormControl<number>(50, { nonNullable: true }),
     });
@@ -97,6 +106,30 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
     { n: 6 as Weekday, label: 'Sat' },
     { n: 0 as Weekday, label: 'Sun' },
   ];
+
+  surfaceTypes = [
+    { value: 'clay', label: 'Clay' },
+    { value: 'grass', label: 'Grass' },
+    { value: 'hard', label: 'Hard Court' },
+    { value: 'carpet', label: 'Carpet' },
+    { value: 'artificial-grass', label: 'Artificial Grass' },
+    { value: 'concrete', label: 'Concrete' },
+    { value: 'synthetic', label: 'Synthetic' },
+    { value: 'wood', label: 'Wood' },
+    { value: 'acrylic', label: 'Acrylic' }
+  ];
+
+  // Dropdown options for sports
+  get sportOptions() {
+    return this.sports.map(sport => ({
+      label: this.capitalize(sport),
+      value: sport
+    }));
+  }
+
+  private capitalize(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
 
   addTag() {
     const raw = (this.form.get('newTag') as FormControl<string>).value || '';
@@ -152,8 +185,13 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
 
   addRule() {
     const v = this.ruleForm.value as any;
-    const start = this.parseTime(v.startTime);
-    const end = this.parseTime(v.endTime);
+    
+    // Convert Date objects to HH:mm strings
+    const startTimeStr = this.dateToTimeString(v.startTime);
+    const endTimeStr = this.dateToTimeString(v.endTime);
+    
+    const start = this.parseTime(startTimeStr);
+    const end = this.parseTime(endTimeStr);
     if (!(typeof start === 'number' && typeof end === 'number' && start < end)) return;
     if (!v.slotMinutes || v.slotMinutes <= 0) return;
     if (!v.price || v.price < 0) return;
@@ -164,8 +202,8 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
       const rule: WeeklyRule = {
         type: 'weekly',
         id: this.genRuleId(),
-        startTime: v.startTime,
-        endTime: v.endTime,
+        startTime: startTimeStr,
+        endTime: endTimeStr,
         slotMinutes: Number(v.slotMinutes),
         price: Number(v.price),
         weekdays: days.slice().sort((a,b)=>a-b)
@@ -176,8 +214,8 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
       const rule: DateRule = {
         type: 'date',
         id: this.genRuleId(),
-        startTime: v.startTime,
-        endTime: v.endTime,
+        startTime: startTimeStr,
+        endTime: endTimeStr,
         slotMinutes: Number(v.slotMinutes),
         price: Number(v.price),
         date: v.date
@@ -199,8 +237,10 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
 
   slotsPerDayForCurrent(): number {
     const v = this.ruleForm.value as any;
-    const start = this.parseTime(v.startTime);
-    const end = this.parseTime(v.endTime);
+    const startTimeStr = this.dateToTimeString(v.startTime);
+    const endTimeStr = this.dateToTimeString(v.endTime);
+    const start = this.parseTime(startTimeStr);
+    const end = this.parseTime(endTimeStr);
     if (!(start < end) || !v.slotMinutes) return 0;
     return Math.max(0, Math.floor((end - start) / Number(v.slotMinutes)));
   }
@@ -210,6 +250,28 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
     const [hh, mm] = s.split(':').map((x: string) => Number(x));
     if (Number.isNaN(hh) || Number.isNaN(mm)) return NaN as any;
     return hh * 60 + mm;
+  }
+
+  // Helper to create a Date object with specific hours and minutes (for time-only input)
+  private createTimeDate(hours: number, minutes: number): Date {
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  }
+
+  // Convert Date object to HH:mm string
+  private dateToTimeString(date: Date | null | undefined): string {
+    if (!date || !(date instanceof Date)) return '00:00';
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  // Convert HH:mm string to Date object
+  private timeStringToDate(timeStr: string): Date {
+    if (!timeStr) return this.createTimeDate(0, 0);
+    const [hours, minutes] = timeStr.split(':').map(x => parseInt(x, 10) || 0);
+    return this.createTimeDate(hours, minutes);
   }
 
   isWeeklyRule(r: AvailabilityRule): r is WeeklyRule { return r.type === 'weekly'; }
@@ -227,11 +289,37 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
     this.saveError = null;
     
     const v = this.form.value;
+    
+    // Build tags array including characteristics
+    const allTags = [...this.tags];
+    
+    // Add temperature characteristic
+    if (v.heated) {
+      allTags.push('Heated');
+    } else {
+      allTags.push('Unheated');
+    }
+    
+    // Add environment characteristic
+    if (v.indoor) {
+      allTags.push('Indoor');
+    } else {
+      allTags.push('Outdoor');
+    }
+    
+    // Add surface type if selected
+    if (v.surfaceType) {
+      const surfaceLabel = this.surfaceTypes.find(s => s.value === v.surfaceType)?.label;
+      if (surfaceLabel) {
+        allTags.push(surfaceLabel);
+      }
+    }
+    
     const details = {
       name: v.name,
       sport: v.sport,
       description: v.description || null,
-      tags: [...this.tags],
+      tags: allTags,
       rules: this.rules,
       equipment: this.equipment
     };
@@ -255,15 +343,38 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
   }
 
   private loadExistingCourt(court: CourtResponse) {
+    // Check for heated/indoor in tags
+    const isHeated = court.tags.some(tag => 
+      tag.toLowerCase() === 'heated'
+    );
+    const isIndoor = court.tags.some(tag => 
+      tag.toLowerCase() === 'indoor'
+    );
+    
+    // Check for surface type in tags
+    const surfaceType = this.surfaceTypes.find(surface =>
+      court.tags.some(tag => tag.toLowerCase() === surface.label.toLowerCase())
+    )?.value || '';
+    
     // Populate form fields
     this.form.patchValue({
       name: court.name,
       sport: court.sport as SportKey,
-      description: court.description || ''
+      description: court.description || '',
+      heated: isHeated,
+      indoor: isIndoor,
+      surfaceType: surfaceType
     });
 
-    // Load tags
-    this.tags = [...court.tags];
+    // Get all surface type labels for filtering
+    const surfaceLabels = this.surfaceTypes.map(s => s.label.toLowerCase());
+    
+    // Load tags (filter out characteristics that are now in separate controls)
+    this.tags = court.tags.filter(tag => {
+      const lowerTag = tag.toLowerCase();
+      return !['heated', 'unheated', 'indoor', 'outdoor'].includes(lowerTag) &&
+             !surfaceLabels.includes(lowerTag);
+    });
 
     // Load equipment
     this.equipment = court.equipment.map(e => 
@@ -274,6 +385,17 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
     this.rules = court.availabilityRules.map(r => 
       this.courtService.mapRuleToFrontend(r)
     );
+
+    // If there are rules, set default time inputs from first rule
+    if (this.rules.length > 0) {
+      const firstRule = this.rules[0];
+      this.ruleForm.patchValue({
+        startTime: this.timeStringToDate(firstRule.startTime),
+        endTime: this.timeStringToDate(firstRule.endTime),
+        slotMinutes: firstRule.slotMinutes,
+        price: firstRule.price
+      });
+    }
 
     // Load photos as preview URLs (but can't edit existing images directly)
     // Users can only add new images in edit mode

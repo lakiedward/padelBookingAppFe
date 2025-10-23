@@ -3,6 +3,7 @@ import { Component, computed, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
+import { Time24Pipe } from '../../pipes/time24.pipe';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -20,7 +21,7 @@ type Reservation = {
 @Component({
   selector: 'app-calendar-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, CourtListingCardComponent],
+  imports: [CommonModule, RouterLink, RouterLinkActive, CourtListingCardComponent, Time24Pipe],
   templateUrl: './calendar-page.component.html',
   styleUrl: './calendar-page.component.scss'
 })
