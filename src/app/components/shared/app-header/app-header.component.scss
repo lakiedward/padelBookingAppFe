@@ -1,0 +1,55 @@
+$bg: #0f1b26;
+$panel: rgba(255, 255, 255, 0.08);
+$border: rgba(214, 221, 230, 0.15);
+$accent: #a7ee43;
+$accent-border: rgba(167, 238, 67, 0.4);
+$text: #d6dde6;
+$muted: #9aa7b5;
+$white: #fff;
+
+.container { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+
+.header {
+  position: sticky; top: 0; z-index: 50; background: #12202e; border-bottom: 1px solid $border;
+  .glow { position: absolute; pointer-events: none; border-radius: 999px; filter: blur(16px);
+    &--left { left: 80px; top: -24px; width: 128px; height: 128px; background: linear-gradient(90deg, transparent, $accent); }
+    &--right { right: 32px; top: -16px; width: 80px; height: 80px; background: linear-gradient(90deg, transparent, $text); }
+  }
+}
+
+.header__inner { height: 80px; display: flex; align-items: center; justify-content: space-between; }
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo-mark { width: 48px; height: 48px; border-radius: 16px; background: $accent; display: grid; place-items: center; }
+.logo-svg { width: 32px; height: 32px; }
+.brand__text { line-height: 1; }
+.brand__title { color: $accent; font-weight: 800; font-size: 24px; letter-spacing: 0.08em; }
+.brand__subtitle { color: $muted; font-size: 14px; margin-top: 2px; }
+
+.nav { display: none; gap: 32px; align-items: center;
+  &--desktop { display: none; }
+}
+.nav__link { color: $text; font-weight: 600; text-decoration: none;
+  &--active { color: $accent; }
+  &--muted { color: #bfcad6; }
+  &:hover { color: $white; }
+}
+
+@media (min-width: 1024px) { .nav--desktop { display: flex; } }
+
+.actions { display: none; gap: 12px; align-items: center; 
+  &--desktop { display: none; }
+}
+@media (min-width: 1024px) { .actions--desktop { display: flex; } .nav-toggle { display: none; } }
+
+.user-mail { color: $muted; font-size: 14px; }
+.btn { height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid $border; background: $panel; color: $text; font-weight: 600; font-size: 14px; }
+.btn--block { width: 100%; }
+.btn-icon { padding: 8px; border-radius: 8px; color: $text; background: transparent; border: 0; }
+.icon { width: 24px; height: 24px; }
+
+.drawer { border-top: 1px solid $border; background: rgba(255, 255, 255, 0.06); }
+.drawer__inner { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.drawer__link { padding: 8px 0; font-weight: 700; color: $text; &--active { color: $accent; } &--muted { color: #cbd4dd; } }
+.divider { height: 1px; background: $border; margin: 8px 0; }
+.drawer__mail { color: $muted; font-size: 14px; }

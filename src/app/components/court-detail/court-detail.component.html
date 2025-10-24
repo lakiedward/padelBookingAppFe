@@ -1,0 +1,173 @@
+<div class="page page-gradient-bg bg-admin-like">
+  <app-header></app-header>
+
+  <section class="hero">
+    <div class="glow glow--hero-a"></div>
+    <div class="glow glow--hero-b"></div>
+    <div class="glow glow--hero-c"></div>
+
+    <div class="container hero__inner">
+      <main class="detail-main">
+    <section class="detail-left">
+      <div class="detail-hero-card">
+        <div class="detail-hero-img-wrap">
+          <img *ngIf="heroImage" [src]="heroImage" [alt]="court?.name || 'Court'" class="detail-hero-img" />
+          <div *ngIf="!heroImage" class="detail-hero-fallback"></div>
+          <div class="detail-hero-overlay"></div>
+          <div class="detail-hero-content">
+            <div class="detail-hero-info">
+              <h1 class="detail-hero-title">{{ court?.name || 'Loading...' }}</h1>
+              <div class="detail-hero-subtitle">{{ court?.clubName || 'Loading...' }}</div>
+              <div class="detail-badges">
+                <span class="detail-badge detail-badge--primary">{{ court?.sport || '...' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-date-card">
+        <div class="detail-date-header">
+          <span class="detail-date-label">Date</span>
+          <div class="date-controls">
+            <button class="today-btn" (click)="setToday()">Today</button>
+            <input
+              type="date"
+              class="date-input"
+              [value]="dateKey(selectedDate)"
+              (change)="onDateInputChange($event)"
+            />
+          </div>
+        </div>
+        <div class="detail-day-scroll">
+          <button
+            *ngFor="let d of days"
+            (click)="onSelectDay(d)"
+            [class.detail-day-btn--active]="dateKey(d) === dateKey(selectedDate)"
+            class="detail-day-btn"
+          >
+            <div class="detail-day-weekday">{{ formatWeekday(d) }}</div>
+            <div class="detail-day-date">{{ formatDayMonth(d) }}</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-slots-card">
+        <div class="detail-slots-header">
+          <div class="detail-slots-title">Time slots</div>
+          <div class="detail-slots-date">{{ formatDay(selectedDate) }}</div>
+        </div>
+        <div class="detail-slots-grid">
+          <button
+            *ngFor="let s of slotsForDay"
+            (click)="onPickSlot(s)"
+            [class.detail-slot-btn--active]="selectedSlot && selectedSlot.start===s.start && selectedSlot.end===s.end"
+            class="detail-slot-btn"
+          >
+            {{ s.start }}–{{ s.end }}
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-extras">
+      <!-- LOCATION SECTION -->
+      <div class="detail-location-card" *ngIf="clubLocation">
+        <div class="detail-section-header">
+          <h3 class="detail-section-title">📍 Location</h3>
+        </div>
+
+        <div class="location-info">
+          <p class="location-address">{{ clubLocation.address }}</p>
+          <p class="location-coords">{{ clubLocation.lat.toFixed(5) }}, {{ clubLocation.lng.toFixed(5) }}</p>
+        </div>
+
+        <div class="map-wrapper" (click)="openGoogleMaps()">
+          <div id="court-detail-map" class="map-container"></div>
+          <div class="map-overlay">
+            <span class="map-overlay-text">🗺️ Open in Google Maps</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COURT DETAILS SECTION -->
+      <div class="detail-info-card">
+        <div class="detail-section-header">
+          <h3 class="detail-section-title">ℹ️ Court Details</h3>
+        </div>
+
+        <!-- Overview (sport, surface, environment, address) -->
+        <div class="info-section">
+          <h4 class="info-label">Overview</h4>
+          <p class="info-value" *ngIf="court?.sport"><strong>Sport:</strong> {{ court?.sport }}</p>
+          <p class="info-value" *ngIf="surfaceFromTags(court?.tags || []) as sf"><strong>Surface:</strong> {{ sf }}</p>
+          <p class="info-value" *ngIf="environmentFromTags(court?.tags || []) as env"><strong>Environment:</strong> {{ env }}</p>
+          <p class="info-value" *ngIf="clubLocation?.address"><strong>Address:</strong> {{ clubLocation?.address }}</p>
+        </div>
+
+        <!-- Description -->
+        <div class="info-section" *ngIf="court?.description">
+          <h4 class="info-label">Description</h4>
+          <p class="info-value">{{ court?.description }}</p>
+        </div>
+
+        <!-- Tags -->
+        <div class="info-section" *ngIf="(court?.tags?.length ?? 0) > 0">
+          <h4 class="info-label">Features</h4>
+          <div class="tags-grid">
+            <span class="tag" *ngFor="let tag of (court?.tags || [])">{{ tag }}</span>
+          </div>
+        </div>
+
+        <!-- Equipment -->
+        <div class="info-section" *ngIf="(court?.equipment?.length ?? 0) > 0">
+          <h4 class="info-label">Available Equipment</h4>
+          <div class="equipment-list">
+            <div class="equipment-item" *ngFor="let eq of (court?.equipment || [])">
+              <span class="equipment-name">{{ eq.name }}</span>
+              <span class="equipment-price">${{ eq.pricePerHour }}/hr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Availability Rules -->
+        <div class="info-section" *ngIf="(court?.availabilityRules?.length ?? 0) > 0">
+          <h4 class="info-label">Pricing & Availability</h4>
+          <div class="rules-list">
+            <div class="rule-item" *ngFor="let rule of (court?.availabilityRules || [])">
+              <div class="rule-details">
+                <div class="rule-time">{{ rule.startTime }} - {{ rule.endTime }}</div>
+                <div class="rule-meta" *ngIf="rule.type === 'WEEKLY' && rule.weekdays">
+                  {{ formatWeekdays(rule.weekdays) }}
+                </div>
+                <div class="rule-meta" *ngIf="rule.type === 'DATE' && rule.date">
+                  {{ rule.date }}
+                </div>
+              </div>
+              <div class="rule-price">${{ rule.price }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+    </section>
+
+    <aside class="detail-summary">
+      <div class="detail-summary-card">
+        <div class="detail-summary-title">Your selection</div>
+        <div class="detail-summary-rows">
+          <div class="detail-summary-row">
+            <span class="detail-summary-label">Date</span>
+            <span class="detail-summary-value">{{ formatDay(selectedDate) }}</span>
+          </div>
+          <div class="detail-summary-row">
+            <span class="detail-summary-label">Time slot</span>
+            <span class="detail-summary-value">{{ selectedSlot ? (selectedSlot.start + '–' + selectedSlot.end) : '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+      </main>
+    </div>
+  </section>
+</div>

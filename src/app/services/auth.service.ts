@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { LoginRequest, AuthResponse, User } from '../models/auth.models';
 import { environment } from '../../environments/environment';
+import { StateService } from './state.service';
 
 export interface RegisterRequest {
   username: string;
@@ -17,11 +18,17 @@ export interface RegisterRequest {
 })
 export class AuthService {
   private apiUrl = `${environment.apiBaseUrl}/api/auth`;
-  private readonly apiBase = 'https://padelbookingappbe-production.up.railway.app';
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private readonly apiBase = environment.apiBaseUrl;
+  private readonly http = inject(HttpClient);
+  private readonly stateService = inject(StateService);
 
-  constructor(private http: HttpClient) {
+  // Expose state service signals (use with $ suffix to avoid naming conflicts)
+  public readonly currentUser$ = this.stateService.currentUser;
+  public readonly isAuthenticated$ = this.stateService.isAuthenticated;
+  public readonly isAdmin$ = this.stateService.isAdmin;
+  public readonly isUser$ = this.stateService.isUser;
+
+  constructor() {
     // Restore user from localStorage on init (SSR-safe)
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       const stored = localStorage.getItem('user');
@@ -32,7 +39,7 @@ export class AuthService {
             ...parsed,
             profileImageUrl: this.toAbsoluteUrl(parsed.profileImageUrl)
           };
-          this.currentUserSubject.next(normalized);
+          this.stateService.setUser(normalized);
           if (normalized.profileImageUrl !== parsed.profileImageUrl) {
             localStorage.setItem('user', JSON.stringify(normalized));
           }
@@ -59,26 +66,19 @@ export class AuthService {
   }
 
   private handleAuthSuccess(response: AuthResponse) {
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-      localStorage.setItem('token', response.token);
-      const user: User = {
-        username: response.username,
-        email: response.email,
-        roles: response.roles,
-        profileImageUrl: this.toAbsoluteUrl(response.profileImageUrl)
-      };
-      localStorage.setItem('user', JSON.stringify(user));
-      this.currentUserSubject.next(user);
-      return;
-    }
-    // Non-browser fallback
     const user: User = {
       username: response.username,
       email: response.email,
       roles: response.roles,
       profileImageUrl: this.toAbsoluteUrl(response.profileImageUrl)
     };
-    this.currentUserSubject.next(user);
+
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+
+    this.stateService.setUser(user);
   }
 
   logout(): void {
@@ -86,11 +86,11 @@ export class AuthService {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     }
-    this.currentUserSubject.next(null);
+    this.stateService.clearUser();
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.stateService.getCurrentUserValue();
   }
 
   isLoggedIn(): boolean {
@@ -100,16 +100,23 @@ export class AuthService {
   }
 
   hasRole(role: string): boolean {
-    const user = this.getCurrentUser();
-    return user ? user.roles.includes(role) : false;
+    return this.stateService.hasRole(role);
   }
 
+  /**
+   * Helper method to check admin role (reads from signal)
+   * For reactive UI, use isAdmin$ signal instead
+   */
   isAdmin(): boolean {
-    return this.hasRole('ROLE_ADMIN');
+    return this.stateService.isAdmin();
   }
 
+  /**
+   * Helper method to check user role (reads from signal)
+   * For reactive UI, use isUser$ signal instead
+   */
   isUser(): boolean {
-    return this.hasRole('ROLE_USER');
+    return this.stateService.isUser();
   }
 
   getToken(): string | null {

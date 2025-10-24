@@ -110,6 +110,7 @@ export interface CourtResponse {
   activity: ActivityResponse;
   clubId: number;
   clubName: string;
+  clubLocation?: { address: string; lat: number; lng: number };
 }
 
 export interface CourtSummaryResponse {

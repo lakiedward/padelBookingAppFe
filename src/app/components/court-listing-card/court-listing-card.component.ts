@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-court-listing-card',
@@ -19,10 +19,15 @@ export class CourtListingCardComponent {
   @Input() tags: string[] = [];
   @Input() availableDate = '';
   @Input() slots: string[] = [];
+  @Output() cardClick = new EventEmitter<void>();
 
   onBook() {
     // Placeholder for action; can emit event in future
     // eslint-disable-next-line no-console
     console.log('Book Court clicked:', this.title);
+  }
+
+  handleCardClick() {
+    this.cardClick.emit();
   }
 }
