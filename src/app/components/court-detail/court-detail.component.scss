@@ -287,32 +287,41 @@ $white: #fff;
 .detail-day-btn {
   scroll-snap-align: start;
   flex-shrink: 0;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 6px;
   border: 1px solid $border;
-  padding: 8px 12px;
-  text-align: left;
-  min-width: 128px;
-  background: rgba(255, 255, 255, 0.06);
+  padding: 8px 10px;
+  text-align: center;
+  min-width: 110px;
+  background: rgba(255, 255, 255, 0.05);
   color: $text;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(214, 221, 230, 0.25);
   }
   &--active {
-    background: $accent;
-    color: #000a14;
-    border-color: $accent-border;
+    border: 2px solid $accent;
+    background: rgba(167, 238, 67, 0.15);
+    box-shadow: 0 0 0 1px rgba(167, 238, 67, 0.3);
   }
 }
 
 .detail-day-weekday {
-  font-size: 12px;
-  opacity: 0.8;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .detail-day-date {
-  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -374,6 +383,15 @@ $white: #fff;
     background: $accent;
     color: #000a14;
     border-color: $accent-border;
+  }
+  &--booked {
+    border-color: rgba(214, 221, 230, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    color: $muted;
+  }
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
   }
 }
 

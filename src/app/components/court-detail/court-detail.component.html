@@ -61,7 +61,9 @@
           <button
             *ngFor="let s of slotsForDay"
             (click)="onPickSlot(s)"
+            [disabled]="s.available === false"
             [class.detail-slot-btn--active]="selectedSlot && selectedSlot.start===s.start && selectedSlot.end===s.end"
+            [class.detail-slot-btn--booked]="s.available === false"
             class="detail-slot-btn"
           >
             {{ s.start }}–{{ s.end }}
@@ -111,10 +113,10 @@
         </div>
 
         <!-- Tags -->
-        <div class="info-section" *ngIf="(court?.tags?.length ?? 0) > 0">
+        <div class="info-section" *ngIf="(featureTagsWithoutEnvSurface(court?.tags || [])?.length ?? 0) > 0">
           <h4 class="info-label">Features</h4>
           <div class="tags-grid">
-            <span class="tag" *ngFor="let tag of (court?.tags || [])">{{ tag }}</span>
+            <span class="tag" *ngFor="let tag of featureTagsWithoutEnvSurface(court?.tags || [])">{{ tag }}</span>
           </div>
         </div>
 
@@ -130,7 +132,7 @@
         </div>
 
         <!-- Availability Rules -->
-        <div class="info-section" *ngIf="(court?.availabilityRules?.length ?? 0) > 0">
+        <div class="info-section" *ngIf="false">
           <h4 class="info-label">Pricing & Availability</h4>
           <div class="rules-list">
             <div class="rule-item" *ngFor="let rule of (court?.availabilityRules || [])">

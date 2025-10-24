@@ -26,7 +26,7 @@ export class CourtDetailComponent implements OnInit {
   // date/state
   selectedDate: Date = new Date();
   days: Date[] = [];
-  slotsForDay: { start: string; end: string }[] = [];
+  slotsForDay: { start: string; end: string; available: boolean }[] = [];
   selectedSlot?: { start: string; end: string };
 
   // location/map state
@@ -97,6 +97,8 @@ export class CourtDetailComponent implements OnInit {
 
   onSelectDay(d: Date) {
     this.selectedDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    console.log('[CourtDetail] onSelectDay called', { oldDate: this.selectedDate, newDate: d, dateKey: this.dateKey(this.selectedDate) });
+    this.selectedSlot = undefined; // Clear selected slot when changing date
     this.loadSlotsForSelectedDate();
   }
 
@@ -122,25 +124,33 @@ export class CourtDetailComponent implements OnInit {
 
   private loadSlotsForSelectedDate() {
     this.slotsForDay = [];
-    this.publicService.getAvailableTimeSlotsByCourt(this.courtId).subscribe({
-      next: (slots) => {
-        const key = this.dateKey(this.selectedDate);
-        const sameDay = (slots || []).filter(s => (s.startTime ?? '').substring(0, 10) === key)
-                                      .sort((a, b) => a.startTime.localeCompare(b.startTime));
-        this.slotsForDay = sameDay.map(s => ({
-          start: s.startTime.substring(11, 16),
-          end: s.endTime.substring(11, 16)
+    this.selectedSlot = undefined; // Clear selected slot when reloading
+    const dateKey = this.dateKey(this.selectedDate);
+    console.log('[CourtDetail] loadSlotsForSelectedDate START', { courtId: this.courtId, dateKey, selectedDate: this.selectedDate });
+    
+    this.publicService.getAllTimeSlotsByCourtAndDate(this.courtId, dateKey).subscribe({
+      next: (resp) => {
+        console.log('[CourtDetail] slots response SUCCESS', { courtId: this.courtId, dateKey, count: resp?.items?.length, items: resp?.items });
+        const items = (resp?.items || []).slice().sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+        this.slotsForDay = items.map(s => ({
+          start: (s.startTime || '').substring(11, 16),
+          end: (s.endTime || '').substring(11, 16),
+          available: !!s.available
         }));
+        console.log('[CourtDetail] slotsForDay mapped', { count: this.slotsForDay.length, slots: this.slotsForDay });
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
+        console.error('[CourtDetail] slots fetch FAILED', { courtId: this.courtId, dateKey, error: err });
         this.slotsForDay = [];
+        this.cdr.detectChanges();
       }
     });
   }
 
-  onPickSlot(slot: { start: string; end: string }) {
-    this.selectedSlot = slot;
+  onPickSlot(slot: { start: string; end: string; available?: boolean }) {
+    if (slot.available === false) return;
+    this.selectedSlot = { start: slot.start, end: slot.end };
   }
 
   logout() {
@@ -219,5 +229,19 @@ export class CourtDetailComponent implements OnInit {
     if (tl.includes('heated')) parts.push('Heated');
     if (tl.includes('unheated')) parts.push('Unheated');
     return parts.length ? parts.join(', ') : null;
+  }
+
+  featureTagsWithoutEnvSurface(tags: string[]): string[] {
+    const env = new Set(['indoor','outdoor','heated','unheated']);
+    const surface = new Set(['clay','grass','hard','synthetic','carpet','acrylic','concrete','asphalt']);
+    const seen = new Set<string>();
+    return (tags || []).filter(t => {
+      const k = (t || '').toLowerCase();
+      if (!k) return false;
+      if (env.has(k) || surface.has(k)) return false;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
   }
 }

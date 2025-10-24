@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { CourtSummaryResponse, PublicAvailableTimeSlot, CourtResponse } from '../models/court.models';
+import { SlotsForDateResponse } from '../models/booking.models';
 
 @Injectable({ providedIn: 'root' })
 export class PublicService {
@@ -20,5 +21,14 @@ export class PublicService {
 
   getPublicCourtById(courtId: number): Observable<CourtResponse> {
     return this.http.get<CourtResponse>(`${this.apiBase}/api/public/courts/${courtId}`);
+  }
+
+  /**
+   * Get ALL time slots (available + unavailable) for a court on a specific date
+   * Used to show which slots are free and which are occupied
+   */
+  getAllTimeSlotsByCourtAndDate(courtId: number, date: string): Observable<SlotsForDateResponse> {
+    const params = new HttpParams().set('date', date);
+    return this.http.get<SlotsForDateResponse>(`${this.apiBase}/api/public/courts/${courtId}/slots`, { params });
   }
 }
