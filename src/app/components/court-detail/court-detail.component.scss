@@ -354,6 +354,9 @@ $white: #fff;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr; // Full-width boxes on small screens
+  }
   @media (min-width: 640px) {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -362,6 +365,32 @@ $white: #fff;
   }
   @media (min-width: 1024px) {
     grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.detail-slots-empty {
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px dashed $border;
+  background: rgba(255, 255, 255, 0.04);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+
+  .empty-title {
+    color: $text;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .empty-sub {
+    color: $muted;
+    font-size: 13px;
+    font-weight: 500;
   }
 }
 
@@ -374,6 +403,7 @@ $white: #fff;
   padding: 8px 12px;
   text-align: center;
   font-weight: 600;
+  width: 100%; // Ensure buttons stretch to full column width
   cursor: pointer;
   transition: all 0.2s;
   &:hover {

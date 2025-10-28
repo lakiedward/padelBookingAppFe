@@ -57,7 +57,11 @@
           <div class="detail-slots-title">Time slots</div>
           <div class="detail-slots-date">{{ formatDay(selectedDate) }}</div>
         </div>
-        <div class="detail-slots-grid">
+        <div class="detail-slots-empty" *ngIf="(slotsForDay?.length || 0) === 0">
+          <div class="empty-title">No available slots</div>
+          <div class="empty-sub">Please choose another date.</div>
+        </div>
+        <div class="detail-slots-grid" *ngIf="(slotsForDay?.length || 0) > 0">
           <button
             *ngFor="let s of slotsForDay"
             (click)="onPickSlot(s)"
