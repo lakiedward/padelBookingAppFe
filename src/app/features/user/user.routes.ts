@@ -15,5 +15,10 @@ export const USER_ROUTES: Routes = [
     path: 'court/:id',
     loadComponent: () => import('../../components/court-detail/court-detail.component')
       .then(m => m.CourtDetailComponent)
+  },
+  {
+    path: 'booking/:timeSlotId',
+    loadComponent: () => import('../../components/booking-page/booking-page.component')
+      .then(m => m.BookingPageComponent)
   }
 ];

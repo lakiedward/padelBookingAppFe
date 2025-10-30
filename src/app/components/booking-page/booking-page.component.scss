@@ -1,0 +1,497 @@
+$bg: #0f1b26;
+$panel: rgba(255, 255, 255, 0.08);
+$border: rgba(214, 221, 230, 0.15);
+$accent: #a7ee43;
+$accent-border: rgba(167, 238, 67, 0.4);
+$text: #d6dde6;
+$muted: #9aa7b5;
+$white: #fff;
+$error: #ef4444;
+
+// Page wrapper
+.page {
+  position: relative;
+  min-height: 100vh;
+  color: $white;
+  isolation: isolate;
+  &.page-gradient-bg::before,
+  &.page-gradient-bg::after {
+    z-index: 0;
+  }
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+// Hero section
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow--hero-a {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  width: 128px;
+  height: 128px;
+  background: linear-gradient(90deg, transparent, $accent);
+  border-radius: 999px;
+  filter: blur(16px);
+}
+
+.glow--hero-b {
+  position: absolute;
+  right: 96px;
+  top: 64px;
+  width: 192px;
+  height: 192px;
+  background: linear-gradient(90deg, transparent, $accent);
+  border-radius: 999px;
+  filter: blur(18px);
+}
+
+.glow--hero-c {
+  position: absolute;
+  right: 224px;
+  top: 40px;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(90deg, transparent, $text);
+  border-radius: 999px;
+  filter: blur(16px);
+}
+
+.bg-admin-like .glow--hero-a,
+.bg-admin-like .glow--hero-b,
+.bg-admin-like .glow--hero-c {
+  display: none;
+}
+
+.hero__inner {
+  padding: 80px 16px 16px;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @media (min-width: 768px) {
+    padding: 40px 0 48px;
+  }
+}
+
+// Booking Main Container
+.booking-main {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+// Loading State
+.booking-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+}
+
+.loading-text {
+  color: $muted;
+  font-size: 14px;
+  margin: 0;
+}
+
+// Error State Card
+.booking-error-card {
+  border-radius: 16px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.1);
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.error-icon {
+  font-size: 48px;
+}
+
+.error-title {
+  color: $white;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.error-message {
+  color: $text;
+  font-size: 14px;
+  margin: 0;
+}
+
+// Booking Container
+.booking-container {
+  width: 100%;
+}
+
+// Booking Card
+.booking-card {
+  border-radius: 16px;
+  border: 1px solid $border;
+  background: $panel;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @media (max-width: 768px) {
+    padding: 20px 16px;
+    gap: 20px;
+  }
+}
+
+// Header
+.booking-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid $border;
+  padding-bottom: 16px;
+}
+
+.booking-title {
+  color: $white;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+}
+
+.booking-subtitle {
+  color: $muted;
+  font-size: 14px;
+  margin: 0;
+}
+
+// Section
+.booking-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  color: $text;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// Summary Grid
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.summary-label {
+  color: $muted;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summary-value {
+  color: $white;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+// Price Card
+.price-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(167, 238, 67, 0.12);
+  border: 2px solid rgba(167, 238, 67, 0.3);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+.price-label {
+  color: $text;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.price-value {
+  color: $accent;
+  font-size: 32px;
+  font-weight: 700;
+
+  @media (max-width: 768px) {
+    font-size: 28px;
+  }
+}
+
+// Payment Methods
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-method {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid $border;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(&--disabled) {
+    border-color: rgba(167, 238, 67, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &--active {
+    border-color: $accent;
+    background: rgba(167, 238, 67, 0.1);
+    box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.15);
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      border-color: $border;
+      background: rgba(255, 255, 255, 0.04);
+    }
+  }
+}
+
+.payment-radio {
+  position: relative;
+  flex-shrink: 0;
+
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: $accent;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+}
+
+.payment-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.payment-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.payment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-name {
+  color: $white;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-desc {
+  color: $muted;
+  font-size: 13px;
+}
+
+.coming-soon-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(167, 238, 67, 0.15);
+  border: 1px solid rgba(167, 238, 67, 0.3);
+  border-radius: 12px;
+  color: $accent;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Error Message
+.booking-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  color: #fca5a5;
+  font-size: 14px;
+}
+
+.error-icon-small {
+  font-size: 20px;
+}
+
+.error-text {
+  flex: 1;
+}
+
+// Action Buttons
+.booking-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--large {
+    height: 52px;
+    min-height: 52px;
+
+    @media (max-width: 768px) {
+      height: 48px;
+      min-height: 48px;
+    }
+  }
+
+  &--primary {
+    background: $accent;
+    color: #000a14;
+    box-shadow: 0 4px 12px rgba(167, 238, 67, 0.25);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(167, 238, 67, 0.35);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+
+  &--secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid $border;
+    color: $text;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(214, 221, 230, 0.25);
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex: 1;
+  }
+
+  @media (min-width: 769px) {
+    flex: 1;
+  }
+}
+
+.btn-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+// Spinner utility (ensure it exists in global styles)
+.u-spinner {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+
+  &--sm {
+    width: 16px;
+    height: 16px;
+  }
+
+  &--lg {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

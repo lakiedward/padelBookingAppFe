@@ -237,19 +237,28 @@ export class BrowseCourtsPageComponent implements OnInit {
   }
 
   private loadAvailabilityFor(index: number, courtId: number) {
+    console.log('[BrowseCourts] Loading availability for court', courtId);
     this.publicService.getAvailableTimeSlotsByCourt(courtId).subscribe({
       next: (slots) => {
-        console.log('[BrowseCourts] Timeslots for court', courtId, slots);
+        console.log('[BrowseCourts] Timeslots for court', courtId, ':', slots);
         if (!Array.isArray(slots) || slots.length === 0) {
+          console.log('[BrowseCourts] No timeslots found, trying fallback from rules for court', courtId);
           this.publicService.getPublicCourtById(courtId).subscribe({
             next: (court) => {
+              console.log('[BrowseCourts] Court details for fallback:', court);
               const fallback = this.computeFromRules(court.availabilityRules);
               if (fallback) {
+                console.log('[BrowseCourts] Fallback availability computed:', fallback);
                 this.items[index].availableDate = fallback.dateStr;
                 this.items[index].slots = fallback.times;
+                this.cdr.detectChanges();
+              } else {
+                console.warn('[BrowseCourts] No fallback could be computed from rules for court', courtId);
               }
             },
-            error: () => {}
+            error: (err) => {
+              console.error('[BrowseCourts] Failed to load court details for fallback:', err);
+            }
           });
           return;
         }
@@ -262,11 +271,14 @@ export class BrowseCourtsPageComponent implements OnInit {
         // Build up to 3 time chips HH:mm
         const chips: string[] = sameDay.slice(0, 3).map(s => s.startTime.substring(11, 16));
         if (sameDay.length > 3) chips.push(`+${sameDay.length - 3} more`);
+        
+        console.log('[BrowseCourts] Setting availability for court', courtId, ':', { date: earliest, slots: chips });
         this.items[index].availableDate = earliest;
         this.items[index].slots = chips;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.warn('[BrowseCourts] Failed to load availability for court', courtId, err);
+        console.error('[BrowseCourts] Failed to load availability for court', courtId, ':', err);
       }
     });
   }

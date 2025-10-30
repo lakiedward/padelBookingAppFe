@@ -26,8 +26,8 @@ export class CourtDetailComponent implements OnInit {
   // date/state
   selectedDate: Date = new Date();
   days: Date[] = [];
-  slotsForDay: { start: string; end: string; available: boolean; price: number }[] = [];
-  selectedSlot?: { start: string; end: string; price: number };
+  slotsForDay: { id: number; start: string; end: string; available: boolean; price: number }[] = [];
+  selectedSlot?: { id: number; start: string; end: string; price: number };
 
   // location/map state
   clubLocation?: { address: string; lat: number; lng: number };
@@ -163,6 +163,7 @@ export class CourtDetailComponent implements OnInit {
         console.log('[CourtDetail] slots response SUCCESS', { courtId: this.courtId, dateKey, count: resp?.items?.length, items: resp?.items });
         const items = (resp?.items || []).slice().sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
         this.slotsForDay = items.map(s => ({
+          id: s.id,
           start: (s.startTime || '').substring(11, 16),
           end: (s.endTime || '').substring(11, 16),
           available: !!s.available,
@@ -179,19 +180,23 @@ export class CourtDetailComponent implements OnInit {
     });
   }
 
-  onPickSlot(slot: { start: string; end: string; available?: boolean; price?: number }) {
+  onPickSlot(slot: { id: number; start: string; end: string; available?: boolean; price?: number }) {
     if (slot.available === false) return;
-    this.selectedSlot = { start: slot.start, end: slot.end, price: slot.price || 0 };
+    this.selectedSlot = { id: slot.id, start: slot.start, end: slot.end, price: slot.price || 0 };
   }
 
   onBookNow() {
-    if (!this.selectedSlot) return;
-    // TODO: Implement booking logic
-    console.log('Booking:', {
-      courtId: this.courtId,
-      date: this.dateKey(this.selectedDate),
-      timeSlot: this.selectedSlot,
-      court: this.court?.name
+    if (!this.selectedSlot || !this.court) return;
+
+    // Navigate to booking page with time slot ID and additional info as query params
+    this.router.navigate(['/user/booking', this.selectedSlot.id], {
+      queryParams: {
+        courtId: this.courtId,
+        date: this.dateKey(this.selectedDate),
+        start: this.selectedSlot.start,
+        end: this.selectedSlot.end,
+        price: this.selectedSlot.price
+      }
     });
   }
 

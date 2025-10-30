@@ -212,10 +212,23 @@
       <!-- Courts section for Week and Day views -->
       <div *ngIf="viewMode() === 'week' || viewMode() === 'day'" class="courts-section">
         <h3 class="courts-section__title">Your Courts</h3>
-        <div class="grid">
+        
+        <!-- Loading state -->
+        <div *ngIf="isLoading" style="text-align: center; padding: 40px; color: #8aa0b5;">
+          Loading your bookings...
+        </div>
+        
+        <!-- Empty state -->
+        <div *ngIf="!isLoading && getUniqueCourts().length === 0" style="text-align: center; padding: 40px; color: #8aa0b5;">
+          <p>No bookings found for this period.</p>
+          <p style="font-size: 14px; margin-top: 8px;">Book a court to see it here!</p>
+        </div>
+        
+        <!-- Courts grid -->
+        <div *ngIf="!isLoading && getUniqueCourts().length > 0" class="grid">
           <app-court-listing-card
             *ngFor="let court of getUniqueCourts()"
-            [image]="getCourtImage(court.court)"
+            [image]="getCourtImage(court.courtId)"
             [emoji]="court.sport"
             [title]="court.court"
             [club]="court.club"

@@ -16,6 +16,7 @@ export interface SlotsForDateResponse {
 export interface BookingSummaryResponse {
   id: number;
   timeSlotId: number;
+  courtId: number;
   courtName: string;
   activityName: string;
   startTime: string; // ISO DateTime string

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { BookingService } from '../../services/booking.service';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { Time24Pipe } from '../../pipes/time24.pipe';
 
@@ -9,6 +10,7 @@ type ViewMode = 'month' | 'week' | 'day';
 
 type Reservation = {
   id: string;
+  courtId: number;
   date: string;   // YYYY-MM-DD
   start: string;  // HH:MM
   end: string;    // HH:MM
@@ -25,31 +27,105 @@ type Reservation = {
   templateUrl: './calendar-page.component.html',
   styleUrl: './calendar-page.component.scss'
 })
-export class CalendarPageComponent {
-  constructor(private auth: AuthService, private router: Router) {}
+export class CalendarPageComponent implements OnInit {
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private bookingService: BookingService
+  ) {}
 
   // Header/mobile
   mobileOpen = false;
+  isLoading = true;
 
   // State
-  anchor = signal(new Date(2025, 9, 1)); // 1 Oct 2025 (demo)
+  anchor = signal(new Date()); // Start with today
   viewMode = signal<ViewMode>('month');
 
-  // Demo reservations
-  readonly reservations: Reservation[] = [
-    { id: 'r1', date: '2025-10-01', start: '08:00', end: '09:00', club: 'Elite Tennis Club', court: 'Elite Tennis Court 1', sport: '🎾', city: 'Downtown' },
-    { id: 'r2', date: '2025-10-01', start: '18:00', end: '19:30', club: 'Elite Tennis Club', court: 'Elite Tennis Court 1', sport: '🎾', city: 'Downtown' },
-    { id: 'r3', date: '2025-10-03', start: '10:00', end: '11:00', club: 'Padel Pro Center', court: 'Padel Court 1', sport: '🏓', city: 'North District' },
-    { id: 'r4', date: '2025-10-05', start: '19:00', end: '20:00', club: 'Elite Sports Center', court: 'Basketball Court 1', sport: '🏀', city: 'Downtown' },
-    { id: 'r5', date: '2025-10-07', start: '09:00', end: '10:00', club: 'Elite Tennis Club', court: 'Elite Tennis Court 2', sport: '🎾', city: 'Downtown' },
-    { id: 'r6', date: '2025-10-12', start: '17:00', end: '18:00', club: 'Padel Pro Center', court: 'Padel Court 1', sport: '🏓', city: 'North District' },
-    { id: 'r7', date: '2025-10-24', start: '07:30', end: '08:30', club: 'Elite Sports Center', court: 'Basketball Court 1', sport: '🏀', city: 'Downtown' },
-  ];
+  // Real user reservations from backend
+  reservations = signal<Reservation[]>([]);
+
+  ngOnInit(): void {
+    this.loadUserBookings();
+  }
+
+  private loadUserBookings(): void {
+    console.log('[CalendarPage] Loading user bookings...');
+    this.isLoading = true;
+    
+    this.bookingService.getMyBookings().subscribe({
+      next: (bookings) => {
+        console.log('[CalendarPage] Bookings received:', bookings);
+        console.log('[CalendarPage] Booking details:', bookings.map(b => ({
+          id: b.id,
+          courtId: b.courtId,
+          courtName: b.courtName,
+          timeSlotId: b.timeSlotId
+        })));
+        
+        // Transform backend BookingSummaryResponse to Reservation format
+        const reservations: Reservation[] = bookings.map(booking => {
+          const startDateTime = new Date(booking.startTime);
+          const endDateTime = new Date(booking.endTime);
+          
+          console.log('[CalendarPage] Processing booking:', {
+            bookingId: booking.id,
+            courtId: booking.courtId,
+            courtName: booking.courtName,
+            imageUrl: this.getCourtImage(booking.courtId)
+          });
+          
+          return {
+            id: booking.id.toString(),
+            courtId: booking.courtId,
+            date: this.formatDateToKey(startDateTime),
+            start: this.formatTimeToHHMM(startDateTime),
+            end: this.formatTimeToHHMM(endDateTime),
+            club: 'Club', // Backend doesn't return club name in booking summary
+            court: booking.courtName,
+            sport: this.getSportEmoji(booking.activityName),
+            city: 'City' // Backend doesn't return city
+          };
+        });
+        
+        this.reservations.set(reservations);
+        console.log('[CalendarPage] Reservations set:', reservations);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('[CalendarPage] Error loading bookings:', err);
+        this.reservations.set([]);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private formatDateToKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  private formatTimeToHHMM(date: Date): string {
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  }
+
+  private getSportEmoji(activityName: string): string {
+    const emojiMap: Record<string, string> = {
+      'tennis': '🎾',
+      'padel': '🏓',
+      'basketball': '🏀',
+      'volleyball': '🏐',
+      'football': '⚽',
+      'soccer': '⚽'
+    };
+    
+    const normalized = activityName.toLowerCase();
+    return emojiMap[normalized] || '🎯';
+  }
 
   // Derived helpers
   readonly eventsByDay = computed<Record<string, string[]>>(() => {
     const m: Record<string, string[]> = {};
-    for (const r of this.reservations) {
+    for (const r of this.reservations()) {
       (m[r.date] ??= []).push(`${r.sport} ${r.court} ${r.start}`);
     }
     return m;
@@ -59,7 +135,11 @@ export class CalendarPageComponent {
   toggleMobile() { this.mobileOpen = !this.mobileOpen; }
   logout() { this.auth.logout(); this.router.navigate(['/auth']); }
 
-  setView(mode: ViewMode) { this.viewMode.set(mode); }
+  setView(mode: ViewMode) { 
+    console.log('[CalendarPage] setView called', { mode, currentReservations: this.reservations().length });
+    this.viewMode.set(mode); 
+    console.log('[CalendarPage] viewMode set, uniqueCourts:', this.getUniqueCourts());
+  }
   
   onDayClick(date: Date) {
     this.anchor.set(date);
@@ -141,30 +221,41 @@ export class CalendarPageComponent {
 
   reservationsByDay(date: Date): Reservation[] {
     const key = this.toDateKey(date);
-    return this.reservations
+    return this.reservations()
       .filter(r => r.date === key)
       .sort((a, b) => a.start.localeCompare(b.start));
   }
 
-  getUniqueCourts(): { court: string; club: string; sport: string }[] {
-    const unique = new Map<string, { court: string; club: string; sport: string }>();
+  getUniqueCourts(): { courtId: number; court: string; club: string; sport: string }[] {
+    const unique = new Map<string, { courtId: number; court: string; club: string; sport: string }>();
+    
+    console.log('[CalendarPage] getUniqueCourts called', { 
+      viewMode: this.viewMode(), 
+      anchor: this.toDateKey(this.anchor()),
+      totalReservations: this.reservations().length 
+    });
     
     // Filter reservations based on current view mode
     const filteredReservations = this.viewMode() === 'day' 
-      ? this.reservations.filter(r => r.date === this.toDateKey(this.anchor()))
-      : this.reservations;
+      ? this.reservations().filter(r => r.date === this.toDateKey(this.anchor()))
+      : this.reservations();
+    
+    console.log('[CalendarPage] filteredReservations:', filteredReservations.length, filteredReservations);
     
     filteredReservations.forEach(r => {
       const key = `${r.court}-${r.club}`;
       if (!unique.has(key)) {
-        unique.set(key, { court: r.court, club: r.club, sport: r.sport });
+        unique.set(key, { courtId: r.courtId, court: r.court, club: r.club, sport: r.sport });
       }
     });
-    return Array.from(unique.values());
+    
+    const result = Array.from(unique.values());
+    console.log('[CalendarPage] uniqueCourts result:', result);
+    return result;
   }
 
   getReservationsForCourt(courtName: string): Reservation[] {
-    let filteredReservations = this.reservations.filter(r => r.court === courtName);
+    let filteredReservations = this.reservations().filter(r => r.court === courtName);
     
     // In day view, only show reservations for the selected day
     if (this.viewMode() === 'day') {
@@ -184,44 +275,27 @@ export class CalendarPageComponent {
   }
 
   // Court data methods for court cards
-  getCourtImage(courtName: string): string {
-    const courtImages: Record<string, string> = {
-      'Elite Tennis Court 1': 'https://images.unsplash.com/photo-1512163143273-bde0e3cc740e?q=80&w=1200&auto=format&fit=crop',
-      'Elite Tennis Court 2': 'https://images.unsplash.com/photo-1500835556837-99ac94a94552?q=80&w=1200&auto=format&fit=crop',
-      'Padel Court 1': 'https://images.unsplash.com/photo-1593111776706-b6400dd9fec4?q=80&w=1200&auto=format&fit=crop',
-      'Basketball Court 1': 'https://images.unsplash.com/photo-1599050751798-13b6ce8ce1b7?q=80&w=1200&auto=format&fit=crop'
-    };
-    return courtImages[courtName] || 'https://images.unsplash.com/photo-1512163143273-bde0e3cc740e?q=80&w=1200&auto=format&fit=crop';
+  // Note: Backend BookingSummaryResponse now includes courtId
+  getCourtImage(courtId: number): string {
+    // Use the new endpoint that accepts courtId and returns primary photo
+    // GET /api/public/courts/{courtId}/photo
+    const baseUrl = 'https://padelbookingappbe-production.up.railway.app';
+    return `${baseUrl}/api/public/courts/${courtId}/photo`;
   }
 
   getCourtLocation(courtName: string): string {
-    const courtLocations: Record<string, string> = {
-      'Elite Tennis Court 1': 'Downtown Sports Complex',
-      'Elite Tennis Court 2': 'Downtown Sports Complex',
-      'Padel Court 1': 'North District',
-      'Basketball Court 1': 'Downtown Sports Complex'
-    };
-    return courtLocations[courtName] || 'Sports Complex';
+    // Generic location since backend doesn't provide club address in booking summary
+    return 'Sports Complex';
   }
 
   getCourtPrice(courtName: string): string {
-    const courtPrices: Record<string, string> = {
-      'Elite Tennis Court 1': '$50',
-      'Elite Tennis Court 2': '$45',
-      'Padel Court 1': '$35',
-      'Basketball Court 1': '$40'
-    };
-    return courtPrices[courtName] || '$40';
+    // Price info not available in calendar view - would need to fetch court details
+    return '—';
   }
 
   getCourtTags(courtName: string): string[] {
-    const courtTags: Record<string, string[]> = {
-      'Elite Tennis Court 1': ['Indoor', 'Hard Court'],
-      'Elite Tennis Court 2': ['Outdoor', 'Clay'],
-      'Padel Court 1': ['Indoor', 'Artificial Turf'],
-      'Basketball Court 1': ['Indoor', 'Synthetic']
-    };
-    return courtTags[courtName] || ['Indoor'];
+    // Tags not available in booking summary
+    return [];
   }
 
   getNextAvailableDate(courtName: string): string {

@@ -1,0 +1,174 @@
+<div class="page page-gradient-bg bg-admin-like">
+  <app-header></app-header>
+
+  <section class="hero">
+    <div class="glow glow--hero-a"></div>
+    <div class="glow glow--hero-b"></div>
+    <div class="glow glow--hero-c"></div>
+
+    <div class="container hero__inner">
+      <main class="booking-main">
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="booking-loading">
+          <div class="u-spinner u-spinner--lg"></div>
+          <p class="loading-text">Loading booking details...</p>
+        </div>
+
+        <!-- Error State (No Booking Details) -->
+        <div *ngIf="!isLoading && !slotDetails" class="booking-error-card">
+          <div class="error-icon">⚠️</div>
+          <h2 class="error-title">Booking Information Missing</h2>
+          <p class="error-message">{{ bookingError || 'Unable to load booking details.' }}</p>
+          <button class="btn btn--primary" (click)="onCancel()">Go Back to Courts</button>
+        </div>
+
+        <!-- Booking Form -->
+        <div *ngIf="!isLoading && slotDetails" class="booking-container">
+
+          <div class="booking-card">
+            <!-- Header -->
+            <div class="booking-header">
+              <h1 class="booking-title">Confirm Your Booking</h1>
+              <p class="booking-subtitle">Review your selection and complete your booking</p>
+            </div>
+
+            <!-- Booking Summary Section -->
+            <div class="booking-section">
+              <h3 class="section-title">📅 Booking Details</h3>
+
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span class="summary-label">Court</span>
+                  <span class="summary-value">{{ slotDetails.courtName }}</span>
+                </div>
+
+                <div class="summary-item">
+                  <span class="summary-label">Sport</span>
+                  <span class="summary-value">{{ slotDetails.sport }}</span>
+                </div>
+
+                <div class="summary-item">
+                  <span class="summary-label">Activity</span>
+                  <span class="summary-value">{{ slotDetails.activityName }}</span>
+                </div>
+
+                <div class="summary-item summary-item--full">
+                  <span class="summary-label">Date</span>
+                  <span class="summary-value">{{ formatDate(slotDetails.date) }}</span>
+                </div>
+
+                <div class="summary-item">
+                  <span class="summary-label">Start Time</span>
+                  <span class="summary-value">{{ formatTime(slotDetails.startTime) }}</span>
+                </div>
+
+                <div class="summary-item">
+                  <span class="summary-label">End Time</span>
+                  <span class="summary-value">{{ formatTime(slotDetails.endTime) }}</span>
+                </div>
+              </div>
+
+              <!-- Price Highlight -->
+              <div class="price-card">
+                <span class="price-label">Total Price</span>
+                <span class="price-value">${{ slotDetails.price.toFixed(2) }}</span>
+              </div>
+            </div>
+
+            <!-- Payment Method Section -->
+            <div class="booking-section">
+              <h3 class="section-title">💳 Payment Method</h3>
+
+              <div class="payment-methods">
+                <!-- Cash Payment -->
+                <div
+                  class="payment-method"
+                  [class.payment-method--active]="selectedPaymentMethod === 'cash'"
+                  [class.payment-method--disabled]="false"
+                  (click)="onSelectPaymentMethod('cash')"
+                >
+                  <div class="payment-radio">
+                    <input
+                      type="radio"
+                      id="payment-cash"
+                      name="paymentMethod"
+                      value="cash"
+                      [checked]="selectedPaymentMethod === 'cash'"
+                      (change)="onSelectPaymentMethod('cash')"
+                    />
+                    <label for="payment-cash"></label>
+                  </div>
+                  <div class="payment-info">
+                    <div class="payment-icon">💵</div>
+                    <div class="payment-details">
+                      <span class="payment-name">Cash</span>
+                      <span class="payment-desc">Pay at the venue</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card Payment (Disabled) -->
+                <div
+                  class="payment-method payment-method--disabled"
+                  [class.payment-method--active]="selectedPaymentMethod === 'card'"
+                  (click)="onSelectPaymentMethod('card')"
+                >
+                  <div class="payment-radio">
+                    <input
+                      type="radio"
+                      id="payment-card"
+                      name="paymentMethod"
+                      value="card"
+                      [checked]="selectedPaymentMethod === 'card'"
+                      disabled
+                    />
+                    <label for="payment-card"></label>
+                  </div>
+                  <div class="payment-info">
+                    <div class="payment-icon">💳</div>
+                    <div class="payment-details">
+                      <span class="payment-name">Card <span class="coming-soon-badge">Coming Soon</span></span>
+                      <span class="payment-desc">Credit or Debit Card</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="bookingError" class="booking-error">
+              <span class="error-icon-small">⚠️</span>
+              <span class="error-text">{{ bookingError }}</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="booking-actions">
+              <button
+                class="btn btn--secondary btn--large"
+                (click)="onCancel()"
+                [disabled]="isSubmitting"
+              >
+                Cancel
+              </button>
+
+              <button
+                class="btn btn--primary btn--large"
+                (click)="onConfirmBooking()"
+                [disabled]="isSubmitting || selectedPaymentMethod !== 'cash'"
+              >
+                <span *ngIf="!isSubmitting">Confirm Booking</span>
+                <span *ngIf="isSubmitting" class="btn-loading">
+                  <div class="u-spinner u-spinner--sm"></div>
+                  <span>Processing...</span>
+                </span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </section>
+</div>

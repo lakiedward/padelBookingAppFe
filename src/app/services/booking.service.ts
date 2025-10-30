@@ -70,10 +70,12 @@ export class BookingService {
    * Helper to get authorization headers with JWT token
    */
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token'); // Changed from 'authToken' to 'token' to match AuthService
     if (!token) {
+      console.error('[BookingService] No token found in localStorage');
       throw new Error('No authentication token found');
     }
+    console.log('[BookingService] Token found, length:', token.length);
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
