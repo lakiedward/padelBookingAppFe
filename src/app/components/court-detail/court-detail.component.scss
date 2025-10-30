@@ -73,16 +73,19 @@ $white: #fff;
 .bg-admin-like .glow--hero-b,
 .bg-admin-like .glow--hero-c { display: none; }
 
-.hero__inner { padding: 40px 16px 48px; }
+.hero__inner { padding: 80px 16px 16px; }
 
 // Detail specific
 .detail-main {
-  padding: 24px 0;
+  padding: 80px 16px 16px;
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
+  @media (min-width: 768px) {
+    padding: 24px 0;
+  }
   @media (min-width: 1024px) {
-    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-columns: 1.4fr 0.6fr;
   }
 }
 
@@ -90,6 +93,7 @@ $white: #fff;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0; // allow grid child to shrink to viewport
 }
 
 // Container for Location and Details sections side-by-side
@@ -170,6 +174,8 @@ $white: #fff;
   font-weight: 700;
   font-size: 24px;
   margin: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   @media (min-width: 768px) {
     font-size: 30px;
   }
@@ -178,6 +184,8 @@ $white: #fff;
 .detail-hero-subtitle {
   color: rgba(156, 163, 175, 1);
   font-size: 14px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .detail-badges {
@@ -234,6 +242,7 @@ $white: #fff;
   display: flex;
   gap: 8px;
   align-items: center;
+  min-width: 0;
 }
 
 .today-btn {
@@ -276,11 +285,17 @@ $white: #fff;
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  margin: 0 -16px;
+  padding: 0 16px 4px 16px;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  cursor: grab;
+  user-select: none;
   &::-webkit-scrollbar {
     display: none;
+  }
+  &:active {
+    cursor: grabbing;
   }
 }
 
@@ -431,6 +446,7 @@ $white: #fff;
     position: sticky;
     top: 88px;
   }
+  min-width: 0; // allow grid child to shrink to viewport
 }
 
 .detail-summary-card {
@@ -466,6 +482,42 @@ $white: #fff;
 
 .detail-summary-value {
   color: $white;
+}
+
+// Book Now button
+.book-now-btn {
+  width: 100%;
+  padding: 14px 20px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 12px;
+  background: $accent;
+  color: #000a14;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(167, 238, 67, 0.25);
+  
+  &:hover:not(:disabled) {
+    background: #b8f55a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(167, 238, 67, 0.35);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(167, 238, 67, 0.25);
+  }
+  
+  &:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: $muted;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 // ========== LOCATION CARD ==========
@@ -504,6 +556,8 @@ $white: #fff;
   font-size: 14px;
   font-weight: 600;
   margin: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .location-coords {
@@ -593,6 +647,8 @@ $white: #fff;
   font-size: 14px;
   line-height: 1.6;
   margin: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .tags-grid {

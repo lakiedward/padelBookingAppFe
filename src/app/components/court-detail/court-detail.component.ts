@@ -26,8 +26,8 @@ export class CourtDetailComponent implements OnInit {
   // date/state
   selectedDate: Date = new Date();
   days: Date[] = [];
-  slotsForDay: { start: string; end: string; available: boolean }[] = [];
-  selectedSlot?: { start: string; end: string };
+  slotsForDay: { start: string; end: string; available: boolean; price: number }[] = [];
+  selectedSlot?: { start: string; end: string; price: number };
 
   // location/map state
   clubLocation?: { address: string; lat: number; lng: number };
@@ -98,8 +98,38 @@ export class CourtDetailComponent implements OnInit {
   onSelectDay(d: Date) {
     this.selectedDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     console.log('[CourtDetail] onSelectDay called', { oldDate: this.selectedDate, newDate: d, dateKey: this.dateKey(this.selectedDate) });
+    
+    // Ensure selected date is in days array
+    this.ensureDateInDaysArray(this.selectedDate);
+    
     this.selectedSlot = undefined; // Clear selected slot when changing date
     this.loadSlotsForSelectedDate();
+    
+    // Scroll selected day into view
+    setTimeout(() => this.scrollToSelectedDay(), 150);
+  }
+
+  private ensureDateInDaysArray(date: Date) {
+    const dateKey = this.dateKey(date);
+    const exists = this.days.some(d => this.dateKey(d) === dateKey);
+    
+    if (!exists) {
+      console.log('[CourtDetail] Adding date to days array', { dateKey, date });
+      // Add the date and regenerate a 7-day window around it
+      const today = new Date();
+      const selectedDay = new Date(date);
+      const diffDays = Math.floor((selectedDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Generate days array starting from the selected date or today (whichever is earlier)
+      const startDay = diffDays < 0 ? diffDays : 0;
+      const endDay = Math.max(6, diffDays + 3); // Show at least 7 days, or selected date + 3 days
+      
+      this.days = Array.from({ length: endDay - startDay + 1 }, (_, i) => this.addDays(today, startDay + i));
+      console.log('[CourtDetail] Updated days array', { startDay, endDay, count: this.days.length });
+      
+      // Force Angular to detect changes and re-render
+      this.cdr.detectChanges();
+    }
   }
 
   onDateInputChange(evt: Event) {
@@ -135,7 +165,8 @@ export class CourtDetailComponent implements OnInit {
         this.slotsForDay = items.map(s => ({
           start: (s.startTime || '').substring(11, 16),
           end: (s.endTime || '').substring(11, 16),
-          available: !!s.available
+          available: !!s.available,
+          price: s.price || 0
         }));
         console.log('[CourtDetail] slotsForDay mapped', { count: this.slotsForDay.length, slots: this.slotsForDay });
         this.cdr.detectChanges();
@@ -148,9 +179,54 @@ export class CourtDetailComponent implements OnInit {
     });
   }
 
-  onPickSlot(slot: { start: string; end: string; available?: boolean }) {
+  onPickSlot(slot: { start: string; end: string; available?: boolean; price?: number }) {
     if (slot.available === false) return;
-    this.selectedSlot = { start: slot.start, end: slot.end };
+    this.selectedSlot = { start: slot.start, end: slot.end, price: slot.price || 0 };
+  }
+
+  onBookNow() {
+    if (!this.selectedSlot) return;
+    // TODO: Implement booking logic
+    console.log('Booking:', {
+      courtId: this.courtId,
+      date: this.dateKey(this.selectedDate),
+      timeSlot: this.selectedSlot,
+      court: this.court?.name
+    });
+  }
+
+  private scrollToSelectedDay() {
+    if (!this.isBrowser) {
+      console.log('[CourtDetail] scrollToSelectedDay - not browser, skipping');
+      return;
+    }
+    
+    const selectedDateKey = this.dateKey(this.selectedDate);
+    console.log('[CourtDetail] scrollToSelectedDay', { 
+      selectedDateKey, 
+      selectedDate: this.selectedDate,
+      daysCount: this.days.length 
+    });
+    
+    const selectedButton = document.querySelector(`[data-date-key="${selectedDateKey}"]`) as HTMLElement;
+    console.log('[CourtDetail] scrollToSelectedDay - found button', { 
+      selectedButton,
+      selector: `[data-date-key="${selectedDateKey}"]`
+    });
+    
+    if (selectedButton) {
+      selectedButton.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+      console.log('[CourtDetail] scrollToSelectedDay - scrolled to button');
+    } else {
+      console.warn('[CourtDetail] scrollToSelectedDay - button not found!');
+      // Debug: log all available date keys
+      const allButtons = document.querySelectorAll('.detail-day-btn');
+      console.log('[CourtDetail] Available day buttons:', Array.from(allButtons).map(b => b.getAttribute('data-date-key')));
+    }
   }
 
   logout() {

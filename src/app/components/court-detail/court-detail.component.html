@@ -44,6 +44,7 @@
             *ngFor="let d of days"
             (click)="onSelectDay(d)"
             [class.detail-day-btn--active]="dateKey(d) === dateKey(selectedDate)"
+            [attr.data-date-key]="dateKey(d)"
             class="detail-day-btn"
           >
             <div class="detail-day-weekday">{{ formatWeekday(d) }}</div>
@@ -170,7 +171,14 @@
             <span class="detail-summary-label">Time slot</span>
             <span class="detail-summary-value">{{ selectedSlot ? (selectedSlot.start + '–' + selectedSlot.end) : '—' }}</span>
           </div>
+          <div class="detail-summary-row" *ngIf="selectedSlot && selectedSlot.price > 0">
+            <span class="detail-summary-label">Price</span>
+            <span class="detail-summary-value">${{ selectedSlot.price }}</span>
+          </div>
         </div>
+        <button class="book-now-btn" [disabled]="!selectedSlot" (click)="onBookNow()">
+          Book Now
+        </button>
       </div>
     </aside>
       </main>
