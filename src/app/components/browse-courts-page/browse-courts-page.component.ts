@@ -1,12 +1,13 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router } from '@angular/router';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { AuthService } from '../../services/auth.service';
 import { PublicService } from '../../services/public.service';
 import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse } from '../../models/court.models';
+import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 
 type SportFilter =
   | 'all'
@@ -40,7 +41,7 @@ interface CourtItem {
 @Component({
   selector: 'app-browse-courts-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CourtListingCardComponent, RouterLink, RouterLinkActive],
+  imports: [CommonModule, FormsModule, CourtListingCardComponent, AppHeaderComponent],
   templateUrl: './browse-courts-page.component.html',
   styleUrl: './browse-courts-page.component.scss'
 })
@@ -229,6 +230,10 @@ export class BrowseCourtsPageComponent implements OnInit {
       if (times.length === 3) break;
     }
     return times;
+  }
+
+  goToDetail(courtId: number) {
+    this.router.navigate(['/user/court', courtId]);
   }
 
   private loadAvailabilityFor(index: number, courtId: number) {

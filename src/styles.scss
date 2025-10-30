@@ -1,6 +1,11 @@
 
 @import 'primeicons/primeicons.css';
 
+/* Global box-sizing and responsive media to avoid overflow */
+html { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: inherit; }
+
+img, video { max-width: 100%; height: auto; }
 
 html, body {
   margin: 0;
