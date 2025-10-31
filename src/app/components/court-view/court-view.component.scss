@@ -26,7 +26,7 @@
 
 .court-panel { border: 1px solid rgba(255,255,255,0.25); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,0.08); }
 
-.court-panel .hero { position: relative; height: 180px; }
+.court-panel .hero { position: relative; height: 180px; background: linear-gradient(135deg, rgba(167, 238, 67, 0.1), rgba(96, 165, 250, 0.1)); }
 .court-panel .hero .img { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.7; }
 .court-panel .hero .hero-gradient { position: absolute; inset: 0; background: linear-gradient(90deg, #0f1b26, transparent); }
 .court-panel .hero .badge { position: absolute; top: 12px; left: 12px; z-index: 2; }
@@ -56,10 +56,61 @@
 
 .calendar { padding: 12px; }
 .calendar .label { color: #d6dde6; font-size: 12px; font-weight: 800; margin-bottom: 8px; }
-.calendar .scroll { display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none; }
+.calendar .scroll { 
+  display: flex; 
+  gap: 12px; 
+  overflow-x: auto; 
+  overflow-y: hidden; 
+  padding-bottom: 8px; 
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+}
 .calendar .scroll::-webkit-scrollbar { display: none; }
 
-.day { min-width: 160px; background: rgba(255,255,255,0.05); border: 1px solid rgba(214,221,230,0.15); border-radius: 12px; padding: 10px; }
+.day { 
+  min-width: 160px; 
+  flex: 1 1 160px; /* Allow days to grow and fill space on wide screens */
+  background: rgba(255,255,255,0.05); 
+  border: 1px solid rgba(214,221,230,0.15); 
+  border-radius: 12px; 
+  padding: 10px; 
+}
+
+/* Mobile calendar - 2 days per row with equal height */
+@media (max-width: 767px) {
+  .calendar .scroll {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* 2 equal columns */
+    grid-auto-rows: 1fr !important; /* Force equal row heights */
+    gap: 12px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    padding-bottom: 0 !important;
+  }
+
+  .day {
+    min-width: unset !important;
+    flex: unset !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important; /* Ensure full height of grid cell */
+  }
+
+  .slots {
+    flex: 1 !important; /* Expand to fill available space */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important; /* Center content vertically */
+  }
+
+  .empty {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
 .day-title { color: #d6dde6; font-weight: 800; font-size: 12px; }
 .slots { margin-top: 8px; display: grid; gap: 8px; place-items: center; }
 .empty { color: #6b7a8b; text-align: center; font-size: 12px; padding: 10px 0; }

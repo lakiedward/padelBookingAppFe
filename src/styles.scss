@@ -161,6 +161,7 @@ html, body {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-clamp: 2;
 }
 
 /* Month cells remain single line with ellipsis */

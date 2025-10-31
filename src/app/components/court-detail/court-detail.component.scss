@@ -442,11 +442,12 @@ $white: #fff;
 
 // Summary
 .detail-summary {
+  min-width: 0; // allow grid child to shrink to viewport
+  
   @media (min-width: 1024px) {
     position: sticky;
     top: 88px;
   }
-  min-width: 0; // allow grid child to shrink to viewport
 }
 
 .detail-summary-card {

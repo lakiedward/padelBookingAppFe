@@ -98,6 +98,29 @@
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(214, 221, 230, 0.15);
 
+  .hamburger-btn {
+    display: none; /* Hidden on desktop */
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid rgba(214, 221, 230, 0.25);
+    border-radius: 10px;
+    color: #d6dde6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(214, 221, 230, 0.4);
+    }
+  }
+
   .page .name { color: #d6dde6; font-weight: 700; font-size: 20px; }
   .page .desc { color: #6b7a8b; font-size: 12px; }
   .spacer { flex: 1; }
@@ -183,4 +206,138 @@
   border-radius: 20px;
   padding: 24px; /* more inner margin */
   box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.3);
+}
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 998;
+  backdrop-filter: blur(4px);
+}
+
+/* Mobile responsive styles */
+@media (max-width: 767px) {
+  .admin-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 64px 1fr;
+    grid-template-areas:
+      'topbar'
+      'content';
+  }
+
+  .sidebar {
+    /* Remove from grid and convert to fixed drawer */
+    grid-area: unset !important;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: min(75vw, 300px); /* 75% of screen width, max 300px */
+    height: 100vh;
+    z-index: 1000 !important; /* Must be above overlay (998) */
+    transition: transform 0.3s ease;
+    transform: translateX(-100%); /* Hidden by default */
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+    overflow-y: auto; /* Allow scrolling if content is too tall */
+    padding: 16px 12px;
+
+    &.mobile-open {
+      transform: translateX(0); /* Visible when open */
+    }
+
+    .brand {
+      padding: 4px;
+
+      .logo {
+        font-size: 24px;
+      }
+
+      .name {
+        font-size: 13px;
+      }
+
+      .desc {
+        font-size: 11px;
+      }
+    }
+
+    .menu button {
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+  }
+
+  .topbar {
+    padding: 12px 16px;
+
+    .hamburger-btn {
+      display: flex; /* Show hamburger on mobile */
+    }
+
+    .page .name {
+      font-size: 16px;
+    }
+
+    .page .desc {
+      display: none; /* Hide description on very small screens */
+    }
+
+    .admin-chip {
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    .logout-btn {
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .content-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .modal-content {
+    width: 94vw;
+    padding: 16px;
+  }
+}
+
+/* Tablet responsive styles */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .admin-container {
+    grid-template-columns: 240px 1fr;
+  }
+
+  .sidebar {
+    padding: 16px 12px;
+
+    .brand {
+      padding: 4px 4px 12px 4px;
+
+      .brand-icon {
+        width: 36px;
+        height: 36px;
+      }
+
+      .logo {
+        font-size: 24px;
+      }
+    }
+
+    .menu button {
+      padding: 12px 14px;
+      font-size: 14px;
+    }
+  }
+
+  .content {
+    padding: 24px;
+  }
 }

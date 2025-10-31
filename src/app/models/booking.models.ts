@@ -25,6 +25,23 @@ export interface BookingSummaryResponse {
   createdAt: string; // ISO DateTime string
 }
 
+export interface AdminBookingResponse {
+  id: number;
+  timeSlotId: number;
+  courtId: number;
+  courtName: string;
+  activityName: string;
+  startTime: string; // ISO DateTime string
+  endTime: string;   // ISO DateTime string
+  price: number;
+  createdAt: string; // ISO DateTime string
+  userId: number;
+  username: string;
+  userEmail: string;
+  userPhone: string;
+  paymentType: string; // e.g., 'Card', 'Cash', 'Online'
+}
+
 export interface CreateBookingRequest {
   timeSlotId: number;
 }

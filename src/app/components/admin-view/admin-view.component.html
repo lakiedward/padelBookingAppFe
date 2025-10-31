@@ -1,5 +1,6 @@
 <div class="admin-container page-gradient-bg">
-  <aside class="sidebar">
+  <!-- Sidebar must come before overlay to ensure proper z-index stacking -->
+  <aside class="sidebar" [class.mobile-open]="mobileMenuOpen">
     <div class="brand">
       <div class="brand-text">
         <div class="logo">PLAYORA</div>
@@ -15,7 +16,10 @@
         <span>Club Management</span>
       </button>
       <button (click)="select('courts')" [class.active]="selectedMenu === 'courts'">
-        <span>Courts</span>
+        <span>Manage Courts</span>
+      </button>
+      <button (click)="select('manage-booking')" [class.active]="selectedMenu === 'manage-booking'">
+        <span>Manage Booking</span>
       </button>
       <button (click)="select('events')" [class.active]="selectedMenu === 'events'">
         <span>Events</span>
@@ -23,12 +27,26 @@
     </nav>
   </aside>
 
+  <!-- Mobile menu overlay (placed after sidebar for correct z-index stacking) -->
+  <div class="mobile-menu-overlay" *ngIf="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
+
   <header class="topbar">
+    <!-- Hamburger button (mobile only) -->
+    <button class="hamburger-btn" (click)="toggleMobileMenu()" aria-label="Toggle menu">
+      <svg *ngIf="!mobileMenuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 6H20M4 12H20M4 18H20" />
+      </svg>
+      <svg *ngIf="mobileMenuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M6 6L18 18M6 18L18 6" />
+      </svg>
+    </button>
+    
     <div class="page">
       <div class="name">
         {{
           selectedMenu === 'club-management' ? 'Club Management' :
-          selectedMenu === 'courts' ? 'Courts' :
+          selectedMenu === 'courts' ? 'Manage Courts' :
+          selectedMenu === 'manage-booking' ? 'Manage Booking' :
           'Events'
         }}
       </div>
@@ -36,6 +54,7 @@
         {{
           selectedMenu === 'club-management' ? 'Manage club profile and branding' :
           selectedMenu === 'courts' ? 'Configure courts and booking schedule' :
+          selectedMenu === 'manage-booking' ? 'View and manage all court bookings' :
           'Create and manage club events'
         }}
       </div>
@@ -54,10 +73,13 @@
       <app-club-details (courtsRequested)="onCourtsRequestedFromChild()"></app-club-details>
     </section>
     <section class="content-card" *ngIf="selectedMenu === 'courts'">
-      <app-court-view 
+      <app-court-view
         (addCourt)="onAddCourtFromView()"
         (editCourt)="onEditCourtFromView($event)">
       </app-court-view>
+    </section>
+    <section class="content-card" *ngIf="selectedMenu === 'manage-booking'">
+      <app-manage-booking></app-manage-booking>
     </section>
     <section class="content-card empty" *ngIf="selectedMenu === 'events'">
       <p>Events — coming soon</p>

@@ -90,10 +90,13 @@ export class CourtViewComponent implements OnInit {
         forkJoin(detailRequests).subscribe({
           next: (detailedCourts) => {
             console.log('[CourtView] Court details loaded:', detailedCourts);
-            this.courts = detailedCourts.map(c => this.mapCourtToPanel(c));
-            for (const court of this.courts) {
-              this.populatePricesForCourt(court);
-            }
+            this.courts = detailedCourts.map(c => {
+              const panel = this.mapCourtToPanel(c);
+              console.log(`[CourtView] Court "${panel.title}" - Image URL:`, panel.imageUrl);
+              return panel;
+            });
+            // Prices are already available from availabilityRules in court details
+            // No need to fetch time slots separately
             this.isLoading = false;
             console.log('[CourtView] Courts array length:', this.courts.length);
             this.cdr.detectChanges();
@@ -140,9 +143,22 @@ export class CourtViewComponent implements OnInit {
   }
 
   private mapCourtToPanel(court: CourtResponse): CourtPanelData {
-    // TODO: Load photos properly through HttpClient with Authorization
-    // For now, don't load images to avoid 403 errors
-    const imageUrl = null;
+    // Load primary photo or first available photo from backend
+    let imageUrl: string | null = null;
+    
+    if (court.photos && court.photos.length > 0) {
+      // Priority 1: Find primary photo
+      const primaryPhoto = court.photos.find(p => p.isPrimary);
+      if (primaryPhoto && primaryPhoto.url) {
+        imageUrl = this.courtService.toAbsoluteUrl(primaryPhoto.url);
+      } else {
+        // Priority 2: Use first photo
+        const firstPhoto = court.photos[0];
+        if (firstPhoto && firstPhoto.url) {
+          imageUrl = this.courtService.toAbsoluteUrl(firstPhoto.url);
+        }
+      }
+    }
 
     // Build subtitle from tags
     const tags = Array.isArray(court.tags) ? court.tags : [];
@@ -172,18 +188,34 @@ export class CourtViewComponent implements OnInit {
   }
 
   private build7DayCalendar(rules: CourtAvailabilityRuleResponse[]): DaySchedule[] {
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const today = new Date();
     const schedules: DaySchedule[] = [];
     
+    // Find Monday of current week
+    const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    let mondayOffset = 0;
+    
+    if (currentDay === 0) {
+      // If today is Sunday, Monday was 6 days ago
+      mondayOffset = -6;
+    } else {
+      // Otherwise, Monday was (currentDay - 1) days ago
+      mondayOffset = -(currentDay - 1);
+    }
+    
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset);
+    
+    // Generate 7 days starting from Monday
     for (let i = 0; i < 7; i++) {
-      const currentDate = new Date(today);
-      currentDate.setDate(today.getDate() + i);
-      const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const label = `${dayNames[dayOfWeek]} ${String(currentDate.getDate()).padStart(2, '0')}`;
+      const currentDate = new Date(monday);
+      currentDate.setDate(monday.getDate() + i);
+      const label = `${dayNames[i]} ${String(currentDate.getDate()).padStart(2, '0')}`;
       const dateStr = this.formatDate(currentDate);
       
       // Find applicable rules for this day
+      const dayOfWeek = (i + 1) % 7; // Monday=1, Tuesday=2, ..., Sunday=0
       const applicableRules = this.getApplicableRules(rules, currentDate, dayOfWeek);
       
       // Generate time slots from rules
@@ -256,7 +288,10 @@ export class CourtViewComponent implements OnInit {
 
   trackByIndex(index: number) { return index; }
 
-  // ===== Populate real prices from backend time slots =====
+  // ===== DEPRECATED: Prices now come from availabilityRules in court details =====
+  // This method is no longer needed since CourtResponse includes availabilityRules with prices
+  // Keeping for reference in case we need to fetch actual booked time slots in the future
+  /*
   private populatePricesForCourt(court: CourtPanelData) {
     if (!court.schedules || court.schedules.length === 0) return;
 
@@ -265,8 +300,11 @@ export class CourtViewComponent implements OnInit {
     const startISO = `${startDateStr}T00:00:00`;
     const endISO = `${endDateStr}T23:59:59`;
 
+    console.log(`[CourtView] Fetching time slots for court ${court.id}:`, { startISO, endISO });
+
     this.courtService.getTimeSlotsByRange(court.id, startISO, endISO, true).subscribe({
       next: (tslots) => {
+        console.log(`[CourtView] Time slots received for court ${court.id}:`, tslots);
         const byDay = new Map<string, { hhmm: string; price: number }[]>();
         for (const t of tslots) {
           const dayKey = t.startTime.substring(0, 10);
@@ -298,10 +336,18 @@ export class CourtViewComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.warn('[CourtView] Failed to fetch timeslot prices:', err);
+        console.error(`[CourtView] Failed to fetch timeslot prices for court ${court.id}:`, err);
+        console.error('[CourtView] Error details:', {
+          status: err.status,
+          statusText: err.statusText,
+          message: err.message,
+          error: err.error
+        });
+        // Continue without prices - don't block the UI
       }
     });
   }
+  */
 
   private hhmmToMinutes(hhmm: string): number {
     const [h, m] = hhmm.split(':').map(Number);

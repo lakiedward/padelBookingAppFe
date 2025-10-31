@@ -67,6 +67,26 @@ export class BookingService {
   }
 
   /**
+   * ADMIN: Get all bookings (requires ROLE_ADMIN)
+   */
+  getAllBookings(): Observable<BookingSummaryResponse[]> {
+    return this.http.get<BookingSummaryResponse[]>(
+      `${this.apiBase}/api/admin/bookings`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * ADMIN: Get bookings for a specific court (requires ROLE_ADMIN)
+   */
+  getBookingsByCourtId(courtId: number): Observable<BookingSummaryResponse[]> {
+    return this.http.get<BookingSummaryResponse[]>(
+      `${this.apiBase}/api/admin/bookings/court/${courtId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
    * Helper to get authorization headers with JWT token
    */
   private getAuthHeaders(): HttpHeaders {

@@ -3,16 +3,17 @@ import { CommonModule } from '@angular/common';
 import { ClubDetailsComponent } from '../club-details/club-details.component';
 import { CourtViewComponent } from '../court-view/court-view.component';
 import { CreateCourtComponent } from '../create-court/create-court.component';
+import { ManageBookingComponent } from '../manage-booking/manage-booking.component';
 import { Router } from '@angular/router';
 import { ClubService } from '../../services/club.service';
 import { AuthService } from '../../services/auth.service';
 
-type AdminMenuKey = 'club-management' | 'courts' | 'events';
+type AdminMenuKey = 'club-management' | 'courts' | 'events' | 'manage-booking';
 
 @Component({
   selector: 'app-admin-view',
   standalone: true,
-  imports: [CommonModule, ClubDetailsComponent, CourtViewComponent, CreateCourtComponent],
+  imports: [CommonModule, ClubDetailsComponent, CourtViewComponent, CreateCourtComponent, ManageBookingComponent],
   templateUrl: './admin-view.component.html',
   styleUrl: './admin-view.component.scss'
 })
@@ -21,6 +22,7 @@ export class AdminViewComponent implements AfterViewInit {
   courtsMode: 'view' | 'create' = 'view';
   showCreateCourtModal = false;
   editingCourtId?: number;
+  mobileMenuOpen = false;
 
   @ViewChild(CourtViewComponent) courtViewComponent?: CourtViewComponent;
 
@@ -39,8 +41,14 @@ export class AdminViewComponent implements AfterViewInit {
   select(menu: AdminMenuKey) {
     console.log('[AdminView] select() called with menu:', menu);
     this.selectedMenu = menu;
+    this.mobileMenuOpen = false; // Close mobile menu after selection
     
     // No need to manually trigger loadCourts; CourtView loads itself on insertion
+  }
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+    console.log('[AdminView] toggleMobileMenu - mobileMenuOpen:', this.mobileMenuOpen);
   }
 
   onCourtsRequestedFromChild() {

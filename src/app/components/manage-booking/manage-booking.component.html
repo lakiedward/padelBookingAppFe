@@ -1,0 +1,220 @@
+<div class="manage-booking-container">
+  <!-- Court Selection Dropdown -->
+  <div class="court-selector">
+    <label class="court-selector__label">Select Court</label>
+    <p-select
+      [options]="courts()"
+      [ngModel]="selectedCourtId()"
+      (onChange)="onCourtChange($event)"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Choose a court..."
+      [style]="{'width': '100%', 'min-width': '250px'}"
+      styleClass="custom-dropdown"
+    />
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading bookings...</p>
+  </div>
+
+  <!-- Calendar Panel -->
+  <section *ngIf="!isLoading() && selectedCourtId()" class="calendar-panel">
+    <div class="toolbar">
+      <div class="toolbar__left">
+        <button class="btn" (click)="goPrev()">Prev</button>
+        <button class="btn" (click)="goToday()">Today</button>
+        <button class="btn" (click)="goNext()">Next</button>
+      </div>
+      <div class="toolbar__right">
+        <button class="pill" [class.pill--active]="viewMode() === 'month'" (click)="setView('month')">Month</button>
+        <button class="pill" [class.pill--active]="viewMode() === 'week'" (click)="setView('week')">Week</button>
+        <button class="pill" [class.pill--active]="viewMode() === 'day'" (click)="setView('day')">Day</button>
+      </div>
+    </div>
+
+    <div class="headline">{{ headline() }}</div>
+
+    <!-- Month view -->
+    <ng-container *ngIf="viewMode() === 'month'; else nonMonth">
+      <!-- Desktop: Classic calendar grid -->
+      <div class="desktop-calendar">
+        <div class="weekdays">
+          <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+        </div>
+        <div class="month-grid">
+          <div class="cal-day cal--month" *ngFor="let c of monthMatrix(); let i = index"
+               [class.cal-day--faded]="!c.inCurrent" [class.cal-day--today]="isToday(c.date)" (click)="onDayClick(c.date)">
+            <div class="cal-day__header">
+              <div class="cal-day__title">{{ weekdayShort(c.date) }}</div>
+              <ng-container [ngSwitch]="bookingsByDay(c.date).length">
+                <span *ngSwitchCase="0"></span>
+                <span *ngSwitchDefault class="cal-day__badge">{{ bookingsByDay(c.date).length }}</span>
+              </ng-container>
+            </div>
+            <div class="cal-day__content">
+              <div class="cal-day__num">{{ c.date.getDate() }}</div>
+              <div class="cal-day__body">
+                <div class="cal-event" *ngFor="let b of (bookingsByDay(c.date) | slice:0:3)" (click)="openBooking(b); $event.stopPropagation()">
+                  <span class="cal-event__icon">{{ b.sport }}</span>
+                  <span class="cal-event__text" [title]="b.username || 'User'">{{ b.username || 'User' }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="cal-day__footer" *ngIf="bookingsByDay(c.date).length > 3">+{{ bookingsByDay(c.date).length - 3 }} more</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile: Weeks layout -->
+      <div class="mobile-calendar">
+        <div class="weeks-container">
+          <div class="week-section" *ngFor="let week of getWeeksInMonth(); let weekIndex = index">
+            <div class="week-header">
+              <h3 class="week-title">Week {{ weekIndex + 1 }}</h3>
+              <span class="week-dates">{{ formatWeekRange(week) }}</span>
+            </div>
+            <div class="week-grid">
+              <div class="cal-day cal--month" *ngFor="let day of week"
+                   [class.cal-day--faded]="!day.inCurrent" [class.cal-day--today]="isToday(day.date)" (click)="onDayClick(day.date)">
+                <div class="cal-day__header">
+                  <div class="cal-day__title">{{ weekdayShort(day.date) }}</div>
+                  <ng-container [ngSwitch]="bookingsByDay(day.date).length">
+                    <span *ngSwitchCase="0"></span>
+                    <span *ngSwitchDefault class="cal-day__badge">{{ bookingsByDay(day.date).length }}</span>
+                  </ng-container>
+                </div>
+                <div class="cal-day__content">
+                  <div class="cal-day__num">{{ day.date.getDate() }}</div>
+                  <div class="cal-day__body">
+                    <div class="cal-event" *ngFor="let b of (bookingsByDay(day.date) | slice:0:1)" (click)="openBooking(b); $event.stopPropagation()">
+                      <span class="cal-event__icon">{{ b.sport }}</span>
+                      <span class="cal-event__text" [title]="b.username || 'User'">{{ b.username || 'User' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="cal-day__footer" *ngIf="bookingsByDay(day.date).length > 1">+{{ bookingsByDay(day.date).length - 1 }} more</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Week/Day views -->
+    <ng-template #nonMonth>
+      <div *ngIf="viewMode() === 'week'; else dayView">
+        <div class="week-head">
+          <div *ngFor="let d of weekDays()" class="week-head__cell" [class.week-head__cell--today]="isToday(d)">{{ weekdayShort(d) }} {{ d.getDate() }}</div>
+        </div>
+        <div class="week-cols">
+          <div class="week-col" *ngFor="let d of weekDays()" [class.week-col--today]="isToday(d)">
+            <div class="week-col__label">{{ weekdayShort(d) }} {{ d.getDate() }}</div>
+            <!-- Desktop: month-like day box inside week view -->
+            <div class="cal-day cal--week" [class.cal-day--today]="isToday(d)">
+              <div class="cal-day__header">
+                <div class="cal-day__title">{{ weekdayShort(d) }}</div>
+                <ng-container [ngSwitch]="bookingsByDay(d).length">
+                  <span *ngSwitchCase="0"></span>
+                  <span *ngSwitchDefault class="cal-day__badge">{{ bookingsByDay(d).length }}</span>
+                </ng-container>
+              </div>
+              <div class="cal-day__content">
+                <div class="cal-day__num">{{ d.getDate() }}</div>
+                <div class="cal-day__body">
+                  <!-- Detailed booking cards inside calendar cells -->
+                  <div class="booking-card booking-card--compact" *ngFor="let b of bookingsByDay(d)" (click)="openBooking(b)">
+                    <div class="booking-card__compact-header">
+                      <div class="booking-card__sport booking-card__sport--small">{{ b.sport }}</div>
+                      <div class="booking-card__time booking-card__time--small">{{ b.start | time24 }} – {{ b.end | time24 }}</div>
+                    </div>
+                    <div class="booking-card__compact-body">
+                      <div class="booking-card__compact-row">
+                        <span class="booking-card__label">User:</span>
+                        <span class="booking-card__value">{{ b.username }}</span>
+                      </div>
+                      <div class="booking-card__compact-row">
+                        <span class="booking-card__label">Price:</span>
+                        <span class="booking-card__value booking-card__price--small">€{{ b.price }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #dayView>
+        <div class="day-list">
+          <div class="empty" *ngIf="bookingsByDay(anchor()).length === 0">No bookings for this day</div>
+          <div class="day-grid">
+            <div class="booking-card booking-card--day" *ngFor="let b of bookingsByDay(anchor())" (click)="openBooking(b)">
+              <div class="booking-card__header">
+                <div class="booking-card__sport">{{ b.sport }}</div>
+                <div class="booking-card__time">{{ b.start | time24 }} – {{ b.end | time24 }}</div>
+              </div>
+              <div class="booking-card__body">
+                <div class="booking-card__row">
+                  <span class="booking-card__label">Court:</span>
+                  <span class="booking-card__value">{{ b.court }}</span>
+                </div>
+                <div class="booking-card__row">
+                  <span class="booking-card__label">User:</span>
+                  <span class="booking-card__value">{{ b.username }}</span>
+                </div>
+                <div class="booking-card__row">
+                  <span class="booking-card__label">Email:</span>
+                  <span class="booking-card__value">{{ b.userEmail }}</span>
+                </div>
+                <div class="booking-card__row">
+                  <span class="booking-card__label">Phone:</span>
+                  <span class="booking-card__value">{{ b.userPhone }}</span>
+                </div>
+                <div class="booking-card__row">
+                  <span class="booking-card__label">Payment:</span>
+                  <span class="booking-card__value booking-card__payment">{{ b.paymentType }}</span>
+                </div>
+                <div class="booking-card__row">
+                  <span class="booking-card__label">Price:</span>
+                  <span class="booking-card__value booking-card__price">€{{ b.price }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </ng-template>
+  </section>
+
+  <!-- Empty state when no court selected -->
+  <div *ngIf="!isLoading() && !selectedCourtId()" class="empty-state">
+    <p>Please select a court to view bookings</p>
+  </div>
+
+  <!-- Booking details modal -->
+  <div class="modal-container" *ngIf="showBookingModal()">
+    <div class="modal-overlay" (click)="closeBooking()"></div>
+    <div class="modal-content" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Booking Details">
+      <div class="booking-modal">
+        <div class="booking-modal__header">
+          <div class="booking-modal__title">Booking Details</div>
+          <button class="btn" (click)="closeBooking()">Close</button>
+        </div>
+        <div class="booking-modal__body" *ngIf="selectedBooking() as sb">
+          <div class="booking-modal__row"><span class="label">Date</span><span class="value">{{ formatDateKeyToLong(sb.date) }}</span></div>
+          <div class="booking-modal__row"><span class="label">Time</span><span class="value">{{ sb.start | time24 }} – {{ sb.end | time24 }}</span></div>
+          <div class="booking-modal__row"><span class="label">Court</span><span class="value">{{ sb.court }}</span></div>
+          <div class="booking-modal__row"><span class="label">User</span><span class="value">{{ sb.username }}</span></div>
+          <div class="booking-modal__row"><span class="label">Email</span><span class="value">{{ sb.userEmail }}</span></div>
+          <div class="booking-modal__row"><span class="label">Phone</span><span class="value">{{ sb.userPhone }}</span></div>
+          <div class="booking-modal__row"><span class="label">Payment</span><span class="value tag">{{ sb.paymentType }}</span></div>
+          <div class="booking-modal__row"><span class="label">Price</span><span class="value price">€{{ sb.price }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
