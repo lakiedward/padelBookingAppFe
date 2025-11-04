@@ -229,6 +229,12 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
     } else {
       (this.ruleForm.get('date') as FormControl<string>).setValue('');
     }
+    
+    // Reset time fields to defaults for next rule
+    const defaultStart = this.createTimeDate(12, 0);
+    const defaultEnd = this.createTimeDate(16, 0);
+    (this.ruleForm.get('startTime') as FormControl<Date>).setValue(defaultStart);
+    (this.ruleForm.get('endTime') as FormControl<Date>).setValue(defaultEnd);
   }
 
   removeRule(index: number) {
@@ -337,7 +343,16 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.isLoading = false;
         console.error('Failed to save court:', err);
-        this.saveError = err.error?.error || err.message || 'Failed to save court';
+        
+        // Check if error is about sport not configured
+        const errorMsg = err.error?.error || err.message || 'Failed to save court';
+        if (errorMsg.includes('not configured for this club')) {
+          const sport = this.form.get('sport')?.value;
+          const sportName = sport ? sport.charAt(0).toUpperCase() + sport.slice(1) : 'This sport';
+          this.saveError = `${sportName} is not configured for your club. Go to Club Management → add ${sport || 'this sport'} to your club's sports list.`;
+        } else {
+          this.saveError = errorMsg;
+        }
       }
     });
   }

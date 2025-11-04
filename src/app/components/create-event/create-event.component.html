@@ -1,0 +1,270 @@
+<div class="create-event-wrap">
+  <div class="modal-header">
+    <h2>{{ modalTitle }}</h2>
+    <button type="button" class="btn-close" (click)="onCancel()" [disabled]="isLoading">×</button>
+  </div>
+
+  <div class="modal-body">
+    <div class="error-banner" *ngIf="saveError">{{ saveError }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="onSave()">
+      <!-- Basic Information -->
+      <section class="form-section">
+        <h3 class="section-title">Basic Information</h3>
+
+        <div class="form-group">
+          <label for="name">Event Name *</label>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            class="form-control"
+            placeholder="e.g., Summer Tennis Championship"
+            [class.invalid]="form.get('name')?.invalid && form.get('name')?.touched">
+          <div class="error-message" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+            Event name is required (2-200 characters)
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="form-control"
+            rows="3"
+            placeholder="Describe your event..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="eventType">Event Type *</label>
+            <p-select
+              inputId="eventType"
+              formControlName="eventType"
+              [options]="eventTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select type"
+              styleClass="w-full"
+              [class.invalid]="form.get('eventType')?.invalid && form.get('eventType')?.touched">
+            </p-select>
+          </div>
+
+          <div class="form-group" *ngIf="isEditMode">
+            <label for="status">Status *</label>
+            <p-select
+              inputId="status"
+              formControlName="status"
+              [options]="statusOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select status"
+              styleClass="w-full">
+            </p-select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sport & Format -->
+      <section class="form-section">
+        <h3 class="section-title">Sport & Format</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sport">Sport *</label>
+            <p-select
+              inputId="sport"
+              formControlName="sport"
+              [options]="sportOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select sport"
+              styleClass="w-full"
+              [class.invalid]="form.get('sport')?.invalid && form.get('sport')?.touched">
+            </p-select>
+            <div class="error-message" *ngIf="form.get('sport')?.invalid && form.get('sport')?.touched">
+              Sport is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="format">Format *</label>
+            <p-select
+              inputId="format"
+              formControlName="format"
+              [options]="formatOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select format"
+              [disabled]="!form.get('sport')?.value || formatOptions.length === 0"
+              styleClass="w-full"
+              [class.invalid]="form.get('format')?.invalid && form.get('format')?.touched">
+            </p-select>
+            <div class="help-text" *ngIf="!form.get('sport')?.value">
+              Select a sport first
+            </div>
+            <div class="error-message" *ngIf="form.get('format')?.invalid && form.get('format')?.touched">
+              Format is required
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dates -->
+      <section class="form-section">
+        <h3 class="section-title">Dates</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startDate">Start Date *</label>
+            <p-datepicker
+              inputId="startDate"
+              formControlName="startDate"
+              dateFormat="dd M yy"
+              placeholder="Select start date"
+              [showIcon]="true"
+              styleClass="w-full"
+              [class.invalid]="form.get('startDate')?.invalid && form.get('startDate')?.touched">
+            </p-datepicker>
+            <div class="error-message" *ngIf="form.get('startDate')?.invalid && form.get('startDate')?.touched">
+              Start date is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date *</label>
+            <p-datepicker
+              inputId="endDate"
+              formControlName="endDate"
+              dateFormat="dd M yy"
+              placeholder="Select end date"
+              [showIcon]="true"
+              styleClass="w-full"
+              [class.invalid]="form.get('endDate')?.invalid && form.get('endDate')?.touched">
+            </p-datepicker>
+            <div class="error-message" *ngIf="form.get('endDate')?.invalid && form.get('endDate')?.touched">
+              End date is required
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="registrationDeadline">Registration Deadline</label>
+          <p-datepicker
+            inputId="registrationDeadline"
+            formControlName="registrationDeadline"
+            dateFormat="dd M yy"
+            placeholder="Optional"
+            [showIcon]="true"
+            styleClass="w-full">
+          </p-datepicker>
+          <div class="help-text">Optional - deadline for players to register</div>
+        </div>
+      </section>
+
+      <!-- Participants & Pricing -->
+      <section class="form-section">
+        <h3 class="section-title">Participants & Pricing</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maxParticipants">Max Participants</label>
+            <input
+              type="number"
+              id="maxParticipants"
+              formControlName="maxParticipants"
+              class="form-control"
+              placeholder="e.g., 16"
+              min="2"
+              max="1000">
+            <div class="help-text">Leave empty for unlimited</div>
+          </div>
+
+          <div class="form-group">
+            <label for="price">Entry Fee (€)</label>
+            <input
+              type="number"
+              id="price"
+              formControlName="price"
+              class="form-control"
+              placeholder="e.g., 25.00"
+              min="0"
+              step="0.01">
+            <div class="help-text">Leave empty for free entry</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Courts Selection -->
+      <section class="form-section">
+        <h3 class="section-title">Courts *</h3>
+        <div class="help-text" style="margin-bottom: 12px;">
+          Select courts that will be used for this event
+          <span *ngIf="!form.get('sport')?.value" style="color: #fbbf24;"> (select a sport first)</span>
+        </div>
+
+        <div class="courts-grid" *ngIf="form.get('sport')?.value && filteredCourtOptions.length > 0">
+          <label
+            *ngFor="let court of filteredCourtOptions"
+            class="court-checkbox"
+            [class.selected]="isCourtSelected(court.value)">
+            <input
+              type="checkbox"
+              [checked]="isCourtSelected(court.value)"
+              (change)="toggleCourtSelection(court.value)">
+            <span class="checkmark"></span>
+            <span class="court-name">{{ court.label }}</span>
+            <span class="court-sport">{{ court.sport }}</span>
+          </label>
+        </div>
+
+        <div class="empty-state" *ngIf="form.get('sport')?.value && filteredCourtOptions.length === 0">
+          <p>No {{ form.get('sport')?.value }} courts available. Please create courts for this sport first.</p>
+        </div>
+
+        <div class="error-message" *ngIf="selectedCourtIds.length === 0 && form.touched">
+          At least one court must be selected
+        </div>
+      </section>
+
+      <!-- Cover Image -->
+      <section class="form-section">
+        <h3 class="section-title">Cover Image</h3>
+
+        <div class="image-upload">
+          <div class="image-preview" *ngIf="coverImagePreview">
+            <img [src]="coverImagePreview" alt="Cover preview">
+            <button type="button" class="btn-remove" (click)="removeCoverImage()">×</button>
+          </div>
+
+          <div class="upload-area" *ngIf="!coverImagePreview">
+            <input
+              type="file"
+              id="coverImage"
+              accept="image/*"
+              (change)="onCoverImageChange($event)"
+              #fileInput>
+            <label for="coverImage" class="upload-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span>Click to upload cover image</span>
+              <span class="help-text">PNG, JPG up to 10MB</span>
+            </label>
+          </div>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="isLoading">Cancel</button>
+    <button type="button" class="btn btn--primary" (click)="onSave()" [disabled]="isLoading">
+      <span *ngIf="!isLoading">{{ isEditMode ? 'Update Event' : 'Create Event' }}</span>
+      <span *ngIf="isLoading">Saving...</span>
+    </button>
+  </div>
+</div>

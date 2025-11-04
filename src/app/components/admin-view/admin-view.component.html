@@ -81,11 +81,15 @@
     <section class="content-card" *ngIf="selectedMenu === 'manage-booking'">
       <app-manage-booking></app-manage-booking>
     </section>
-    <section class="content-card empty" *ngIf="selectedMenu === 'events'">
-      <p>Events — coming soon</p>
+    <section class="content-card" *ngIf="selectedMenu === 'events'">
+      <app-event-view
+        (addEvent)="onAddEventFromView()"
+        (editEvent)="onEditEventFromView($event)">
+      </app-event-view>
     </section>
   </main>
 
+  <!-- Create/Edit Court Modal -->
   <div class="modal-container" *ngIf="showCreateCourtModal">
     <div class="modal-overlay" (click)="onCreateCourtCancel()" aria-hidden="true"></div>
     <div
@@ -95,12 +99,30 @@
       aria-label="Create Court"
       (click)="$event.stopPropagation()"
     >
-      <app-create-court 
-        [sports]="clubService.lastSaved()?.sports || []" 
+      <app-create-court
+        [sports]="getAvailableSports()"
         [courtId]="editingCourtId"
-        (cancel)="onCreateCourtCancel()" 
+        (cancel)="onCreateCourtCancel()"
         (saved)="onCreateCourtSaved($event)">
       </app-create-court>
+    </div>
+  </div>
+
+  <!-- Create/Edit Event Modal -->
+  <div class="modal-container" *ngIf="showCreateEventModal">
+    <div class="modal-overlay" (click)="onCreateEventCancel()" aria-hidden="true"></div>
+    <div
+      class="modal-content"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Create Event"
+      (click)="$event.stopPropagation()"
+    >
+      <app-create-event
+        [eventId]="editingEventId"
+        (cancelled)="onCreateEventCancel()"
+        (saved)="onCreateEventSaved($event)">
+      </app-create-event>
     </div>
   </div>
 </div>

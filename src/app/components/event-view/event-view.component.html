@@ -1,0 +1,114 @@
+<div class="events-wrap">
+  <div class="events-header">
+    <div class="titles">
+      <div class="title">Events</div>
+      <div class="sub">Manage your club events and tournaments</div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn--primary" (click)="onAddEventClick()">Add Event</button>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="isLoading">Loading events...</div>
+  <div class="error" *ngIf="loadError">{{ loadError }}</div>
+
+  <div class="empty-state" *ngIf="!isLoading && !loadError && events.length === 0">
+    <p>No events yet. Click "Add Event" to create your first event.</p>
+  </div>
+
+  <div class="panels" *ngIf="!isLoading && events.length > 0">
+    <section class="event-panel" *ngFor="let e of events; trackBy: trackByIndex">
+      <div class="hero">
+        <div class="img" [style.background-image]="getAbsoluteImageUrl(e.coverImageUrl) ? 'url(' + getAbsoluteImageUrl(e.coverImageUrl) + ')' : ''"></div>
+        <div class="hero-gradient" aria-hidden="true"></div>
+
+        <div class="badge">
+          <span class="badge-pill" [ngClass]="getStatusClass(e.status)">{{ getStatusDisplay(e) }}</span>
+        </div>
+
+        <div class="hero-actions desktop">
+          <button type="button" class="btn btn--primary btn--xs" (click)="onEditEvent(e.id)">Edit</button>
+          <button type="button" class="btn btn--ghost btn--xs btn--danger" (click)="onDeleteEvent(e.id, e.name)">Delete</button>
+        </div>
+
+        <div class="hero-bottom">
+          <div class="left">
+            <div class="icon-box" aria-hidden="true">{{ getSportIcon(e.sportKey) }}</div>
+            <div class="text">
+              <h3>{{ e.name }}</h3>
+              <p class="muted">{{ getFormatDisplay(e) }} • {{ e.sportKey }}</p>
+              <div class="chips">
+                <span class="chip chip--primary">
+                  <svg class="check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M3 8l3 3 7-7" />
+                  </svg>
+                  {{ e.courtCount }} {{ e.courtCount === 1 ? 'Court' : 'Courts' }}
+                </span>
+                <span class="chip" *ngIf="e.maxParticipants">
+                  {{ e.currentParticipants }}/{{ e.maxParticipants }} Players
+                </span>
+              </div>
+              <div class="price mobile" *ngIf="e.price">
+                <div class="val">€{{ e.price }}</div>
+                <div class="note">entry fee</div>
+              </div>
+            </div>
+          </div>
+          <div class="right price desktop" *ngIf="e.price">
+            <div class="val">€{{ e.price }}</div>
+            <div class="note">entry fee</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions mobile">
+        <button type="button" class="btn btn--primary btn--xs" (click)="onEditEvent(e.id)">Edit</button>
+        <button type="button" class="btn btn--ghost btn--xs btn--danger" (click)="onDeleteEvent(e.id, e.name)">Delete</button>
+      </div>
+
+      <div class="event-details">
+        <div class="detail-section">
+          <div class="label">Event Period</div>
+          <div class="value">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            {{ formatDateRange(e.startDate, e.endDate) }}
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="e.registrationDeadline">
+          <div class="label">Registration Deadline</div>
+          <div class="value">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            {{ formatDate(e.registrationDeadline) }}
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="label">Venue</div>
+          <div class="value">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            {{ e.clubName }}
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="e.description">
+          <div class="label">Description</div>
+          <div class="value description">{{ e.description }}</div>
+        </div>
+
+        <button type="button" class="btn btn--primary wide register">View Details</button>
+      </div>
+    </section>
+  </div>
+</div>
