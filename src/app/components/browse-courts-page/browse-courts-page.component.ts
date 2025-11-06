@@ -8,6 +8,7 @@ import { PublicService } from '../../services/public.service';
 import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse } from '../../models/court.models';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
+import { DatePickerModule } from 'primeng/datepicker';
 
 type SportFilter =
   | 'all'
@@ -44,7 +45,7 @@ interface CourtItem {
 @Component({
   selector: 'app-browse-courts-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CourtListingCardComponent, AppHeaderComponent],
+  imports: [CommonModule, FormsModule, CourtListingCardComponent, AppHeaderComponent, DatePickerModule],
   templateUrl: './browse-courts-page.component.html',
   styleUrl: './browse-courts-page.component.scss'
 })

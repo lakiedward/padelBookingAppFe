@@ -319,6 +319,47 @@ $white: #fff;
   }
 }
 
+/* PrimeNG DatePicker with time-input class */
+:host ::ng-deep .time-input {
+  &.p-datepicker {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    
+    .p-inputtext {
+      height: 32px;
+      min-height: 32px;
+      max-height: 32px;
+      padding: 0 12px;
+      background: $panel;
+      border: 1px solid $border;
+      border-radius: 8px;
+      color: $text;
+      font-size: 14px;
+      font-weight: 400;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-sizing: border-box;
+      width: 100%;
+      flex: 1;
+      
+      &:hover {
+        border-color: rgba(214, 221, 230, 0.25);
+        background: rgba(255, 255, 255, 0.12);
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: $accent-border;
+        box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25);
+        background: rgba(255, 255, 255, 0.12);
+      }
+    }
+  }
+}
+
 .time-separator {
   color: rgba(214, 221, 230, 0.4);
   font-weight: 600;
