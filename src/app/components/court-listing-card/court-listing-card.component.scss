@@ -16,6 +16,7 @@ $blackish: #000a14;
   flex-direction: column;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   cursor: pointer;
+  outline: none;
 }
 
 .media {
@@ -191,10 +192,31 @@ $blackish: #000a14;
   background: $accent;
   color: $blackish;
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: $accent;
+    border-color: $accent;
+    box-shadow: 0 0 0 4px rgba(167, 238, 67, 0.3), 0 4px 12px rgba(167, 238, 67, 0.4);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.2);
+  }
 }
 
 .card:hover {
   border-color: $accent-border;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   transform: translateY(-2px);
+}
+
+.card:focus-visible {
+  border-color: $accent-border;
+  box-shadow: 0 0 0 4px rgba(167, 238, 67, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+  outline: 2px solid $accent;
+  outline-offset: 4px;
 }

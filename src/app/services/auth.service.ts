@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import { LoginRequest, AuthResponse, User } from '../models/auth.models';
+import { LoginRequest, AuthResponse, User, GoogleLoginRequest } from '../models/auth.models';
 import { environment } from '../../environments/environment';
 import { StateService } from './state.service';
 
@@ -54,6 +54,15 @@ export class AuthService {
     const loginRequest: LoginRequest = { email, password };
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginRequest)
+      .pipe(
+        tap(response => this.handleAuthSuccess(response))
+      );
+  }
+
+  loginWithGoogle(idToken: string): Observable<AuthResponse> {
+    const payload: GoogleLoginRequest = { idToken };
+
+    return this.http.post<AuthResponse>(`${this.apiUrl}/google`, payload)
       .pipe(
         tap(response => this.handleAuthSuccess(response))
       );

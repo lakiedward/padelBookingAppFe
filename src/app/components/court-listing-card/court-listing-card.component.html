@@ -1,4 +1,10 @@
-<div class="card" (click)="handleCardClick()">
+<div
+  class="card"
+  (click)="handleCardClick()"
+  (keydown)="onKeyDown($event)"
+  role="button"
+  tabindex="0"
+>
   <div class="media">
     <img [src]="image" [alt]="title" class="media-img" />
     <div class="media-overlay"></div>
@@ -28,12 +34,14 @@
       <span *ngFor="let t of tags" class="badge" [ngClass]="{ 'badge--primary': t === 'Indoor' || t === 'Outdoor', 'badge--subtle': !(t === 'Indoor' || t === 'Outdoor') }">{{ t }}</span>
     </div>
 
-    <div class="availability">Available on {{ availableDate || '—' }}:</div>
-    <div class="slots">
+    <div class="availability" *ngIf="mode === 'booking'">Available on {{ availableDate || '—' }}:</div>
+    <div class="availability" *ngIf="mode === 'reservation' && availableDate">Booked on {{ availableDate }}:</div>
+    <div class="slots" *ngIf="slots && slots.length > 0">
       <span class="chip" *ngFor="let s of slots">{{ s }}</span>
     </div>
 
-    <button class="btn-cta" (click)="onBook()">Book Court</button>
+    <button class="btn-cta" *ngIf="mode === 'booking'" (click)="onPrimaryAction($event)">Book Court</button>
+    <button class="btn-cta" *ngIf="mode === 'reservation'" (click)="onPrimaryAction($event)">View Details</button>
   </div>
 </div>
 

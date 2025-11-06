@@ -18,3 +18,7 @@ export interface User {
   roles: string[];
   profileImageUrl?: string;
 }
+
+export interface GoogleLoginRequest {
+  idToken: string;
+}

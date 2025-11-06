@@ -132,6 +132,15 @@
       &::after { right: 0; }
     }
 
+    .google-btn-slot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
     .google-btn {
       width: 100%;
       display: flex;
@@ -151,6 +160,58 @@
       &:hover { background: rgba(255, 255, 255, 0.04); }
       &:active { transform: translateY(1px); }
       &:disabled { opacity: 0.6; cursor: not-allowed; }
+    }
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .login-container {
+    .login-title {
+      font-size: 28px;
+    }
+
+    .login-subtitle {
+      font-size: 13px;
+    }
+
+    .login-form {
+      .form-field {
+        margin-bottom: 18px;
+      }
+
+      label {
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+
+      .row-between {
+        flex-wrap: wrap;
+        gap: 8px;
+
+        .remember {
+          label {
+            font-size: 13px;
+          }
+        }
+
+        .link {
+          font-size: 13px;
+        }
+      }
+
+      .divider {
+        margin: 16px 0 14px 0;
+      }
+
+      .google-btn {
+        padding: 13px 16px;
+        font-size: 15px;
+      }
+    }
+
+    .signup-link p {
+      font-size: 14px;
     }
   }
 }
@@ -265,5 +326,26 @@
     &:disabled { opacity: 0.7; cursor: not-allowed; }
 
     .p-button-label { font-weight: 700; color: inherit; }
+  }
+
+  /* Mobile optimizations for inputs */
+  @media (max-width: 640px) {
+    .p-inputtext {
+      padding: 13px;
+      font-size: 16px; /* Prevents auto-zoom on iOS */
+    }
+
+    .p-password {
+      .p-password-input {
+        padding: 13px;
+        padding-right: 44px;
+        font-size: 16px; /* Prevents auto-zoom on iOS */
+      }
+    }
+
+    .p-button {
+      padding: 14px 24px;
+      font-size: 16px;
+    }
   }
 }

@@ -49,7 +49,9 @@
 
     <div class="divider"><span>Or continue with</span></div>
 
-    <button type="button" class="google-btn" (click)="onGoogleSignUp()" [disabled]="loading">
+    <div id="googleButtonContainerRegister" class="btn btn--full google-btn-slot" *ngIf="useGoogleButton"></div>
+
+    <button type="button" class="google-btn" (click)="onGoogleSignUp()" [disabled]="loading" *ngIf="!useGoogleButton">
       <img src="assets/icons/google.png" alt="Google" width="20" height="20" />
       Google
     </button>

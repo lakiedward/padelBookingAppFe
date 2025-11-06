@@ -23,6 +23,8 @@ type VenueFilter = 'all' | 'indoor' | 'outdoor';
 type HeatedFilter = 'all' | 'heated' | 'unheated';
 type SortBy = 'earliest' | 'price-asc' | 'price-desc';
 
+type SlotInterval = { start: string; end: string; available?: boolean };
+
 interface CourtItem {
   courtId: number;
   image: string;
@@ -36,6 +38,7 @@ interface CourtItem {
   availableDate?: string; // e.g. "2025-09-01"
   slots: string[]; // e.g. ["6:00 AM","7:00 AM","9:00 AM","+6 more"]
   sport: SportFilter;
+  fullSlots: SlotInterval[]; // full start/end slots used for filtering
 }
 
 @Component({
@@ -107,7 +110,8 @@ export class BrowseCourtsPageComponent implements OnInit {
         const fallback = this.computeFromRules(court.availabilityRules);
         if (fallback) {
           this.items[index].availableDate = fallback.dateStr;
-          this.items[index].slots = fallback.times;
+          this.items[index].fullSlots = fallback.intervals;
+          this.items[index].slots = fallback.displayTimes;
         }
       },
       error: () => {}
@@ -140,6 +144,14 @@ export class BrowseCourtsPageComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.isBrowser) return;
+    
+    // Set today as default if no date selected
+    if (!this.selectedDate) {
+      const now = new Date();
+      this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      this.selectedDateStr = this.formatDateForInput(this.selectedDate);
+    }
+    
     setTimeout(() => {
       this.loadCourts();
     }, 0);
@@ -160,10 +172,11 @@ export class BrowseCourtsPageComponent implements OnInit {
           price: '',
           tags: c.tags || [],
           slots: [],
-          sport: (c.sport as any)
+          sport: (c.sport as any),
+          fullSlots: []
         }));
         this.items.forEach((it, idx) => {
-          this.preloadAvailabilityFromRules(idx, it.courtId);
+          // Only use loadAvailabilityFor - it will use fallback if needed
           this.loadAvailabilityFor(idx, it.courtId);
           if (!courts[idx].primaryPhotoUrl) {
             this.ensurePhotoFromDetails(idx, it.courtId);
@@ -180,7 +193,7 @@ export class BrowseCourtsPageComponent implements OnInit {
     });
   }
 
-  private computeFromRules(rules: CourtAvailabilityRuleResponse[]): { dateStr: string; times: string[] } | null {
+  private computeFromRules(rules: CourtAvailabilityRuleResponse[]): { dateStr: string; displayTimes: string[]; intervals: SlotInterval[] } | null {
     if (!Array.isArray(rules) || rules.length === 0) return null;
     const today = new Date();
     const candidates: { date: Date; rule: CourtAvailabilityRuleResponse }[] = [];
@@ -199,8 +212,11 @@ export class BrowseCourtsPageComponent implements OnInit {
     candidates.sort((a, b) => a.date.getTime() - b.date.getTime());
     const chosen = candidates[0];
     const dateStr = this.formatDateForInput(chosen.date);
-    const times = this.buildTimeChips(chosen.rule.startTime, chosen.rule.endTime, chosen.rule.slotMinutes);
-    return { dateStr, times };
+    const intervals = this.buildIntervals(chosen.rule.startTime, chosen.rule.endTime, chosen.rule.slotMinutes);
+    if (!intervals.length) return null;
+    const starts = intervals.map(i => i.start);
+    const displayTimes = this.toChipLabels(starts);
+    return { dateStr, displayTimes, intervals };
   }
 
   private nextDateForWeekday(ref: Date, weekday: number): Date {
@@ -216,20 +232,39 @@ export class BrowseCourtsPageComponent implements OnInit {
     return da >= db;
   }
 
-  private buildTimeChips(startHHmm: string, endHHmm: string, slotMinutes: number): string[] {
-    const toMin = (s: string) => {
-      const [h, m] = s.split(':').map(Number);
-      return h * 60 + m;
-    };
-    const toHHMM = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-    const start = toMin(startHHmm);
-    const end = toMin(endHHmm);
-    const times: string[] = [];
-    for (let t = start; t + slotMinutes <= end; t += slotMinutes) {
-      times.push(toHHMM(t));
-      if (times.length === 3) break;
+  private buildIntervals(startHHmm: string, endHHmm: string, slotMinutes: number, limit?: number): SlotInterval[] {
+    const start = this.parseTimeString(startHHmm);
+    const end = this.parseTimeString(endHHmm);
+    if (start == null || end == null || !slotMinutes || slotMinutes <= 0) {
+      return [];
     }
-    return times;
+
+    const results: SlotInterval[] = [];
+    for (let current = start; current + slotMinutes <= end; current += slotMinutes) {
+      const next = current + slotMinutes;
+      results.push({
+        start: this.minutesToHHMM(current),
+        end: this.minutesToHHMM(next)
+      });
+      if (limit && results.length >= limit) break;
+    }
+    return results;
+  }
+
+  private toChipLabels(allTimes: string[]): string[] {
+    if (allTimes.length <= 3) {
+      return [...allTimes];
+    }
+    const displayed = allTimes.slice(0, 3);
+    displayed.push(`+${allTimes.length - 3} more`);
+    return displayed;
+  }
+
+  private minutesToHHMM(totalMinutes: number): string {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const clampedHours = (hours + 24) % 24;
+    return `${String(clampedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   }
 
   goToDetail(courtId: number) {
@@ -238,9 +273,16 @@ export class BrowseCourtsPageComponent implements OnInit {
 
   private loadAvailabilityFor(index: number, courtId: number) {
     console.log('[BrowseCourts] Loading availability for court', courtId);
-    this.publicService.getAvailableTimeSlotsByCourt(courtId).subscribe({
-      next: (slots) => {
-        console.log('[BrowseCourts] Timeslots for court', courtId, ':', slots);
+    
+    // Use today's date or selected date for availability check
+    const targetDate = this.selectedDate || new Date();
+    const dateStr = this.formatDateForInput(targetDate);
+    
+    this.publicService.getAllTimeSlotsByCourtAndDate(courtId, dateStr).subscribe({
+      next: (response) => {
+        console.log('[BrowseCourts] All timeslots for court', courtId, ':', response);
+        const slots = response?.items || [];
+        
         if (!Array.isArray(slots) || slots.length === 0) {
           console.log('[BrowseCourts] No timeslots found, trying fallback from rules for court', courtId);
           this.publicService.getPublicCourtById(courtId).subscribe({
@@ -249,8 +291,13 @@ export class BrowseCourtsPageComponent implements OnInit {
               const fallback = this.computeFromRules(court.availabilityRules);
               if (fallback) {
                 console.log('[BrowseCourts] Fallback availability computed:', fallback);
-                this.items[index].availableDate = fallback.dateStr;
-                this.items[index].slots = fallback.times;
+                this.items[index] = {
+                  ...this.items[index],
+                  availableDate: fallback.dateStr,
+                  fullSlots: fallback.intervals,
+                  slots: fallback.displayTimes
+                };
+                this.items = [...this.items];
                 this.cdr.detectChanges();
               } else {
                 console.warn('[BrowseCourts] No fallback could be computed from rules for court', courtId);
@@ -262,19 +309,36 @@ export class BrowseCourtsPageComponent implements OnInit {
           });
           return;
         }
-        // Find earliest date (yyyy-MM-dd)
-        const dates = slots.map(s => s.startTime.substring(0, 10));
-        const earliest = dates.sort()[0];
-        const sameDay = slots
-          .filter(s => s.startTime.substring(0, 10) === earliest)
-          .sort((a, b) => a.startTime.localeCompare(b.startTime));
-        // Build up to 3 time chips HH:mm
-        const chips: string[] = sameDay.slice(0, 3).map(s => s.startTime.substring(11, 16));
-        if (sameDay.length > 3) chips.push(`+${sameDay.length - 3} more`);
         
-        console.log('[BrowseCourts] Setting availability for court', courtId, ':', { date: earliest, slots: chips });
-        this.items[index].availableDate = earliest;
-        this.items[index].slots = chips;
+        // Sort slots by time
+        const sorted = slots.slice().sort((a, b) => a.startTime.localeCompare(b.startTime));
+        
+        // Build arrays of HH:mm times for filtering and chips (with availability status)
+        const intervals: SlotInterval[] = sorted.map(s => ({
+          start: s.startTime.substring(11, 16),
+          end: s.endTime.substring(11, 16),
+          available: s.available
+        }));
+        
+        // Only show available slots in chips
+        const availableIntervals = intervals.filter(i => i.available !== false);
+        const chips: string[] = this.toChipLabels(availableIntervals.map(i => i.start));
+        
+        console.log('[BrowseCourts] Setting availability for court', courtId, ':', { 
+          date: dateStr, 
+          totalSlots: intervals.length,
+          availableSlots: availableIntervals.length,
+          chips 
+        });
+        
+        // Create new object to force change detection
+        this.items[index] = {
+          ...this.items[index],
+          availableDate: dateStr,
+          fullSlots: intervals, // All slots with availability status
+          slots: chips // Only available slots for display
+        };
+        this.items = [...this.items]; // Force array reference change
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -311,9 +375,9 @@ export class BrowseCourtsPageComponent implements OnInit {
     this.timeOptions = options;
   }
 
-  onTimeChange(which: 'from' | 'to', event: Event) {
-    const target = event.target as HTMLSelectElement;
-    const value = target.value;
+  onTimeInputChange(which: 'from' | 'to', event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value; // HH:MM format
     
     if (which === 'from') {
       this.timeFromStr = value;
@@ -344,35 +408,48 @@ export class BrowseCourtsPageComponent implements OnInit {
       (this.venueFilter === 'indoor' && it.tags.includes('Indoor')) ||
       (this.venueFilter === 'outdoor' && it.tags.includes('Outdoor'));
 
-    const timeInRange = (slots: string[]): boolean => {
-      // If no time filter, accept
+    const timeInRange = (item: CourtItem): boolean => {
       if (!this.timeFromStr && !this.timeToStr) return true;
 
       const fromMin = this.timeFromStr ? this.parseTimeString(this.timeFromStr) : null;
       const toMin = this.timeToStr ? this.parseTimeString(this.timeToStr) : null;
 
-      // Iterate slot strings like "6:00 AM"
-      for (const s of slots) {
-        if (s.startsWith('+')) continue; // "+6 more" etc.
-        const m = this.parseTimeString(s);
-        if (m == null) continue;
+      const intervals: SlotInterval[] = item.fullSlots && item.fullSlots.length > 0
+        ? item.fullSlots
+        : (item.slots || [])
+            .filter((s) => !s.startsWith('+'))
+            .map((start) => ({ start, end: start }));
+
+      for (const interval of intervals) {
+        // Skip unavailable/booked slots
+        if (interval.available === false) continue;
+
+        const startMin = this.parseTimeString(interval.start);
+        const endMin = this.parseTimeString(interval.end);
+        if (startMin == null || endMin == null) continue;
+
         if (fromMin != null && toMin != null) {
           if (fromMin <= toMin) {
-            if (m >= fromMin && m <= toMin) return true;
+            // Check for overlap: slot overlaps with filter window if:
+            // slot starts before filter ends AND slot ends after filter starts
+            if (startMin < toMin && endMin > fromMin) return true;
           } else {
-            // Over midnight case
-            if (m >= fromMin || m <= toMin) return true;
+            // Over-midnight case (e.g., From 22:00, To 02:00)
+            // Slot overlaps if it's either late (>= fromMin) or early (<= toMin)
+            if (startMin >= fromMin || endMin <= toMin) return true;
           }
         } else if (fromMin != null) {
-          if (m >= fromMin) return true;
+          // Only "From" specified - any slot starting at or after fromMin
+          if (startMin >= fromMin) return true;
         } else if (toMin != null) {
-          if (m <= toMin) return true;
+          // Only "To" specified - any slot ending at or before toMin
+          if (endMin <= toMin) return true;
         }
       }
       return false;
     };
 
-    const parsed = this.items.filter((it) => sportMatch(it) && venueMatch(it) && timeInRange(it.slots));
+    const parsed = this.items.filter((it) => sportMatch(it) && venueMatch(it) && timeInRange(it));
 
     const toPrice = (p: string) => Number((p || '').replace(/[^0-9.]/g, '')) || 0;
     if (this.sortBy === 'price-asc') parsed.sort((a, b) => toPrice(a.price) - toPrice(b.price));
@@ -399,6 +476,11 @@ export class BrowseCourtsPageComponent implements OnInit {
     // zero out time for clearer comparisons
     this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     this.selectedDateStr = this.formatDateForInput(this.selectedDate);
+    
+    // Reload availability for all courts with today's date
+    this.items.forEach((item, idx) => {
+      this.loadAvailabilityFor(idx, item.courtId);
+    });
   }
 
   onDateChange(event: any) {
@@ -410,6 +492,11 @@ export class BrowseCourtsPageComponent implements OnInit {
       this.selectedDate = null;
       this.selectedDateStr = '';
     }
+    
+    // Reload availability for all courts with new date
+    this.items.forEach((item, idx) => {
+      this.loadAvailabilityFor(idx, item.courtId);
+    });
   }
 
   private formatDateForInput(date: Date): string {

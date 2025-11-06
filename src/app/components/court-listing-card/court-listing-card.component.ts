@@ -19,15 +19,22 @@ export class CourtListingCardComponent {
   @Input() tags: string[] = [];
   @Input() availableDate = '';
   @Input() slots: string[] = [];
+  @Input() mode: 'booking' | 'reservation' = 'booking'; // 'booking' for browse, 'reservation' for calendar
   @Output() cardClick = new EventEmitter<void>();
-
-  onBook() {
-    // Placeholder for action; can emit event in future
-    // eslint-disable-next-line no-console
-    console.log('Book Court clicked:', this.title);
-  }
 
   handleCardClick() {
     this.cardClick.emit();
+  }
+
+  onPrimaryAction(event: Event) {
+    event.stopPropagation();
+    this.cardClick.emit();
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.cardClick.emit();
+    }
   }
 }

@@ -178,7 +178,14 @@
                   </div>
                 </div>
               </div>
-              <div class="res-item" *ngFor="let r of reservationsByDay(d)">
+              <div
+                class="res-item res-item--interactive"
+                *ngFor="let r of reservationsByDay(d)"
+                (click)="onReservationClick(r)"
+                (keydown)="onReservationKeyDown($event, r)"
+                role="button"
+                tabindex="0"
+              >
                 <div class="res-item__left">
                   <div class="emoji">{{ r.sport }}</div>
                   <div class="meta">
@@ -195,7 +202,14 @@
         <ng-template #dayView>
           <div class="day-list">
             <div class="empty" *ngIf="reservationsByDay(anchor()).length === 0">No reservations</div>
-            <div class="res-item" *ngFor="let r of reservationsByDay(anchor())">
+            <div
+              class="res-item res-item--interactive"
+              *ngFor="let r of reservationsByDay(anchor())"
+              (click)="onReservationClick(r)"
+              (keydown)="onReservationKeyDown($event, r)"
+              role="button"
+              tabindex="0"
+            >
               <div class="res-item__left">
                 <div class="emoji">{{ r.sport }}</div>
                 <div class="meta">
@@ -238,6 +252,8 @@
             [tags]="getCourtTags(court.court)"
             [availableDate]="getNextAvailableDate(court.court)"
             [slots]="getCourtSlots(court.court)"
+            mode="reservation"
+            (cardClick)="onCourtCardClick(court)"
           />
         </div>
       </div>

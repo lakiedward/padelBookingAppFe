@@ -77,15 +77,24 @@
             <div class="filter-item">
               <label class="filter-label">Time</label>
               <div class="time-controls">
-                <select class="minimal-select" [(ngModel)]="timeFromStr" (change)="onTimeChange('from', $event)">
-                  <option value="">From</option>
-                  <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.label }}</option>
-                </select>
-                <select class="minimal-select" [(ngModel)]="timeToStr" (change)="onTimeChange('to', $event)">
-                  <option value="">To</option>
-                  <option *ngFor="let time of timeOptions" [value]="time.value">{{ time.label }}</option>
-                </select>
-                <button class="clear-btn" type="button" (click)="clearTime()">×</button>
+                <input 
+                  type="time" 
+                  class="time-input"
+                  [(ngModel)]="timeFromStr"
+                  (change)="onTimeInputChange('from', $event)"
+                  placeholder="From"
+                  step="900"
+                />
+                <span class="time-separator">—</span>
+                <input 
+                  type="time" 
+                  class="time-input"
+                  [(ngModel)]="timeToStr"
+                  (change)="onTimeInputChange('to', $event)"
+                  placeholder="To"
+                  step="900"
+                />
+                <button class="clear-btn" type="button" (click)="clearTime()" *ngIf="timeFromStr || timeToStr">×</button>
               </div>
             </div>
 

@@ -1,13 +1,15 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PublicService } from '../../services/public.service';
 import { CourtService } from '../../services/court.service';
-import { CourtAvailabilityRuleResponse, CourtPhotoResponse, CourtResponse, PublicAvailableTimeSlot } from '../../models/court.models';
+import { CourtAvailabilityRuleResponse, CourtPhotoResponse, CourtResponse } from '../../models/court.models';
 import { AuthService } from '../../services/auth.service';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { MapService } from '../../services/map.service';
+import { Subject, combineLatest } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-court-detail',
@@ -16,7 +18,7 @@ import { MapService } from '../../services/map.service';
   templateUrl: './court-detail.component.html',
   styleUrl: './court-detail.component.scss'
 })
-export class CourtDetailComponent implements OnInit {
+export class CourtDetailComponent implements OnInit, OnDestroy {
   isLoading = true;
   courtId!: number;
   court?: CourtResponse;
@@ -34,6 +36,12 @@ export class CourtDetailComponent implements OnInit {
   private mapInitialized = false;
 
   private isBrowser: boolean;
+  private destroy$ = new Subject<void>();
+  private initialDateParam?: string;
+  private initialSlotIdParam?: number;
+  private initialStartParam?: string;
+  private hasAppliedInitialSelection = false;
+  private pendingScrollToSlots = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -50,15 +58,47 @@ export class CourtDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.days = Array.from({ length: 7 }, (_, i) => this.addDays(new Date(), i));
-    this.route.paramMap.subscribe(params => {
-      const id = Number(params.get('id'));
-      if (!id) {
-        this.router.navigate(['/user']);
-        return;
-      }
-      this.courtId = id;
-      this.load();
-    });
+    combineLatest([this.route.paramMap, this.route.queryParamMap])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([params, query]) => {
+        const id = Number(params.get('id'));
+        if (!id) {
+          this.router.navigate(['/user']);
+          return;
+        }
+
+        this.courtId = id;
+
+        const dateParam = query.get('date') || undefined;
+        const slotParam = query.get('slot');
+        const startParam = query.get('start') || query.get('time') || undefined;
+
+        this.initialDateParam = dateParam;
+        this.initialSlotIdParam = slotParam ? Number(slotParam) : undefined;
+        if (this.initialSlotIdParam != null && Number.isNaN(this.initialSlotIdParam)) {
+          this.initialSlotIdParam = undefined;
+        }
+        this.initialStartParam = startParam;
+        this.hasAppliedInitialSelection = false;
+        this.pendingScrollToSlots = !!(this.initialDateParam || this.initialSlotIdParam != null || this.initialStartParam);
+
+        const parsedDate = this.initialDateParam ? this.parseDateKey(this.initialDateParam) : null;
+        if (parsedDate) {
+          this.selectedDate = parsedDate;
+          this.ensureDateInDaysArray(parsedDate);
+        } else {
+          const today = new Date();
+          this.selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          this.ensureDateInDaysArray(this.selectedDate);
+        }
+
+        this.load();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private load() {
@@ -69,6 +109,7 @@ export class CourtDetailComponent implements OnInit {
         this.clubLocation = court.clubLocation;
         this.heroImage = this.pickHeroImage(court.photos);
         this.loadSlotsForSelectedDate();
+        setTimeout(() => this.scrollToSelectedDay(), 200);
 
         // Initialize map if location exists
         if (this.clubLocation && this.isBrowser) {
@@ -171,11 +212,13 @@ export class CourtDetailComponent implements OnInit {
         }));
         console.log('[CourtDetail] slotsForDay mapped', { count: this.slotsForDay.length, slots: this.slotsForDay });
         this.cdr.detectChanges();
+        this.handleInitialSlotSelection();
       },
       error: (err) => {
         console.error('[CourtDetail] slots fetch FAILED', { courtId: this.courtId, dateKey, error: err });
         this.slotsForDay = [];
         this.cdr.detectChanges();
+        this.handleInitialSlotSelection();
       }
     });
   }
@@ -232,6 +275,58 @@ export class CourtDetailComponent implements OnInit {
       const allButtons = document.querySelectorAll('.detail-day-btn');
       console.log('[CourtDetail] Available day buttons:', Array.from(allButtons).map(b => b.getAttribute('data-date-key')));
     }
+  }
+
+  private handleInitialSlotSelection() {
+    if (!this.pendingScrollToSlots) {
+      return;
+    }
+
+    if (!this.hasAppliedInitialSelection) {
+      let selectedSlot = undefined as { id: number; start: string; end: string; available: boolean; price: number } | undefined;
+      if (this.initialSlotIdParam != null) {
+        selectedSlot = this.slotsForDay.find(s => s.id === this.initialSlotIdParam);
+      }
+      if (!selectedSlot && this.initialStartParam) {
+        selectedSlot = this.slotsForDay.find(s => s.start === this.initialStartParam);
+      }
+
+      if (selectedSlot) {
+        this.onPickSlot(selectedSlot);
+      }
+
+      this.hasAppliedInitialSelection = true;
+    }
+
+    setTimeout(() => this.scrollToTimeSlots(), 150);
+    this.pendingScrollToSlots = false;
+  }
+
+  private scrollToTimeSlots() {
+    if (!this.isBrowser) return;
+    const section = document.getElementById('time-slots');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  private parseDateKey(value: string): Date | null {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return null;
+    }
+
+    const [year, month, day] = value.split('-').map(part => Number(part));
+    const parsed = new Date(year, month - 1, day);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+
+    if (parsed.getFullYear() !== year || parsed.getMonth() !== month - 1 || parsed.getDate() !== day) {
+      return null;
+    }
+
+    return parsed;
   }
 
   logout() {

@@ -18,6 +18,7 @@ type Reservation = {
   court: string;
   sport: string;  // emoji or short
   city?: string;
+  timeSlotId?: number;
 };
 
 @Component({
@@ -84,7 +85,8 @@ export class CalendarPageComponent implements OnInit {
             club: 'Club', // Backend doesn't return club name in booking summary
             court: booking.courtName,
             sport: this.getSportEmoji(booking.activityName),
-            city: 'City' // Backend doesn't return city
+            city: 'City', // Backend doesn't return city
+            timeSlotId: booking.timeSlotId
           };
         });
         
@@ -229,18 +231,45 @@ export class CalendarPageComponent implements OnInit {
   getUniqueCourts(): { courtId: number; court: string; club: string; sport: string }[] {
     const unique = new Map<string, { courtId: number; court: string; club: string; sport: string }>();
     
-    console.log('[CalendarPage] getUniqueCourts called', { 
-      viewMode: this.viewMode(), 
-      anchor: this.toDateKey(this.anchor()),
-      totalReservations: this.reservations().length 
-    });
+    const currentViewMode = this.viewMode();
+    const currentAnchor = this.anchor();
+    const anchorDateKey = this.toDateKey(currentAnchor);
+    
+    console.log('[CalendarPage] ===== getUniqueCourts DEBUG START =====');
+    console.log('[CalendarPage] View Mode:', currentViewMode);
+    console.log('[CalendarPage] Anchor Date:', currentAnchor);
+    console.log('[CalendarPage] Anchor Date Key:', anchorDateKey);
+    console.log('[CalendarPage] Total Reservations:', this.reservations().length);
+    console.log('[CalendarPage] All Reservations:', this.reservations());
     
     // Filter reservations based on current view mode
-    const filteredReservations = this.viewMode() === 'day' 
-      ? this.reservations().filter(r => r.date === this.toDateKey(this.anchor()))
-      : this.reservations();
+    let filteredReservations: Reservation[];
     
-    console.log('[CalendarPage] filteredReservations:', filteredReservations.length, filteredReservations);
+    if (currentViewMode === 'day') {
+      filteredReservations = this.reservations().filter(r => {
+        const matches = r.date === anchorDateKey;
+        console.log(`[CalendarPage] Day filter: ${r.date} === ${anchorDateKey}? ${matches}`);
+        return matches;
+      });
+    } else if (currentViewMode === 'week') {
+      const weekStart = this.startOfWeekMon(currentAnchor);
+      const weekEnd = this.endOfWeekMon(currentAnchor);
+      const weekStartKey = this.toDateKey(weekStart);
+      const weekEndKey = this.toDateKey(weekEnd);
+      
+      console.log('[CalendarPage] Week range:', { weekStartKey, weekEndKey });
+      
+      filteredReservations = this.reservations().filter(r => {
+        const matches = r.date >= weekStartKey && r.date <= weekEndKey;
+        console.log(`[CalendarPage] Week filter: ${r.date} in [${weekStartKey}, ${weekEndKey}]? ${matches}`);
+        return matches;
+      });
+    } else {
+      // Month view - show all reservations
+      filteredReservations = this.reservations();
+    }
+    
+    console.log('[CalendarPage] Filtered Reservations:', filteredReservations.length, filteredReservations);
     
     filteredReservations.forEach(r => {
       const key = `${r.court}-${r.club}`;
@@ -250,7 +279,8 @@ export class CalendarPageComponent implements OnInit {
     });
     
     const result = Array.from(unique.values());
-    console.log('[CalendarPage] uniqueCourts result:', result);
+    console.log('[CalendarPage] Unique Courts Result:', result);
+    console.log('[CalendarPage] ===== getUniqueCourts DEBUG END =====');
     return result;
   }
 
@@ -302,21 +332,85 @@ export class CalendarPageComponent implements OnInit {
     const reservations = this.getReservationsForCourt(courtName);
     if (reservations.length === 0) return '';
     
-    // Find the next available date after the last reservation
-    const lastReservation = reservations[reservations.length - 1];
-    const lastDate = new Date(lastReservation.date);
-    const nextDate = new Date(lastDate);
-    nextDate.setDate(nextDate.getDate() + 1);
-    
-    return nextDate.toISOString().split('T')[0];
+    // Return the date of the first reservation
+    const firstReservation = reservations[0];
+    return firstReservation.date;
   }
 
   getCourtSlots(courtName: string): string[] {
     const reservations = this.getReservationsForCourt(courtName);
-    if (reservations.length === 0) return ['6:00 AM', '7:00 AM', '9:00 AM', '+6 more'];
+    if (reservations.length === 0) return [];
     
-    // Return some sample slots for demo
-    return ['6:00 AM', '7:00 AM', '9:00 AM', '+6 more'];
+    // Return the actual booked time slots for this court
+    const slots = reservations.map(r => {
+      const startDate = new Date(`${r.date}T${r.start}`);
+      return startDate.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    });
+    
+    // If more than 3 slots, show first 3 and count the rest
+    if (slots.length > 3) {
+      const remaining = slots.length - 3;
+      return [...slots.slice(0, 3), `+${remaining} more`];
+    }
+    
+    return slots;
+  }
+
+  onCourtCardClick(court: { courtId: number; court: string; club: string; sport: string }) {
+    const reservations = this.getReservationsForCourt(court.court);
+    const target = this.pickReservationForNavigation(reservations);
+    this.navigateToCourtDetail(court.courtId, target);
+  }
+
+  onReservationClick(reservation: Reservation) {
+    this.navigateToCourtDetail(reservation.courtId, reservation);
+  }
+
+  onReservationKeyDown(event: KeyboardEvent, reservation: Reservation) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.onReservationClick(reservation);
+    }
+  }
+
+  private pickReservationForNavigation(reservations: Reservation[]): Reservation | undefined {
+    if (!reservations.length) return undefined;
+
+    const anchorKey = this.toDateKey(this.anchor());
+
+    if (this.viewMode() === 'day') {
+      return reservations[0];
+    }
+
+    const sameDay = reservations.find(r => r.date === anchorKey);
+    if (sameDay) return sameDay;
+
+    const upcoming = reservations.find(r => r.date >= anchorKey);
+    return upcoming ?? reservations[0];
+  }
+
+  private navigateToCourtDetail(courtId: number, reservation?: Reservation) {
+    const queryParams: Record<string, string | number> = { source: 'calendar' };
+
+    if (reservation) {
+      queryParams['date'] = reservation.date;
+      if (reservation.timeSlotId != null) {
+        queryParams['slot'] = reservation.timeSlotId;
+      } else if (reservation.start) {
+        queryParams['start'] = reservation.start;
+      }
+    } else {
+      queryParams['date'] = this.toDateKey(this.anchor());
+    }
+
+    this.router.navigate(['/user/court', courtId], {
+      queryParams,
+      fragment: 'time-slots'
+    });
   }
 
   // ===================
