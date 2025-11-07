@@ -51,7 +51,7 @@
 .container { padding: 16px 20px 24px; }
 
 .about h2, .contact h2, .courts h2 { font-size: 20px; margin: 8px 0 8px; }
-.about p { color: #fff; }
+.about p { color: #fff; white-space: pre-line; }
 
 .contact .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 @media (min-width: 640px) { .contact .grid { grid-template-columns: 1fr 1fr; } }
@@ -190,7 +190,7 @@
 .container { padding: 16px 20px 24px; }
 
 .about h2, .contact h2, .courts h2 { font-size: 20px; margin: 8px 0 8px; }
-.about p { color: #fff; }
+.about p { color: #fff; white-space: pre-line; }
 
 /* Contact items with icons */
 .contact .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }

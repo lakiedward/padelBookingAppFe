@@ -23,19 +23,13 @@
   </div>
 
   <div class="body">
-    <div class="location">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="loc-icon" aria-hidden="true">
-        <path d="M2 6l2 2 5-5" stroke="#A7EE43" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-      <span class="loc-text">{{ location }}</span>
-    </div>
 
     <div class="tags">
       <span *ngFor="let t of tags" class="badge" [ngClass]="{ 'badge--primary': t === 'Indoor' || t === 'Outdoor', 'badge--subtle': !(t === 'Indoor' || t === 'Outdoor') }">{{ t }}</span>
     </div>
 
     <div class="availability" *ngIf="mode === 'booking'">Available on {{ availableDate || '—' }}:</div>
-    <div class="availability" *ngIf="mode === 'reservation' && availableDate">Booked on {{ availableDate }}:</div>
+    <div class="availability" *ngIf="mode === 'reservation' && availableDate">Available on {{ availableDate }}:</div>
     <div class="slots" *ngIf="slots && slots.length > 0">
       <span class="chip" *ngFor="let s of slots">{{ s }}</span>
     </div>

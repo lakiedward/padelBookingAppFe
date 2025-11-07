@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal, OnInit } from '@angular/core';
+import { Component, computed, signal, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { BookingService } from '../../services/booking.service';
 import { CourtService } from '../../services/court.service';
 import { CourtSummaryResponse } from '../../models/court.models';
@@ -40,7 +40,7 @@ interface CourtOption {
   templateUrl: './manage-booking.component.html',
   styleUrl: './manage-booking.component.scss'
 })
-export class ManageBookingComponent implements OnInit {
+export class ManageBookingComponent implements OnInit, OnChanges {
   constructor(
     private bookingService: BookingService,
     private courtService: CourtService
@@ -50,6 +50,8 @@ export class ManageBookingComponent implements OnInit {
   isLoading = signal(true);
   courts = signal<CourtOption[]>([]);
   selectedCourtId = signal<number | null>(null);
+  @Input() preselectCourtId: number | null = null;
+  private pendingPreselectId: number | null = null;
 
   anchor = signal(new Date());
   viewMode = signal<ViewMode>('month');
@@ -59,6 +61,22 @@ export class ManageBookingComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCourts();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['preselectCourtId']) {
+      const val: number | null = changes['preselectCourtId'].currentValue ?? null;
+      if (val != null) {
+        // If courts are already loaded, apply immediately; else store pending
+        const exists = this.courts().some(c => c.value === val);
+        if (exists) {
+          this.selectedCourtId.set(val);
+          this.loadBookingsForCourt(val);
+        } else {
+          this.pendingPreselectId = val;
+        }
+      }
+    }
   }
 
   private loadCourts(): void {
@@ -74,8 +92,15 @@ export class ManageBookingComponent implements OnInit {
         }));
         this.courts.set(courtOptions);
 
-        // Auto-select first court if available
-        if (courtOptions.length > 0) {
+        // Apply preselection if provided and present in options
+        const pre = this.preselectCourtId ?? this.pendingPreselectId;
+        const match = pre != null ? courtOptions.find(c => c.value === pre) : undefined;
+        if (match) {
+          this.selectedCourtId.set(match.value);
+          this.loadBookingsForCourt(match.value);
+          this.pendingPreselectId = null;
+        } else if (courtOptions.length > 0) {
+          // Fallback: auto-select first
           this.selectedCourtId.set(courtOptions[0].value);
           this.loadBookingsForCourt(courtOptions[0].value);
         } else {
@@ -125,7 +150,7 @@ export class ManageBookingComponent implements OnInit {
             userId: booking.id, // Placeholder - should be actual userId
             userEmail: `user${booking.id}@example.com`, // Placeholder
             userPhone: `+40 7${String(index).padStart(2, '0')} ${String(booking.id).padStart(3, '0')} ${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`, // Placeholder
-            paymentType: ['Card', 'Cash', 'Online'][index % 3], // Placeholder
+            paymentType: 'Cash', // Placeholder until backend provides paymentType
             price: booking.price,
           };
         });

@@ -141,6 +141,7 @@
                 [tags]="c.tags"
                 [availableDate]="c.availableDate"
                 [slots]="c.slots"
+                (cardClick)="onCourtCardClick(c)"
               ></app-court-listing-card>
             </div>
           </ng-container>
@@ -161,6 +162,7 @@
                     [tags]="c.tags"
                     [availableDate]="c.availableDate"
                     [slots]="c.slots"
+                    (cardClick)="onCourtCardClick(c)"
                   ></app-court-listing-card>
                 </div>
               </ng-container>

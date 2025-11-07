@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, signal, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router } from '@angular/router';
+import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { Time24Pipe } from '../../pipes/time24.pipe';
+import { sportEmoji } from '../../utils/sport-emoji.util';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -24,7 +26,7 @@ type Reservation = {
 @Component({
   selector: 'app-calendar-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, CourtListingCardComponent, Time24Pipe],
+  imports: [CommonModule, AppHeaderComponent, CourtListingCardComponent, Time24Pipe],
   templateUrl: './calendar-page.component.html',
   styleUrl: './calendar-page.component.scss'
 })
@@ -84,7 +86,7 @@ export class CalendarPageComponent implements OnInit {
             end: this.formatTimeToHHMM(endDateTime),
             club: 'Club', // Backend doesn't return club name in booking summary
             court: booking.courtName,
-            sport: this.getSportEmoji(booking.activityName),
+            sport: sportEmoji(booking.activityName),
             city: 'City', // Backend doesn't return city
             timeSlotId: booking.timeSlotId
           };
@@ -110,19 +112,7 @@ export class CalendarPageComponent implements OnInit {
     return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 
-  private getSportEmoji(activityName: string): string {
-    const emojiMap: Record<string, string> = {
-      'tennis': '🎾',
-      'padel': '🏓',
-      'basketball': '🏀',
-      'volleyball': '🏐',
-      'football': '⚽',
-      'soccer': '⚽'
-    };
-    
-    const normalized = activityName.toLowerCase();
-    return emojiMap[normalized] || '🎯';
-  }
+  
 
   // Derived helpers
   readonly eventsByDay = computed<Record<string, string[]>>(() => {

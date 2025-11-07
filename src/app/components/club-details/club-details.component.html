@@ -176,7 +176,7 @@
 
   <ng-template #previewBlock>
     <ng-container *ngIf="clubService.lastSaved() as saved; else noData">
-      <app-club-preview [details]="saved" (editRequested)="startEdit()" (editCourtsRequested)="onEditCourtsRequested()" (deleteRequested)="onDeleteClub()"></app-club-preview>
+      <app-club-preview [details]="saved" (editRequested)="startEdit()" (editCourtsRequested)="onEditCourtsRequested()" (deleteRequested)="onDeleteClub()" (manageBookingRequested)="onManageBooking($event)"></app-club-preview>
     </ng-container>
     <ng-template #noData>
       <div class="no-data">

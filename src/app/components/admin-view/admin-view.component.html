@@ -70,7 +70,7 @@
 
   <main class="content">
     <section class="content-card" *ngIf="selectedMenu === 'club-management'">
-      <app-club-details (courtsRequested)="onCourtsRequestedFromChild()"></app-club-details>
+      <app-club-details (courtsRequested)="onCourtsRequestedFromChild()" (manageBookingRequested)="onManageBookingFromClub($event)"></app-club-details>
     </section>
     <section class="content-card" *ngIf="selectedMenu === 'courts'">
       <app-court-view
@@ -79,7 +79,7 @@
       </app-court-view>
     </section>
     <section class="content-card" *ngIf="selectedMenu === 'manage-booking'">
-      <app-manage-booking></app-manage-booking>
+      <app-manage-booking [preselectCourtId]="preselectCourtId"></app-manage-booking>
     </section>
     <section class="content-card" *ngIf="selectedMenu === 'events'">
       <app-event-view

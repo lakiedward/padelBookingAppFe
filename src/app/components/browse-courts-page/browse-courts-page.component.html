@@ -78,26 +78,30 @@
               <label class="filter-label">Time</label>
               <div class="time-controls">
                 <p-datepicker 
-                  [(ngModel)]="timeFromStr"
-                  (change)="onTimeInputChange('from', $event)"
+                  [(ngModel)]="timeFrom"
                   [timeOnly]="true"
                   [hourFormat]="'24'"
-                  [stepMinute]="15"
+                  [stepMinute]="1"
+                  [readonlyInput]="true"
                   [showIcon]="false"
                   placeholder="From"
-                  styleClass="time-input"
+                  styleClass="time-input minimal-datepicker"
+                  panelStyleClass="minimal-datepicker-panel"
+                  [appendTo]="overlayAppendTarget"
                   [style]="{'width':'100%'}">
                 </p-datepicker>
                 <span class="time-separator">—</span>
                 <p-datepicker 
-                  [(ngModel)]="timeToStr"
-                  (change)="onTimeInputChange('to', $event)"
+                  [(ngModel)]="timeTo"
                   [timeOnly]="true"
                   [hourFormat]="'24'"
-                  [stepMinute]="15"
+                  [stepMinute]="1"
+                  [readonlyInput]="true"
                   [showIcon]="false"
                   placeholder="To"
-                  styleClass="time-input"
+                  styleClass="time-input minimal-datepicker"
+                  panelStyleClass="minimal-datepicker-panel"
+                  [appendTo]="overlayAppendTarget"
                   [style]="{'width':'100%'}">
                 </p-datepicker>
                 <button class="clear-btn" type="button" (click)="clearTime()" *ngIf="timeFromStr || timeToStr">×</button>

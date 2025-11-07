@@ -1,0 +1,142 @@
+<div class="page page-gradient-bg bg-admin-like">
+  <app-header></app-header>
+  <div class="hero">
+    <div class="glow glow--hero-a"></div>
+    <div class="glow glow--hero-b"></div>
+    <div class="glow glow--hero-c"></div>
+
+    <div class="container hero__inner">
+      <div class="hero__head">
+        <h1 class="hero__title">
+          <span class="muted">Discover </span>
+          <span class="accent">Events &amp; Tournaments</span>
+        </h1>
+        <p class="hero__subtitle">Join curated competitions and social gatherings hosted by Playora clubs.</p>
+      </div>
+
+      <div class="filters">
+        <div class="filters__section">
+          <div class="filters__group">
+            <div class="filters__label">Sports</div>
+            <div class="pills">
+              <button
+                type="button"
+                class="pill"
+                [class.pill--active]="selectedSport() === 'all'"
+                (click)="selectSport('all')"
+              >
+                All Sports
+              </button>
+              <button
+                *ngFor="let sport of displayedSports(); trackBy: trackSport"
+                type="button"
+                class="pill"
+                [class.pill--active]="selectedSport() === sport"
+                (click)="selectSport(sport)"
+              >
+                {{ sportLabel(sport) }}
+              </button>
+              <button
+                *ngIf="extraSportsCount() > 0"
+                type="button"
+                class="pill pill--more"
+                (click)="toggleMoreSports($event)"
+              >
+                {{ moreSportsOpen() ? 'Show less' : ('+' + extraSportsCount() + ' more') }}
+              </button>
+            </div>
+          </div>
+
+          <div class="filters__group">
+            <div class="filters__label">Status</div>
+            <div class="pills pills--compact">
+              <button
+                *ngFor="let option of statusFilters"
+                type="button"
+                class="pill"
+                [class.pill--active]="selectedStatus() === option.value"
+                (click)="selectStatus(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="filters__section filters__section--minimal" *ngIf="selectedSport() !== 'all' || selectedStatus() !== 'all'">
+          <div class="filter-summary">
+            <span class="summary-label">Active filters:</span>
+            <div class="chips">
+              <span class="chip" *ngIf="selectedSport() !== 'all'">Sport · {{ sportLabel(selectedSport()) }}</span>
+              <span class="chip" *ngIf="selectedStatus() !== 'all'">Status · {{ activeStatusLabel() }}</span>
+              <button type="button" class="chip chip--action" (click)="selectSport('all'); selectStatus('all')">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container content">
+    <div class="state" *ngIf="loading()">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading events…</p>
+    </div>
+
+    <div class="state state--error" *ngIf="!loading() && loadError()">
+      <p>{{ loadError() }}</p>
+    </div>
+
+    <div class="state state--empty" *ngIf="!loading() && !loadError() && !hasResults()">
+      <h2>No events match your filters</h2>
+      <p>Try selecting a different sport or status to explore all upcoming activities.</p>
+    </div>
+
+    <section class="grid" *ngIf="!loading() && !loadError() && hasResults()">
+      <article class="event-card" *ngFor="let event of filteredEvents(); trackBy: trackEvent">
+        <div class="event-hero">
+          <div class="event-cover" [ngStyle]="{ 'background-image': coverImageUrl(event) ? 'url(' + coverImageUrl(event) + ')' : '' }"></div>
+          <div class="event-hero__overlay" aria-hidden="true"></div>
+
+          <div class="event-hero__badge">
+            <span class="badge" [ngClass]="cardStatusClass(event)">{{ formatStatus(event) }}</span>
+          </div>
+
+          <div class="event-hero__content">
+            <div class="event-hero__icon" aria-hidden="true">{{ sportIcon(event.sportKey) }}</div>
+            <div class="event-hero__text">
+              <h3>{{ event.name }}</h3>
+              <p class="muted">{{ formatEventType(event) }} • {{ formatEventFormat(event) }}</p>
+              <div class="chips">
+                <span class="chip chip--ghost">{{ event.courtCount }} {{ event.courtCount === 1 ? 'Court' : 'Courts' }}</span>
+                <span class="chip chip--ghost" *ngIf="event.maxParticipants">
+                  {{ event.currentParticipants }}/{{ event.maxParticipants }} Players
+                </span>
+              </div>
+            </div>
+            <div class="event-hero__price" *ngIf="event.price">
+              <span class="price">€{{ event.price }}</span>
+              <span class="note">Entry fee</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-body">
+          <div class="event-detail">
+            <span class="label">Dates</span>
+            <span class="value">{{ formatDateRange(event) }}</span>
+          </div>
+          <div class="event-detail">
+            <span class="label">Club</span>
+            <span class="value">{{ event.clubName }}</span>
+          </div>
+          <div class="event-detail" *ngIf="event.description">
+            <span class="label">About</span>
+            <span class="value value--description">{{ event.description }}</span>
+          </div>
+          <button type="button" class="btn btn--accent">View Details</button>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>

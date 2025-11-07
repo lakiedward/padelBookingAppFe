@@ -5,6 +5,7 @@ import { CourtSummaryResponse, CourtResponse, BackendAvailabilityRuleType } from
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { CourtService } from '../../services/court.service';
 import { Time24Pipe } from '../../pipes/time24.pipe';
+import { sportEmoji } from '../../utils/sport-emoji.util';
 
 interface CourtListingData {
   id: string;
@@ -33,6 +34,7 @@ export class ClubPreviewComponent implements OnInit {
   @Output() editRequested = new EventEmitter<void>();
   @Output() deleteRequested = new EventEmitter<void>();
   @Output() editCourtsRequested = new EventEmitter<void>();
+  @Output() manageBookingRequested = new EventEmitter<number>();
 
   activeCourtFilter = signal<'all' | SportKey>('all');
   realCourts = signal<CourtListingData[]>([]);
@@ -112,7 +114,7 @@ export class ClubPreviewComponent implements OnInit {
       }
     }
     
-    const emoji = this.getSportEmoji(summary.sport as SportKey);
+    const emoji = sportEmoji(summary.sport as any);
     
     // Fallback data when full details are not available
     const price = 'N/A';
@@ -150,7 +152,7 @@ export class ClubPreviewComponent implements OnInit {
       }
     }
     
-    const emoji = this.getSportEmoji(court.sport as SportKey);
+    const emoji = sportEmoji(court.sport as any);
     
     // Extract pricing and availability from rules
     const { price, availableDate, slots } = this.extractAvailabilityInfo(court);
@@ -228,7 +230,7 @@ export class ClubPreviewComponent implements OnInit {
 
       return {
         price,
-        availableDate: 'Today',
+        availableDate: todayDateStr,
         slots: sampleSlots
       };
     }
@@ -253,8 +255,6 @@ export class ClubPreviewComponent implements OnInit {
       });
 
       if (futureRules.length > 0) {
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const dayName = dayNames[futureDayOfWeek];
         
         // Generate sample slots
         const sampleSlots: string[] = [];
@@ -276,7 +276,7 @@ export class ClubPreviewComponent implements OnInit {
 
         return {
           price,
-          availableDate: i === 1 ? 'Tomorrow' : dayName,
+          availableDate: futureDateStr,
           slots: sampleSlots
         };
       }
@@ -285,7 +285,7 @@ export class ClubPreviewComponent implements OnInit {
     // No availability in the next 7 days
     return {
       price,
-      availableDate: 'Not available',
+      availableDate: '',
       slots: []
     };
   }
@@ -318,20 +318,7 @@ export class ClubPreviewComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  private getSportEmoji(sport: SportKey): string {
-    const emojiMap: Record<SportKey, string> = {
-      'padel': '🏓',
-      'tennis': '🎾',
-      'basketball': '🏀',
-      'football': '⚽',
-      'volleyball': '🏐',
-      'badminton': '🏸',
-      'squash': '🎾',
-      'pingpong': '🏓',
-      'handball': '🤾'
-    };
-    return emojiMap[sport] || '🏃';
-  }
+  
 
   setCourtFilter(v: 'all' | SportKey) {
     this.activeCourtFilter.set(v);
@@ -340,6 +327,13 @@ export class ClubPreviewComponent implements OnInit {
   trackByIndex(index: number) { return index; }
 
   onEditCourts() { this.editCourtsRequested.emit(); }
+
+  onCourtCardClick(c: CourtListingData) {
+    const idNum = Number(c.id);
+    if (!Number.isNaN(idNum)) {
+      this.manageBookingRequested.emit(idNum);
+    }
+  }
 
   courtsBySport(s: SportKey | 'all'): CourtListingData[] {
     const all = this.realCourts();

@@ -516,6 +516,14 @@ $white: #fff;
   display: flex;
   align-items: center;
 }
+.time-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 200;
+  overflow: visible;
+}
 .field__controls { 
   display: flex; 
   align-items: center; 
@@ -723,8 +731,9 @@ $white: #fff;
   color: $text;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  z-index: 10001 !important;
+  z-index: 999999 !important;
   position: fixed !important;
+  pointer-events: auto !important;
   
   .p-datepicker-header {
     background: $panel;

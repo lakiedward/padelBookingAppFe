@@ -28,6 +28,7 @@ export class AdminViewComponent implements AfterViewInit {
   showCreateEventModal = false;
   editingEventId?: number;
   mobileMenuOpen = false;
+  preselectCourtId: number | null = null;
 
   @ViewChild(CourtViewComponent) courtViewComponent?: CourtViewComponent;
   @ViewChild(EventViewComponent) eventViewComponent?: EventViewComponent;
@@ -126,6 +127,14 @@ export class AdminViewComponent implements AfterViewInit {
     if (this.eventViewComponent) {
       this.eventViewComponent.loadEvents();
     }
+  }
+
+  onManageBookingFromClub(courtId: number) {
+    console.log('[AdminView] manage booking requested for court:', courtId);
+    this.preselectCourtId = courtId;
+    this.select('manage-booking');
+    // Optionally scroll to the section
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
   }
 
   getAvailableSports(): SportKey[] {

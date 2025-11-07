@@ -18,6 +18,7 @@
 
     <nav class="nav nav--desktop">
       <a class="nav__link" [routerLink]="['/user']" routerLinkActive="nav__link--active" [routerLinkActiveOptions]="{ exact: true }">Courts</a>
+      <a class="nav__link" [routerLink]="['/user/events']" routerLinkActive="nav__link--active">Events</a>
       <a class="nav__link" [routerLink]="['/calendar']" routerLinkActive="nav__link--active">Calendar</a>
       <a class="nav__link nav__link--muted" href="javascript:void(0)">About</a>
       <a class="nav__link nav__link--muted" href="javascript:void(0)">Contact</a>
@@ -41,6 +42,7 @@
   <div *ngIf="mobileOpen" class="drawer">
     <div class="drawer__inner">
       <a class="drawer__link" [routerLink]="['/user']" routerLinkActive="drawer__link--active" [routerLinkActiveOptions]="{ exact: true }">Courts</a>
+      <a class="drawer__link" [routerLink]="['/user/events']" routerLinkActive="drawer__link--active">Events</a>
       <a class="drawer__link" [routerLink]="['/calendar']" routerLinkActive="drawer__link--active">Calendar</a>
       <a class="drawer__link drawer__link--muted">About</a>
       <a class="drawer__link drawer__link--muted">Contact</a>

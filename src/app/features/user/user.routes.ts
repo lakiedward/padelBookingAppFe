@@ -17,6 +17,11 @@ export const USER_ROUTES: Routes = [
       .then(m => m.CourtDetailComponent)
   },
   {
+    path: 'events',
+    loadComponent: () => import('../../components/events-page/events-page.component')
+      .then(m => m.EventsPageComponent)
+  },
+  {
     path: 'booking/:timeSlotId',
     loadComponent: () => import('../../components/booking-page/booking-page.component')
       .then(m => m.BookingPageComponent)

@@ -9,6 +9,7 @@ import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse } from '../../models/court.models';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { DatePickerModule } from 'primeng/datepicker';
+import { sportEmoji } from '../../utils/sport-emoji.util';
 
 type SportFilter =
   | 'all'
@@ -63,9 +64,13 @@ export class BrowseCourtsPageComponent implements OnInit {
   moreSportsOpen = false;
   selectedDate: Date | null = null;
   selectedDateStr = '';
-  // Simple time strings (HH:MM format)
-  timeFromStr = '';
-  timeToStr = '';
+  // Simple time strings (HH:MM format) used for filtering
+  timeFromStr: string = '';
+  timeToStr: string = '';
+  // Date models bound to PrimeNG time-only pickers
+  timeFrom: Date | null = null;
+  timeTo: Date | null = null;
+  overlayAppendTarget: string | null = null;
 
   // Time options (24h format with 15-minute intervals)
   timeOptions: { label: string; value: string }[] = [];
@@ -141,6 +146,9 @@ export class BrowseCourtsPageComponent implements OnInit {
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.generateTimeOptions();
+    if (this.isBrowser) {
+      this.overlayAppendTarget = 'body';
+    }
   }
 
   ngOnInit(): void {
@@ -152,6 +160,9 @@ export class BrowseCourtsPageComponent implements OnInit {
       this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       this.selectedDateStr = this.formatDateForInput(this.selectedDate);
     }
+    // Sanitize any pre-filled time strings to strict quarter steps
+    this.timeFromStr = this.timeFromStr;
+    this.timeToStr = this.timeToStr;
     
     setTimeout(() => {
       this.loadCourts();
@@ -166,7 +177,7 @@ export class BrowseCourtsPageComponent implements OnInit {
         this.items = courts.map(c => ({
           courtId: c.id,
           image: this.courtService.toAbsoluteUrl(c.primaryPhotoUrl) || 'https://placehold.co/1200x800?text=Court',
-          emoji: this.emojiFor(c.sport),
+          emoji: sportEmoji(c.sport),
           title: c.name,
           club: c.clubName,
           location: c.clubName,
@@ -349,16 +360,7 @@ export class BrowseCourtsPageComponent implements OnInit {
   }
 
 
-  private emojiFor(sport: string): string {
-    const key = (sport || '').toLowerCase();
-    if (key.includes('tennis') || key.includes('padel')) return '🎾';
-    if (key.includes('basket')) return '🏀';
-    if (key.includes('foot') || key.includes('soccer')) return '⚽';
-    if (key.includes('volley')) return '🏐';
-    if (key.includes('badminton')) return '🏸';
-    if (key.includes('table')) return '🏓';
-    return '🎾';
-  }
+  
 
   private generateTimeOptions() {
     const options: { label: string; value: string }[] = [];
@@ -376,16 +378,29 @@ export class BrowseCourtsPageComponent implements OnInit {
     this.timeOptions = options;
   }
 
-  onTimeInputChange(which: 'from' | 'to', event: Event) {
-    const target = event.target as HTMLInputElement;
-    const value = target.value; // HH:MM format
-    
-    if (which === 'from') {
-      this.timeFromStr = value;
-    } else {
-      this.timeToStr = value;
+  onTimeInputChange(which: 'from' | 'to', event: any) {
+    // Support both native input events and PrimeNG Date objects
+    const raw = (event && event.target && typeof event.target.value === 'string')
+      ? event.target.value
+      : (event && event.value) // PrimeNG often sends { value: Date }
+        ?? event; // fallback
+
+    const mins = this.coerceToMinutes(raw);
+    if (mins != null) {
+      const nextQuarter = this.roundToNextQuarter(mins);
+      const hhmm = this.minutesToHHMM(nextQuarter);
+      const hours = Math.floor(nextQuarter / 60);
+      const minutes = nextQuarter % 60;
+      const snappedDate = new Date(1970, 0, 1, hours, minutes, 0, 0);
+      if (which === 'from') {
+        this.timeFromStr = hhmm;
+        this.timeFrom = snappedDate;
+      } else {
+        this.timeToStr = hhmm;
+        this.timeTo = snappedDate;
+      }
     }
-    
+
     // Validate time range
     if (this.timeFromStr && this.timeToStr) {
       if (this.timeFromStr >= this.timeToStr) {
@@ -393,11 +408,48 @@ export class BrowseCourtsPageComponent implements OnInit {
         // Reset the invalid time
         if (which === 'to') {
           this.timeToStr = '';
+          this.timeTo = null;
         } else {
           this.timeFromStr = '';
+          this.timeFrom = null;
         }
       }
     }
+  }
+
+  private coerceToMinutes(raw: any): number | null {
+    if (raw instanceof Date) {
+      return raw.getHours() * 60 + raw.getMinutes();
+    }
+    if (typeof raw === 'string') {
+      return this.parseTimeString(raw);
+    }
+    // Try toString() if available
+    if (raw && typeof raw.toString === 'function') {
+      const str = raw.toString();
+      return this.parseTimeString(str);
+    }
+    return null;
+  }
+
+  private roundToNextQuarter(totalMinutes: number): number {
+    const rem = totalMinutes % 15;
+    const add = rem === 0 ? 15 : (15 - rem);
+    const next = totalMinutes + add;
+    const DAY = 24 * 60;
+    return next % DAY; // wrap around midnight
+  }
+
+  private sanitizeToQuarter(raw: string): string {
+    if (!raw) return '';
+    const mins = this.parseTimeString(raw);
+    if (mins == null) return '';
+    // Snap to NEXT 15-minute increment to avoid illegal minutes like :46
+    const rem = mins % 15;
+    const snapped = rem === 0 ? mins : mins + (15 - rem);
+    const DAY = 24 * 60;
+    const normalized = ((snapped % DAY) + DAY) % DAY;
+    return this.minutesToHHMM(normalized);
   }
 
   get filtered(): CourtItem[] {
@@ -410,10 +462,15 @@ export class BrowseCourtsPageComponent implements OnInit {
       (this.venueFilter === 'outdoor' && it.tags.includes('Outdoor'));
 
     const timeInRange = (item: CourtItem): boolean => {
-      if (!this.timeFromStr && !this.timeToStr) return true;
+      // Derive minutes from Date models first; fall back to strings for safety
+      const fromMin = this.timeFrom
+        ? this.timeFrom.getHours() * 60 + this.timeFrom.getMinutes()
+        : (this.timeFromStr ? this.parseTimeString(this.timeFromStr) : null);
+      const toMin = this.timeTo
+        ? this.timeTo.getHours() * 60 + this.timeTo.getMinutes()
+        : (this.timeToStr ? this.parseTimeString(this.timeToStr) : null);
 
-      const fromMin = this.timeFromStr ? this.parseTimeString(this.timeFromStr) : null;
-      const toMin = this.timeToStr ? this.parseTimeString(this.timeToStr) : null;
+      if (fromMin == null && toMin == null) return true;
 
       const intervals: SlotInterval[] = item.fullSlots && item.fullSlots.length > 0
         ? item.fullSlots
@@ -510,11 +567,29 @@ export class BrowseCourtsPageComponent implements OnInit {
   clearTime() {
     this.timeFromStr = '';
     this.timeToStr = '';
+    this.timeFrom = null;
+    this.timeTo = null;
   }
 
-  private parseTimeString(s: string): number | null {
+  private parseTimeString(raw: unknown): number | null {
+    if (raw == null) return null;
+
+    let candidate: string | null = null;
+    if (typeof raw === 'string') {
+      candidate = raw;
+    } else if (typeof raw === 'number') {
+      candidate = raw.toString();
+    } else if (typeof raw === 'object' && raw !== null) {
+      const maybeToString = (raw as { toString?: () => string }).toString;
+      if (typeof maybeToString === 'function') {
+        candidate = maybeToString.call(raw);
+      }
+    }
+
+    if (typeof candidate !== 'string') return null;
+
     // Parse HH:MM format
-    const trimmed = s.trim();
+    const trimmed = candidate.trim();
     const h24 = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
     if (h24) {
       const h = parseInt(h24[1], 10);
