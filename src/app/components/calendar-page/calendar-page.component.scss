@@ -170,7 +170,7 @@ $white: #fff;
 .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
 
 /* Calendar day cells */
-.cal-day { border: 1px solid $border; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 4px; min-height: 70px; display: flex; flex-direction: column; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; }
+.cal-day { border: 1px solid $border; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 4px; min-height: 70px; display: flex; flex-direction: column; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; width: 100%; min-width: 0; overflow: hidden; }
 .cal-day:hover { background: rgba(255,255,255,0.08); border-color: rgba(214, 221, 230, 0.25); }
 .cal-day--faded { opacity: 0.6; }
 .cal-day--today { 
@@ -181,10 +181,10 @@ $white: #fff;
 .cal-day--today .cal-day__num { color: $accent; font-weight: 800; text-shadow: 0 0 8px rgba(167,238,67,0.4); }
 .cal-day__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .cal-day__title { color: rgba(255,255,255,0.7); font-size: 9px; text-transform: uppercase; font-weight: 600; }
-.cal-day__content { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex: 1; }
+.cal-day__content { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex: 1; width: 100%; min-width: 0; }
 .cal-day__num { color: rgba(255,255,255,0.92); font-size: 18px; font-weight: 700; flex-shrink: 0; width: 100%; text-align: left; }
 .cal-day__badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: $accent; color: #000a14; font-size: 10px; font-weight: 800; }
-.cal-day__body { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: hidden; }
+.cal-day__body { display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: hidden; width: 100%; min-width: 0; }
 .cal-day__footer { color: $accent; font-size: 10px; font-weight: 600; margin-top: 4px; text-align: center; }
 
 /* Calendar events in month view */
@@ -200,7 +200,9 @@ $white: #fff;
   transition: all 0.2s ease; 
   min-height: 20px; 
   width: 100%; 
+  max-width: 100%; 
   min-width: 0; 
+  box-sizing: border-box; 
 }
 .cal-event:hover { background: rgba(255,255,255,0.12); border-color: rgba(214,221,230,0.2); transform: translateY(-1px); }
 .cal-event__icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
