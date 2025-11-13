@@ -1,0 +1,167 @@
+// Variables
+$bg: #0f1b26;
+$panel: rgba(255, 255, 255, 0.08);
+$border: rgba(214, 221, 230, 0.15);
+$accent: #a7ee43;
+$text: #d6dde6;
+$muted: #9aa7b5;
+$white: #fff;
+
+// Page wrapper
+.page {
+  position: relative;
+  min-height: 100vh;
+  color: $white;
+  isolation: isolate;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+// Hero section
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero__inner {
+  padding: 80px 16px 16px;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Booking Main Container
+.booking-main {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.booking-container {
+  width: 100%;
+}
+
+// Booking Card
+.booking-card {
+  border-radius: 16px;
+  border: 1px solid $border;
+  background: $panel;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.booking-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid $border;
+  padding-bottom: 16px;
+}
+
+.booking-title {
+  color: $white;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.booking-subtitle {
+  color: $muted;
+  font-size: 14px;
+  margin: 0;
+}
+
+.booking-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  color: $text;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(167, 238, 67, 0.12);
+  border: 2px solid rgba(167, 238, 67, 0.3);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+.price-label {
+  color: $text;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.price-value {
+  color: $accent;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  flex: 1;
+
+  &--large {
+    height: 52px;
+    min-height: 52px;
+  }
+
+  &--primary {
+    background: $accent;
+    color: #000a14;
+    box-shadow: 0 4px 12px rgba(167, 238, 67, 0.25);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(167, 238, 67, 0.35);
+    }
+  }
+
+  &--secondary {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid $border;
+    color: $text;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+}

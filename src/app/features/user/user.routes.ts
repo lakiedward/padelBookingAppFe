@@ -25,5 +25,15 @@ export const USER_ROUTES: Routes = [
     path: 'booking/:timeSlotId',
     loadComponent: () => import('../../components/booking-page/booking-page.component')
       .then(m => m.BookingPageComponent)
+  },
+  {
+    path: 'checkout/success',
+    loadComponent: () => import('../../components/checkout-success/checkout-success.component')
+      .then(m => m.CheckoutSuccessComponent)
+  },
+  {
+    path: 'checkout/cancel',
+    loadComponent: () => import('../../components/checkout-cancel/checkout-cancel.component')
+      .then(m => m.CheckoutCancelComponent)
   }
 ];

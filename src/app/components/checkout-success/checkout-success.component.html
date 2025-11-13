@@ -1,0 +1,34 @@
+<div class="page page-gradient-bg bg-admin-like">
+  <app-header></app-header>
+  <section class="hero">
+    <div class="glow glow--hero-a"></div>
+    <div class="glow glow--hero-b"></div>
+    <div class="glow glow--hero-c"></div>
+    <div class="container hero__inner">
+      <main class="booking-main">
+        <div class="booking-container">
+          <div class="booking-card">
+            <div class="booking-header">
+              <h1 class="booking-title">✅ Payment Successful</h1>
+              <p class="booking-subtitle">Your booking has been confirmed</p>
+            </div>
+
+            <div class="booking-section">
+              <h3 class="section-title">📋 Booking Status</h3>
+              <div class="price-card">
+                <span class="price-label">Status</span>
+                <span class="price-value">Confirmed</span>
+              </div>
+              <p class="booking-subtitle" style="margin-top: 16px; text-align: center;">Your booking will appear in My Calendar shortly.</p>
+            </div>
+
+            <div class="booking-actions">
+              <button class="btn btn--secondary btn--large" (click)="goHome()">Back to Browse</button>
+              <button class="btn btn--primary btn--large" (click)="goToCalendar()">Go to Calendar</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+</div>

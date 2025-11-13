@@ -6,6 +6,7 @@ import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { BookingService } from '../../services/booking.service';
 import { PublicService } from '../../services/public.service';
 import { BookingSummaryResponse } from '../../models/booking.models';
+import { PaymentsService } from '../../services/payments.service';
 import { CourtResponse } from '../../models/court.models';
 
 type PaymentMethod = 'cash' | 'card';
@@ -42,6 +43,7 @@ export class BookingPageComponent implements OnInit {
     private router: Router,
     private bookingService: BookingService,
     private publicService: PublicService,
+    private paymentsService: PaymentsService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -112,21 +114,27 @@ export class BookingPageComponent implements OnInit {
   }
 
   onSelectPaymentMethod(method: PaymentMethod): void {
-    if (method === 'cash') {
-      this.selectedPaymentMethod = method;
-    }
-    // Card is disabled for now
+    this.selectedPaymentMethod = method;
   }
 
   onConfirmBooking(): void {
     if (!this.slotDetails) return;
-    if (this.selectedPaymentMethod === 'card') {
-      this.bookingError = 'Card payment is coming soon. Please select Cash payment.';
-      return;
-    }
 
     this.isSubmitting = true;
     this.bookingError = null;
+
+    if (this.selectedPaymentMethod === 'card') {
+      this.paymentsService.createCheckoutSession(this.slotDetails.timeSlotId).subscribe({
+        next: (res) => {
+          window.location.href = res.url;
+        },
+        error: (err) => {
+          this.bookingError = err.error?.error || err.message || 'Failed to start checkout.';
+          this.isSubmitting = false;
+        }
+      });
+      return;
+    }
 
     this.bookingService.createBooking(this.slotDetails.timeSlotId).subscribe({
       next: (booking: BookingSummaryResponse) => {

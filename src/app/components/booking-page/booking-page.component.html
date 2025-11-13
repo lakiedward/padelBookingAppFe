@@ -108,9 +108,9 @@
                   </div>
                 </div>
 
-                <!-- Card Payment (Disabled) -->
+                <!-- Card Payment -->
                 <div
-                  class="payment-method payment-method--disabled"
+                  class="payment-method"
                   [class.payment-method--active]="selectedPaymentMethod === 'card'"
                   (click)="onSelectPaymentMethod('card')"
                 >
@@ -121,14 +121,13 @@
                       name="paymentMethod"
                       value="card"
                       [checked]="selectedPaymentMethod === 'card'"
-                      disabled
                     />
                     <label for="payment-card"></label>
                   </div>
                   <div class="payment-info">
                     <div class="payment-icon">💳</div>
                     <div class="payment-details">
-                      <span class="payment-name">Card <span class="coming-soon-badge">Coming Soon</span></span>
+                      <span class="payment-name">Card</span>
                       <span class="payment-desc">Credit or Debit Card</span>
                     </div>
                   </div>
@@ -155,9 +154,11 @@
               <button
                 class="btn btn--primary btn--large"
                 (click)="onConfirmBooking()"
-                [disabled]="isSubmitting || selectedPaymentMethod !== 'cash'"
+                [disabled]="isSubmitting"
               >
-                <span *ngIf="!isSubmitting">Confirm Booking</span>
+                <span *ngIf="!isSubmitting">
+                  {{ selectedPaymentMethod === 'card' ? 'Proceed to Payment' : 'Confirm Booking' }}
+                </span>
                 <span *ngIf="isSubmitting" class="btn-loading">
                   <div class="u-spinner u-spinner--sm"></div>
                   <span>Processing...</span>

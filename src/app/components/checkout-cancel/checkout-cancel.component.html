@@ -1,0 +1,30 @@
+<div class="page page-gradient-bg bg-admin-like">
+  <app-header></app-header>
+  <section class="hero">
+    <div class="glow glow--hero-a"></div>
+    <div class="glow glow--hero-b"></div>
+    <div class="glow glow--hero-c"></div>
+    <div class="container hero__inner">
+      <main class="booking-main">
+        <div class="booking-container">
+          <div class="booking-card">
+            <div class="booking-header">
+              <h1 class="booking-title">❌ Payment Canceled</h1>
+              <p class="booking-subtitle">Your payment was canceled</p>
+            </div>
+
+            <div class="booking-section">
+              <h3 class="section-title">📋 What happened?</h3>
+              <p class="booking-subtitle" style="text-align: center;">No charges were made. You can try booking again or return to browse courts.</p>
+            </div>
+
+            <div class="booking-actions">
+              <button class="btn btn--secondary btn--large" (click)="goHome()">Back to Browse</button>
+              <button class="btn btn--primary btn--large" (click)="goToCourts()">View Courts</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+</div>
