@@ -5,11 +5,13 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { finalize, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { MessageService } from 'primeng/api';
 import { environment } from '../../../environments/environment';
+import { PaymentsService } from '../../services/payments.service';
 
 type GoogleIdentity = {
   accounts: typeof google.accounts;
@@ -18,9 +20,10 @@ type GoogleIdentity = {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule, ToastModule],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss'
+  styleUrls: ['./register.component.scss'],
+  providers: [MessageService]
 })
 export class RegisterComponent implements AfterViewInit {
   success = false;
@@ -34,13 +37,15 @@ export class RegisterComponent implements AfterViewInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
   private removeResizeListener?: () => void;
+  accountType: 'player' | 'owner' = 'player';
 
   constructor(
     private fb: FormBuilder, 
     private authService: AuthService, 
     private router: Router, 
     private cdr: ChangeDetectorRef,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private paymentsService: PaymentsService
   ) {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
@@ -52,9 +57,43 @@ export class RegisterComponent implements AfterViewInit {
 
   onSubmit() {
     this.submitted = true;
-    if (!this.registerForm.valid || this.loading) return;
+    this.clearServerErrors();
+    if (this.loading) return;
     this.loading = true;
     const { username, email, phoneNumber, password } = this.registerForm.value;
+    if (this.accountType === 'owner') {
+      const emailCtrl = this.registerForm.get('email');
+      const passCtrl = this.registerForm.get('password');
+      if (!emailCtrl || !passCtrl || emailCtrl.invalid || passCtrl.invalid) {
+        this.loading = false;
+        this.cdr.detectChanges();
+        return;
+      }
+      this.authService.registerAdmin({ email, password })
+        .pipe(
+          switchMap(() => this.paymentsService.initConnect({})),
+          finalize(() => {
+            this.loading = false;
+            this.cdr.detectChanges();
+          })
+        )
+        .subscribe({
+          next: (res) => {
+            try { window.location.href = res.url; } catch {}
+          },
+          error: (err) => {
+            console.error('Owner onboarding failed:', err);
+            const msg = err?.error?.message || 'Stripe onboarding could not be started. Please try again.';
+            this.messageService.add({ key: 'auth', severity: 'error', summary: 'Onboarding error', detail: msg, life: 4000 });
+          }
+        });
+      return;
+    }
+    if (!this.registerForm.valid) {
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
     this.authService.register({ username, email, phoneNumber, password })
       .pipe(
         finalize(() => {
@@ -69,8 +108,89 @@ export class RegisterComponent implements AfterViewInit {
         },
         error: (error) => {
           console.error('Registration failed:', error);
+          this.handleRegistrationError(error);
         }
       });
+  }
+
+  private handleRegistrationError(error: unknown) {
+    const message = this.extractErrorMessage(error);
+    if (message) {
+      const normalized = message.toLowerCase();
+      if (normalized.includes('username')) {
+        this.setServerError('username', message);
+      }
+      if (normalized.includes('email')) {
+        this.setServerError('email', message);
+      }
+    }
+
+    const detail = message || 'Registration failed. Please try again.';
+    this.messageService.add({
+      key: 'auth',
+      severity: 'error',
+      summary: 'Registration failed',
+      detail,
+      life: 5000
+    });
+    this.cdr.markForCheck();
+  }
+
+  private extractErrorMessage(error: unknown): string | null {
+    if (!error) {
+      return null;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+
+    const httpError = error as {
+      error?: unknown;
+      message?: string;
+    };
+
+    if (typeof httpError.error === 'string') {
+      return httpError.error;
+    }
+
+    if (httpError.error && typeof (httpError.error as { message?: unknown }).message === 'string') {
+      return (httpError.error as { message: string }).message;
+    }
+
+    if (httpError.message) {
+      return httpError.message;
+    }
+
+    return null;
+  }
+
+  private setServerError(controlName: string, message: string) {
+    const control = this.registerForm.get(controlName);
+    if (!control) {
+      return;
+    }
+    const currentErrors = control.errors ?? {};
+    control.setErrors({ ...currentErrors, serverExists: message });
+    control.markAsTouched();
+  }
+
+  private clearServerErrors() {
+    ['username', 'email', 'phoneNumber'].forEach(field => {
+      const control = this.registerForm.get(field);
+      if (!control) {
+        return;
+      }
+      const errors = control.errors;
+      if (errors && 'serverExists' in errors) {
+        const { serverExists: _serverExists, ...remainingErrors } = errors;
+        const hasOtherErrors = Object.keys(remainingErrors).length > 0;
+        control.setErrors(hasOtherErrors ? remainingErrors : null);
+        control.updateValueAndValidity({ emitEvent: false });
+      }
+    });
   }
 
   ngAfterViewInit(): void {

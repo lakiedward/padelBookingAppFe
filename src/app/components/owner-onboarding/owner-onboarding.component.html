@@ -1,0 +1,25 @@
+<div class="onboarding-container">
+  <h2>Stripe Onboarding</h2>
+  <div *ngIf="loading" class="status">Checking status...</div>
+  <div *ngIf="!loading && error" class="status error">{{ error }}</div>
+
+  <div *ngIf="!loading && !error">
+    <div *ngIf="chargesEnabled; else notReady">
+      <div class="status success">Payments are enabled.</div>
+      <button class="btn btn--primary" (click)="goToAdmin()">Go to Admin</button>
+    </div>
+    <ng-template #notReady>
+      <div class="status warn">Complete Stripe onboarding to enable payments.</div>
+      <div *ngIf="due.length > 0" class="due">
+        <div>Missing information:</div>
+        <ul>
+          <li *ngFor="let d of due">{{ d }}</li>
+        </ul>
+      </div>
+      <div class="actions">
+        <button class="btn btn--primary" (click)="resumeOnboarding()">Resume Onboarding</button>
+        <button class="btn" (click)="refreshStatus()">Refresh Status</button>
+      </div>
+    </ng-template>
+  </div>
+</div>

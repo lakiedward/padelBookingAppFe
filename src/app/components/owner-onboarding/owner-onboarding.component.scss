@@ -1,0 +1,7 @@
+.onboarding-container { padding: 16px; display: grid; gap: 12px; }
+.status { font-weight: 700; }
+.status.success { color: #a7ee43; }
+.status.error { color: #ef4444; }
+.status.warn { color: #f59e0b; }
+.due { font-size: 13px; color: #d6dde6; }
+.actions { display: flex; gap: 8px; }

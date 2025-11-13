@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { CourtService } from '../../services/court.service';
 import { CourtSummaryResponse, CourtResponse, CourtAvailabilityRuleResponse, BackendAvailabilityRuleType } from '../../models/court.models';
 import { forkJoin } from 'rxjs';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 type Tone = 'green' | 'blue' | 'gray';
 
@@ -37,9 +39,10 @@ interface CourtPanelData {
 @Component({
   selector: 'app-court-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ConfirmDialogModule],
   templateUrl: './court-view.component.html',
-  styleUrl: './court-view.component.scss'
+  styleUrl: './court-view.component.scss',
+  providers: [ConfirmationService]
 })
 export class CourtViewComponent implements OnInit {
   activeTab = signal<'courts'>('courts');
@@ -53,7 +56,8 @@ export class CourtViewComponent implements OnInit {
 
   constructor(
     private courtService: CourtService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -126,18 +130,23 @@ export class CourtViewComponent implements OnInit {
   }
 
   onDeleteCourt(courtId: number, courtName: string) {
-    if (!confirm(`Are you sure you want to delete "${courtName}"?`)) {
-      return;
-    }
-
-    this.courtService.deleteCourt(courtId).subscribe({
-      next: () => {
-        console.log('Court deleted successfully');
-        this.loadCourts(); // Refresh the list
-      },
-      error: (err) => {
-        console.error('Failed to delete court:', err);
-        alert('Failed to delete court: ' + (err.error?.error || err.message));
+    this.confirmationService.confirm({
+      header: 'Delete Court',
+      message: `Are you sure you want to delete "${courtName}"? This action cannot be undone.`,
+      icon: 'pi pi-exclamation-triangle',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      accept: () => {
+        this.courtService.deleteCourt(courtId).subscribe({
+          next: () => {
+            console.log('Court deleted successfully');
+            this.loadCourts(); // Refresh the list
+          },
+          error: (err) => {
+            console.error('Failed to delete court:', err);
+            alert('Failed to delete court: ' + (err.error?.error || err.message));
+          }
+        });
       }
     });
   }

@@ -1,6 +1,7 @@
 <div class="club-details">
   <p-toast key="error" position="bottom-right" appendTo="body" [baseZIndex]="10000"></p-toast>
   <p-toast key="success" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
+  <p-confirmDialog appendTo="body"></p-confirmDialog>
 
   <ng-container *ngIf="!isLoading(); else loadingTpl">
   <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted" [class.saving]="isSaving()">

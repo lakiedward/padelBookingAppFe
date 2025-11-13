@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthComponent } from './components/auth/auth.component';
 import { CalendarPageComponent } from './components/calendar-page/calendar-page.component';
+import { OwnerOnboardingComponent } from './components/owner-onboarding/owner-onboarding.component';
 import { authRedirectGuard } from './guards/auth-redirect.guard';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
@@ -39,6 +40,18 @@ export const routes: Routes = [
     path: 'calendar',
     component: CalendarPageComponent,
     canActivate: [authGuard]
+  },
+
+  // Owner onboarding (Stripe return/refresh)
+  {
+    path: 'owner/onboarding/callback',
+    component: OwnerOnboardingComponent,
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'owner/onboarding/refresh',
+    component: OwnerOnboardingComponent,
+    canActivate: [adminGuard]
   },
 
   // Default redirect

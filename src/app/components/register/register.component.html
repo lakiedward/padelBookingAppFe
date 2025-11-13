@@ -1,7 +1,15 @@
 <div class="login-container">
+  <p-toast key="auth" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
   <ng-container *ngIf="!success; else successTpl">
   <h2 class="login-title">Playora</h2>
   <p class="login-subtitle">Sign up to book your favorite courts</p>
+
+  <div class="form-field" style="margin-bottom: 8px;">
+    <div class="btn-group" style="display:flex; gap:8px;">
+      <button type="button" class="btn" [class.btn--primary]="accountType === 'player'" (click)="accountType='player'">Player</button>
+      <button type="button" class="btn" [class.btn--primary]="accountType === 'owner'" (click)="accountType='owner'">Club Owner</button>
+    </div>
+  </div>
 
   <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="login-form">
     <div class="form-field">
@@ -11,6 +19,9 @@
         <span *ngIf="registerForm.get('username')?.errors?.['required']">Username is required</span>
         <span *ngIf="registerForm.get('username')?.errors?.['minlength']">At least 3 characters</span>
       </small>
+      <small class="error-message" *ngIf="registerForm.get('username')?.errors?.['serverExists'] as serverError">
+        {{ serverError }}
+      </small>
     </div>
 
     <div class="form-field">
@@ -19,6 +30,9 @@
       <small class="error-message" *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.touched || registerForm.get('email')?.dirty || submitted)">
         <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
         <span *ngIf="registerForm.get('email')?.errors?.['email']">Enter a valid email</span>
+      </small>
+      <small class="error-message" *ngIf="registerForm.get('email')?.errors?.['serverExists'] as serverError">
+        {{ serverError }}
       </small>
     </div>
 
@@ -41,9 +55,13 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn--primary btn--full" [disabled]="loading || registerForm.invalid">
+      <button type="submit" class="btn btn--primary btn--full" [disabled]="
+        loading ||
+        (accountType==='player' && registerForm.invalid) ||
+        (accountType==='owner' && (registerForm.get('email')?.invalid || registerForm.get('password')?.invalid))
+      ">
         <span class="u-spinner u-spinner--sm" *ngIf="loading" aria-hidden="true"></span>
-        <span *ngIf="!loading">Sign Up</span>
+        <span *ngIf="!loading">{{ accountType === 'owner' ? 'Continue with Stripe Setup' : 'Sign Up' }}</span>
       </button>
     </div>
 

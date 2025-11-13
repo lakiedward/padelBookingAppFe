@@ -6,12 +6,15 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MapService } from '../../services/map.service';
 import { ClubService, ClubDetailsRequest } from '../../services/club.service';
 import { finalize } from 'rxjs/operators';
 import { ClubDetails, SportKey, SPORT_OPTIONS } from '../../models/club.models';
 import { ClubPreviewComponent } from '../club-preview/club-preview.component';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 interface SavedLocation {
   address: string;
@@ -22,10 +25,10 @@ interface SavedLocation {
   @Component({
   selector: 'app-club-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputTextModule, ButtonModule, RippleModule, PasswordModule, ToastModule, ClubPreviewComponent],
+  imports: [CommonModule, ReactiveFormsModule, InputTextModule, ButtonModule, RippleModule, PasswordModule, ToastModule, ConfirmDialogModule, ClubPreviewComponent],
   templateUrl: './club-details.component.html',
   styleUrl: './club-details.component.scss',
-  providers: [MessageService]
+  providers: [MessageService, ConfirmationService]
 })
 export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   form: FormGroup;
@@ -70,7 +73,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   hasExistingClub = false;
 
-  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, public clubService: ClubService, private messageService: MessageService, private host: ElementRef<HTMLElement>) {
+  constructor(private fb: FormBuilder, @Inject(PLATFORM_ID) platformId: Object, private mapService: MapService, public clubService: ClubService, private messageService: MessageService, private host: ElementRef<HTMLElement>, private router: Router, private authService: AuthService, private confirmationService: ConfirmationService) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -109,7 +112,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     // Load existing club from backend with spinner
     this.isLoading.set(true);
     this.clubService.getMyClub().pipe(
-      finalize(() => this.isLoading.set(false))
+      finalize(() => { this.isLoading.set(false); setTimeout(() => this.initMapOnce()); })
     ).subscribe({
       next: (club) => {
         this.hasExistingClub = true;
@@ -483,29 +486,51 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   // Removed handleProfileFile/handleWallpaperFile helpers in favor of direct assignment
 
   onDeleteClub() {
-    const ok = typeof window !== 'undefined' ? window.confirm('Delete this club and all related data (courts)?') : true;
-    if (!ok) return;
-    this.clubService.deleteClub().subscribe({
-      next: () => {
-        // Reset local state
-        this.clubService.lastSaved.set(null);
-        this.hasExistingClub = false;
-        this.form.reset();
-        this.savedLocations = [];
-        this.selectedSports = new Set<SportKey>(['tennis']);
-        const p = this.profilePreviewUrl(); if (p) URL.revokeObjectURL(p);
-        const w = this.wallpaperPreviewUrl(); if (w) URL.revokeObjectURL(w);
-        this.profilePreviewUrl.set(null);
-        this.wallpaperPreviewUrl.set(null);
-        this.selectedProfileFile = null;
-        this.selectedWallpaperFile = null;
-        this.isEditing.set(true);
-        this.messageService.add({ key: 'success', severity: 'success', summary: 'Deleted', detail: 'Club deleted successfully', life: 3000 });
-      },
-      error: (err) => {
-        console.error('Delete failed', err);
-        const msg = err?.error?.message || 'Failed to delete club';
-        this.messageService.add({ key: 'error', severity: 'error', summary: 'Error', detail: msg, life: 5000 });
+    this.confirmationService.confirm({
+      header: 'Delete Club',
+      message: 'This will permanently delete your club, all courts, bookings and also your owner account. You will be logged out. Continue?',
+      icon: 'pi pi-exclamation-triangle',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Continue',
+      accept: () => {
+        // Defer to next tick so the first dialog fully closes before opening the second
+        setTimeout(() => {
+          this.confirmationService.confirm({
+            header: 'Confirm Deletion',
+            message: 'This action cannot be undone. Are you absolutely sure you want to permanently delete your club and owner account?',
+            icon: 'pi pi-exclamation-triangle',
+            rejectLabel: 'Cancel',
+            acceptLabel: 'Delete',
+            accept: () => {
+              this.clubService.deleteClub().subscribe({
+                next: () => {
+                  // Reset local state
+                  this.clubService.lastSaved.set(null);
+                  this.hasExistingClub = false;
+                  this.form.reset();
+                  this.savedLocations = [];
+                  this.selectedSports = new Set<SportKey>(['tennis']);
+                  const p = this.profilePreviewUrl(); if (p) URL.revokeObjectURL(p);
+                  const w = this.wallpaperPreviewUrl(); if (w) URL.revokeObjectURL(w);
+                  this.profilePreviewUrl.set(null);
+                  this.wallpaperPreviewUrl.set(null);
+                  this.selectedProfileFile = null;
+                  this.selectedWallpaperFile = null;
+                  this.isEditing.set(true);
+                  this.messageService.add({ key: 'success', severity: 'success', summary: 'Deleted', detail: 'Club deleted successfully', life: 3000 });
+                  // Owner account will also be deleted on backend; logout locally and redirect to auth
+                  try { this.authService.logout(); } catch {}
+                  try { this.router.navigate(['/auth']); } catch {}
+                },
+                error: (err) => {
+                  console.error('Delete failed', err);
+                  const msg = err?.error?.message || 'Failed to delete club';
+                  this.messageService.add({ key: 'error', severity: 'error', summary: 'Error', detail: msg, life: 5000 });
+                }
+              });
+            }
+          });
+        }, 0);
       }
     });
   }

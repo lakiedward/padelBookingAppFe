@@ -2,13 +2,16 @@ import { Component, EventEmitter, OnInit, Output, ChangeDetectorRef } from '@ang
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../services/event.service';
 import { EventSummaryResponse, EventPanelData, eventSummaryToPanelData, getFormatDisplayName, getStatusDisplayName, EventStatus } from '../../models/event.models';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-event-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ConfirmDialogModule],
   templateUrl: './event-view.component.html',
-  styleUrl: './event-view.component.scss'
+  styleUrl: './event-view.component.scss',
+  providers: [ConfirmationService]
 })
 export class EventViewComponent implements OnInit {
   @Output() addEvent = new EventEmitter<void>();
@@ -20,7 +23,8 @@ export class EventViewComponent implements OnInit {
 
   constructor(
     private eventService: EventService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -62,18 +66,23 @@ export class EventViewComponent implements OnInit {
   }
 
   onDeleteEvent(eventId: number, eventName: string) {
-    if (!confirm(`Are you sure you want to delete "${eventName}"?`)) {
-      return;
-    }
-
-    this.eventService.deleteEvent(eventId).subscribe({
-      next: () => {
-        console.log('Event deleted successfully');
-        this.loadEvents();
-      },
-      error: (err) => {
-        console.error('Failed to delete event:', err);
-        alert('Failed to delete event: ' + (err.error?.error || err.message));
+    this.confirmationService.confirm({
+      header: 'Delete Event',
+      message: `Are you sure you want to delete "${eventName}"? This action cannot be undone.`,
+      icon: 'pi pi-exclamation-triangle',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      accept: () => {
+        this.eventService.deleteEvent(eventId).subscribe({
+          next: () => {
+            console.log('Event deleted successfully');
+            this.loadEvents();
+          },
+          error: (err) => {
+            console.error('Failed to delete event:', err);
+            alert('Failed to delete event: ' + (err.error?.error || err.message));
+          }
+        });
       }
     });
   }

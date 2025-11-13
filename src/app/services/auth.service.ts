@@ -74,6 +74,12 @@ export class AuthService {
       .pipe(map(() => void 0));
   }
 
+  registerAdmin(payload: { email: string; password: string }): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/admin/register`, payload)
+      .pipe(tap(response => this.handleAuthSuccess(response)));
+  }
+
   private handleAuthSuccess(response: AuthResponse) {
     const user: User = {
       username: response.username,
