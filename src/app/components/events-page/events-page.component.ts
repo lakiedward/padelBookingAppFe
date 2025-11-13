@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
+import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { PublicService } from '../../services/public.service';
 import {
   EventPanelData,
@@ -21,7 +22,7 @@ interface StatusFilterOption {
 @Component({
   selector: 'app-events-page',
   standalone: true,
-  imports: [CommonModule, AppHeaderComponent],
+  imports: [CommonModule, AppHeaderComponent, ConvertMoneyPipe],
   templateUrl: './events-page.component.html',
   styleUrls: ['./events-page.component.scss']
 })

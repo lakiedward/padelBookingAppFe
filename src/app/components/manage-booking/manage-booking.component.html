@@ -137,7 +137,7 @@
                       </div>
                       <div class="booking-card__compact-row">
                         <span class="booking-card__label">Price:</span>
-                        <span class="booking-card__value booking-card__price--small">€{{ b.price }}</span>
+                        <span class="booking-card__value booking-card__price--small">{{ b.price | convertMoney:'EUR' }}</span>
                       </div>
                     </div>
                   </div>
@@ -166,11 +166,11 @@
                   <span class="booking-card__label">User:</span>
                   <span class="booking-card__value">{{ b.username }}</span>
                 </div>
-                <div class="booking-card__row">
+                <div class="booking-card__row" *ngIf="b.userEmail">
                   <span class="booking-card__label">Email:</span>
                   <span class="booking-card__value">{{ b.userEmail }}</span>
                 </div>
-                <div class="booking-card__row">
+                <div class="booking-card__row" *ngIf="b.userPhone">
                   <span class="booking-card__label">Phone:</span>
                   <span class="booking-card__value">{{ b.userPhone }}</span>
                 </div>
@@ -180,7 +180,7 @@
                 </div>
                 <div class="booking-card__row">
                   <span class="booking-card__label">Price:</span>
-                  <span class="booking-card__value booking-card__price">€{{ b.price }}</span>
+                  <span class="booking-card__value booking-card__price">{{ b.price | convertMoney:'EUR' }}</span>
                 </div>
               </div>
             </div>
@@ -209,10 +209,10 @@
           <div class="booking-modal__row"><span class="label">Time</span><span class="value">{{ sb.start | time24 }} – {{ sb.end | time24 }}</span></div>
           <div class="booking-modal__row"><span class="label">Court</span><span class="value">{{ sb.court }}</span></div>
           <div class="booking-modal__row"><span class="label">User</span><span class="value">{{ sb.username }}</span></div>
-          <div class="booking-modal__row"><span class="label">Email</span><span class="value">{{ sb.userEmail }}</span></div>
-          <div class="booking-modal__row"><span class="label">Phone</span><span class="value">{{ sb.userPhone }}</span></div>
+          <div class="booking-modal__row" *ngIf="sb.userEmail"><span class="label">Email</span><span class="value">{{ sb.userEmail }}</span></div>
+          <div class="booking-modal__row" *ngIf="sb.userPhone"><span class="label">Phone</span><span class="value">{{ sb.userPhone }}</span></div>
           <div class="booking-modal__row"><span class="label">Payment</span><span class="value tag">{{ sb.paymentType }}</span></div>
-          <div class="booking-modal__row"><span class="label">Price</span><span class="value price">€{{ sb.price }}</span></div>
+          <div class="booking-modal__row"><span class="label">Price</span><span class="value price">{{ sb.price | convertMoney:'EUR' }}</span></div>
         </div>
       </div>
     </div>

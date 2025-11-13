@@ -333,12 +333,11 @@ export class CalendarPageComponent implements OnInit {
     
     // Return the actual booked time slots for this court
     const slots = reservations.map(r => {
-      const startDate = new Date(`${r.date}T${r.start}`);
-      return startDate.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
-      });
+      const start = new Date(`${r.date}T${r.start}`);
+      const end = new Date(`${r.date}T${r.end}`);
+      const startStr = start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const endStr = end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return `${startStr} – ${endStr}`;
     });
     
     // If more than 3 slots, show first 3 and count the rest

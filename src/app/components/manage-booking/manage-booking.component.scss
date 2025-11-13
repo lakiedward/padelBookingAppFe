@@ -1278,6 +1278,8 @@ $white: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px; /* keep content off screen edges on small devices */
+  box-sizing: border-box;
 }
 
 .modal-overlay {
@@ -1292,7 +1294,7 @@ $white: #fff;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(1100px, 96vw);
+  width: min(1100px, calc(100vw - 32px)); /* prevent side overflow on narrow screens */
   max-height: 92vh;
   overflow: auto;
   background: rgba(255, 255, 255, 0.08);
@@ -1303,6 +1305,8 @@ $white: #fff;
   padding: 24px;
   box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.3);
   z-index: 2;
+  box-sizing: border-box; /* include padding in width */
+  overflow-wrap: anywhere; /* wrap long values */
 }
 
 .booking-modal__header {
@@ -1363,9 +1367,38 @@ $white: #fff;
   font-size: 16px;
 }
 
-@media (max-width: 640px) {
+@media (min-width: 769px) and (max-width: 1024px) {
+  .modal-content {
+    width: calc(100vw - 48px); /* safe gutters on tablets */
+    padding: 20px;
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: calc(100vw - 24px); /* keep side gutters on phones */
+    max-width: calc(100vw - 24px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 16px; /* reduce padding on small screens */
+    border-radius: 14px;
+  }
+
   .booking-modal__row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* stack label/value */
+  }
+
+  .booking-modal__title {
+    font-size: 16px;
+  }
+
+  .booking-modal__row .label {
+    font-size: 12px;
+  }
+
+  .booking-modal__row .value {
+    font-size: 13px;
   }
 }
 

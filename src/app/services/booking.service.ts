@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   CreateBookingRequest,
-  BookingSummaryResponse
+  BookingSummaryResponse,
+  AdminBookingResponse
 } from '../models/booking.models';
 
 @Injectable({ providedIn: 'root' })
@@ -69,8 +70,8 @@ export class BookingService {
   /**
    * ADMIN: Get all bookings (requires ROLE_ADMIN)
    */
-  getAllBookings(): Observable<BookingSummaryResponse[]> {
-    return this.http.get<BookingSummaryResponse[]>(
+  getAllBookings(): Observable<AdminBookingResponse[]> {
+    return this.http.get<AdminBookingResponse[]>(
       `${this.apiBase}/api/admin/bookings`,
       { headers: this.getAuthHeaders() }
     );
@@ -79,8 +80,8 @@ export class BookingService {
   /**
    * ADMIN: Get bookings for a specific court (requires ROLE_ADMIN)
    */
-  getBookingsByCourtId(courtId: number): Observable<BookingSummaryResponse[]> {
-    return this.http.get<BookingSummaryResponse[]>(
+  getBookingsByCourtId(courtId: number): Observable<AdminBookingResponse[]> {
+    return this.http.get<AdminBookingResponse[]>(
       `${this.apiBase}/api/admin/bookings/court/${courtId}`,
       { headers: this.getAuthHeaders() }
     );

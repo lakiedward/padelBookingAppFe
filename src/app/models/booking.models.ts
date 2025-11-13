@@ -4,6 +4,7 @@ export interface AllTimeSlotItem {
   endTime: string;   // ISO DateTime string
   price: number;
   available: boolean;
+  currency?: string;
 }
 
 export interface SlotsForDateResponse {
@@ -23,6 +24,7 @@ export interface BookingSummaryResponse {
   endTime: string;   // ISO DateTime string
   price: number;
   createdAt: string; // ISO DateTime string
+  currency?: string;
 }
 
 export interface AdminBookingResponse {
@@ -35,11 +37,12 @@ export interface AdminBookingResponse {
   endTime: string;   // ISO DateTime string
   price: number;
   createdAt: string; // ISO DateTime string
+  currency?: string;
   userId: number;
   username: string;
-  userEmail: string;
-  userPhone: string;
-  paymentType: string; // e.g., 'Card', 'Cash', 'Online'
+  userEmail?: string | null;
+  userPhone?: string | null;
+  paymentType?: string | null; // e.g., 'Card', 'Cash', 'Online'
 }
 
 export interface CreateBookingRequest {

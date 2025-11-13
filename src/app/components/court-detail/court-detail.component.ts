@@ -9,12 +9,13 @@ import { AuthService } from '../../services/auth.service';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { MapService } from '../../services/map.service';
 import { Subject, combineLatest } from 'rxjs';
+import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-court-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppHeaderComponent],
+  imports: [CommonModule, FormsModule, AppHeaderComponent, ConvertMoneyPipe],
   templateUrl: './court-detail.component.html',
   styleUrl: './court-detail.component.scss'
 })
@@ -28,8 +29,8 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
   // date/state
   selectedDate: Date = new Date();
   days: Date[] = [];
-  slotsForDay: { id: number; start: string; end: string; available: boolean; price: number }[] = [];
-  selectedSlot?: { id: number; start: string; end: string; price: number };
+  slotsForDay: { id: number; start: string; end: string; available: boolean; price: number; currency?: string }[] = [];
+  selectedSlot?: { id: number; start: string; end: string; price: number; currency?: string };
 
   // location/map state
   clubLocation?: { address: string; lat: number; lng: number };
@@ -208,7 +209,8 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
           start: (s.startTime || '').substring(11, 16),
           end: (s.endTime || '').substring(11, 16),
           available: !!s.available,
-          price: s.price || 0
+          price: s.price || 0,
+          currency: (s as any).currency || 'EUR'
         }));
         console.log('[CourtDetail] slotsForDay mapped', { count: this.slotsForDay.length, slots: this.slotsForDay });
         this.cdr.detectChanges();
@@ -223,9 +225,9 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  onPickSlot(slot: { id: number; start: string; end: string; available?: boolean; price?: number }) {
+  onPickSlot(slot: { id: number; start: string; end: string; available?: boolean; price?: number; currency?: string }) {
     if (slot.available === false) return;
-    this.selectedSlot = { id: slot.id, start: slot.start, end: slot.end, price: slot.price || 0 };
+    this.selectedSlot = { id: slot.id, start: slot.start, end: slot.end, price: slot.price || 0, currency: slot.currency };
   }
 
   onBookNow() {

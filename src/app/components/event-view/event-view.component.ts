@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../services/event.service';
+import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { EventSummaryResponse, EventPanelData, eventSummaryToPanelData, getFormatDisplayName, getStatusDisplayName, EventStatus } from '../../models/event.models';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
@@ -8,7 +9,7 @@ import { ConfirmationService } from 'primeng/api';
 @Component({
   selector: 'app-event-view',
   standalone: true,
-  imports: [CommonModule, ConfirmDialogModule],
+  imports: [CommonModule, ConfirmDialogModule, ConvertMoneyPipe],
   templateUrl: './event-view.component.html',
   styleUrl: './event-view.component.scss',
   providers: [ConfirmationService]

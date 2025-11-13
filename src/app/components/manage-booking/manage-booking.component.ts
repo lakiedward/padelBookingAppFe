@@ -3,10 +3,11 @@ import { Component, computed, signal, OnInit, Input, OnChanges, SimpleChanges } 
 import { BookingService } from '../../services/booking.service';
 import { CourtService } from '../../services/court.service';
 import { CourtSummaryResponse } from '../../models/court.models';
-import { BookingSummaryResponse } from '../../models/booking.models';
+import { AdminBookingResponse } from '../../models/booking.models';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Time24Pipe } from '../../pipes/time24.pipe';
+import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -22,9 +23,9 @@ type AdminBooking = {
   city?: string;
   username: string;
   userId: number;
-  userEmail: string;
-  userPhone: string;
-  paymentType: string;
+  userEmail?: string | null;
+  userPhone?: string | null;
+  paymentType?: string | null;
   price: number;
 };
 
@@ -36,7 +37,7 @@ interface CourtOption {
 @Component({
   selector: 'app-manage-booking',
   standalone: true,
-  imports: [CommonModule, Select, FormsModule, Time24Pipe],
+  imports: [CommonModule, Select, FormsModule, Time24Pipe, ConvertMoneyPipe],
   templateUrl: './manage-booking.component.html',
   styleUrl: './manage-booking.component.scss'
 })
@@ -128,15 +129,14 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     this.isLoading.set(true);
 
     this.bookingService.getBookingsByCourtId(courtId).subscribe({
-      next: (bookings: BookingSummaryResponse[]) => {
+      next: (bookings: AdminBookingResponse[]) => {
         console.log('[ManageBooking] Bookings received:', bookings);
 
-        // Transform backend BookingSummaryResponse to AdminBooking format
-        const adminBookings: AdminBooking[] = bookings.map((booking, index) => {
+        // Transform backend AdminBookingResponse to AdminBooking format
+        const adminBookings: AdminBooking[] = bookings.map((booking) => {
           const startDateTime = new Date(booking.startTime);
           const endDateTime = new Date(booking.endTime);
 
-          // TODO: Update backend to return AdminBookingResponse with full user details
           return {
             id: booking.id.toString(),
             courtId: booking.courtId,
@@ -146,11 +146,11 @@ export class ManageBookingComponent implements OnInit, OnChanges {
             club: 'Club',
             court: booking.courtName,
             sport: this.getSportEmoji(booking.activityName),
-            username: `User ${booking.id}`, // Placeholder - backend should provide actual username
-            userId: booking.id, // Placeholder - should be actual userId
-            userEmail: `user${booking.id}@example.com`, // Placeholder
-            userPhone: `+40 7${String(index).padStart(2, '0')} ${String(booking.id).padStart(3, '0')} ${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`, // Placeholder
-            paymentType: 'Cash', // Placeholder until backend provides paymentType
+            username: booking.username,
+            userId: booking.userId,
+            userEmail: booking.userEmail ?? undefined,
+            userPhone: booking.userPhone ?? undefined,
+            paymentType: booking.paymentType ?? 'Card',
             price: booking.price,
           };
         });

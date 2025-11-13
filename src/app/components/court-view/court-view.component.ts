@@ -5,6 +5,7 @@ import { CourtSummaryResponse, CourtResponse, CourtAvailabilityRuleResponse, Bac
 import { forkJoin } from 'rxjs';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 
 type Tone = 'green' | 'blue' | 'gray';
 
@@ -12,6 +13,8 @@ interface TimeSlot {
   label: string;
   note?: string;
   price?: string;
+  priceValue?: number;
+  currency?: string;
   tone?: Tone;
   startHHmm?: string;
   endHHmm?: string;
@@ -28,6 +31,8 @@ interface CourtPanelData {
   title: string;
   subtitle: string;
   price: string;
+  priceValue?: number;
+  currency?: string;
   imageUrl?: string | null;
   status?: 'Active' | 'Inactive';
   tags: string[];
@@ -39,7 +44,7 @@ interface CourtPanelData {
 @Component({
   selector: 'app-court-view',
   standalone: true,
-  imports: [CommonModule, ConfirmDialogModule],
+  imports: [CommonModule, ConfirmDialogModule, ConvertMoneyPipe],
   templateUrl: './court-view.component.html',
   styleUrl: './court-view.component.scss',
   providers: [ConfirmationService]
@@ -187,6 +192,8 @@ export class CourtViewComponent implements OnInit {
       title: court.name,
       subtitle,
       price: minPrice > 0 ? `€${minPrice}` : 'N/A',
+      priceValue: minPrice,
+      currency: 'EUR',
       imageUrl,
       status: 'Active',
       tags,
@@ -277,6 +284,8 @@ export class CourtViewComponent implements OnInit {
           label: `${rule.startTime} – ${rule.endTime}`,
           note: `every ${rule.slotMinutes} min`,
           price: `€${rule.price}`,
+          priceValue: rule.price,
+          currency: 'EUR',
           tone: tones[toneIndex % tones.length]
           , startHHmm: rule.startTime
           , endHHmm: rule.endTime

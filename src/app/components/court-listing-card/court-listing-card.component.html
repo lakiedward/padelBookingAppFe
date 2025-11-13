@@ -29,7 +29,7 @@
     </div>
 
     <div class="availability" *ngIf="mode === 'booking'">Available on {{ availableDate || '—' }}:</div>
-    <div class="availability" *ngIf="mode === 'reservation' && availableDate">Available on {{ availableDate }}:</div>
+    <div class="availability" *ngIf="mode === 'reservation' && availableDate">Your booking is on {{ availableDate }} from:</div>
     <div class="slots" *ngIf="slots && slots.length > 0">
       <span class="chip" *ngFor="let s of slots">{{ s }}</span>
     </div>

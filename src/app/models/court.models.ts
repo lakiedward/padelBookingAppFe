@@ -67,6 +67,7 @@ export enum BackendAvailabilityRuleType {
 export interface CourtEquipmentResponse {
   name: string;
   pricePerHour: number;
+  currency?: string;
 }
 
 export interface CourtAvailabilityRuleResponse {
@@ -78,6 +79,7 @@ export interface CourtAvailabilityRuleResponse {
   endTime: string;
   slotMinutes: number;
   price: number;
+  currency?: string;
 }
 
 export interface CourtPhotoResponse {
@@ -147,4 +149,5 @@ export interface PublicAvailableTimeSlot {
   endTime: string;   // ISO LocalDateTime
   price: number;
   duration: number; // minutes
+  currency?: string;
 }
