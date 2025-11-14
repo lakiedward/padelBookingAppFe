@@ -137,7 +137,7 @@
                       </div>
                       <div class="booking-card__compact-row">
                         <span class="booking-card__label">Price:</span>
-                        <span class="booking-card__value booking-card__price--small">{{ b.price | convertMoney:'EUR' }}</span>
+                        <span class="booking-card__value booking-card__price--small">{{ b.price | convertMoney:(b.currency || 'EUR') }}</span>
                       </div>
                     </div>
                   </div>
@@ -180,7 +180,7 @@
                 </div>
                 <div class="booking-card__row">
                   <span class="booking-card__label">Price:</span>
-                  <span class="booking-card__value booking-card__price">{{ b.price | convertMoney:'EUR' }}</span>
+                  <span class="booking-card__value booking-card__price">{{ b.price | convertMoney:(b.currency || 'EUR') }}</span>
                 </div>
               </div>
             </div>
@@ -202,19 +202,96 @@
       <div class="booking-modal">
         <div class="booking-modal__header">
           <div class="booking-modal__title">Booking Details</div>
-          <button class="btn" (click)="closeBooking()">Close</button>
+          <div class="booking-modal__header-actions">
+            <button class="btn" (click)="openBookingFullPage(selectedBooking())">Open full page</button>
+            <button class="btn" (click)="closeBooking()">Close</button>
+          </div>
         </div>
         <div class="booking-modal__body" *ngIf="selectedBooking() as sb">
-          <div class="booking-modal__row"><span class="label">Date</span><span class="value">{{ formatDateKeyToLong(sb.date) }}</span></div>
-          <div class="booking-modal__row"><span class="label">Time</span><span class="value">{{ sb.start | time24 }} – {{ sb.end | time24 }}</span></div>
-          <div class="booking-modal__row"><span class="label">Court</span><span class="value">{{ sb.court }}</span></div>
-          <div class="booking-modal__row"><span class="label">User</span><span class="value">{{ sb.username }}</span></div>
-          <div class="booking-modal__row" *ngIf="sb.userEmail"><span class="label">Email</span><span class="value">{{ sb.userEmail }}</span></div>
-          <div class="booking-modal__row" *ngIf="sb.userPhone"><span class="label">Phone</span><span class="value">{{ sb.userPhone }}</span></div>
-          <div class="booking-modal__row"><span class="label">Payment</span><span class="value tag">{{ sb.paymentType }}</span></div>
-          <div class="booking-modal__row"><span class="label">Price</span><span class="value price">{{ sb.price | convertMoney:'EUR' }}</span></div>
+          <div class="booking-modal__layout">
+            <div class="booking-modal__column booking-modal__column--summary">
+              <div class="booking-modal__row"><span class="label">Date</span><span class="value">{{ formatDateKeyToLong(sb.date) }}</span></div>
+              <div class="booking-modal__row"><span class="label">Time</span><span class="value">{{ sb.start | time24 }} – {{ sb.end | time24 }}</span></div>
+              <div class="booking-modal__row"><span class="label">Court</span><span class="value">{{ sb.court }}</span></div>
+              <div class="booking-modal__row"><span class="label">User</span><span class="value">{{ sb.username }}</span></div>
+              <div class="booking-modal__row" *ngIf="sb.userEmail"><span class="label">Email</span><span class="value">{{ sb.userEmail }}</span></div>
+              <div class="booking-modal__row" *ngIf="sb.userPhone"><span class="label">Phone</span><span class="value">{{ sb.userPhone }}</span></div>
+              <div class="booking-modal__row"><span class="label">Payment</span><span class="value tag">{{ sb.paymentType }}</span></div>
+              <div class="booking-modal__row"><span class="label">Price</span><span class="value price">{{ sb.price | convertMoney:(sb.currency || 'EUR') }}</span></div>
+            </div>
+
+            <div class="booking-modal__column booking-modal__column--reschedule">
+              <!-- Reschedule section -->
+              <div class="booking-modal__section">
+                <div class="booking-modal__section-header">
+                  <div class="booking-modal__section-title">Reschedule booking</div>
+                  <div class="booking-modal__section-subtitle">
+                    Select a new date and slot for this booking.
+                  </div>
+                </div>
+
+                <div class="booking-modal__row booking-modal__row--compact">
+                  <span class="label">New date</span>
+                  <span class="value">
+                    <input
+                      type="date"
+                      [value]="rescheduleDate() || sb.date"
+                      (change)="onRescheduleDateChange($event)"
+                    />
+                  </span>
+                </div>
+
+                <div class="booking-modal__row booking-modal__row--compact">
+                  <button class="btn btn--primary" (click)="loadRescheduleOptions()" [disabled]="rescheduleLoading()">
+                    Show available slots
+                  </button>
+                </div>
+
+                <div class="booking-modal__row booking-modal__row--compact" *ngIf="rescheduleLoading()">
+                  <span class="value">Loading reschedule options...</span>
+                </div>
+
+                <div class="booking-modal__row booking-modal__row--compact" *ngIf="rescheduleError() as err">
+                  <span class="value error">{{ err }}</span>
+                </div>
+
+                <ng-container *ngIf="rescheduleOptions() as groups">
+                  <div class="booking-modal__row booking-modal__row--compact" *ngIf="groups.length === 0">
+                    <span class="value">No available slots for this date.</span>
+                  </div>
+
+                  <div class="reschedule-groups" *ngIf="groups.length > 0">
+                    <div class="reschedule-group" *ngFor="let g of groups">
+                      <div class="reschedule-group__header">
+                        <div class="reschedule-group__title">
+                          {{ g.courtName }}
+                          <span *ngIf="g.isCurrentCourt" class="tag tag--current-court">current court</span>
+                        </div>
+                      </div>
+
+                      <div class="reschedule-slots">
+                        <button
+                          class="slot-chip"
+                          *ngFor="let s of g.slots"
+                          [class.slot-chip--current]="s.isCurrentSlot"
+                          [class.slot-chip--unavailable]="!s.available && !s.isCurrentSlot"
+                          [disabled]="rescheduleLoading() || (!s.available && !s.isCurrentSlot)"
+                          (click)="rescheduleToSlot(s)"
+                        >
+                          <span class="slot-chip__time">{{ s.startTime | time24 }} – {{ s.endTime | time24 }}</span>
+                          <span class="slot-chip__price">{{ s.price | convertMoney:(s.currency || 'EUR') }}</span>
+                          <span *ngIf="s.isCurrentSlot" class="slot-chip__badge">current</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  
 </div>

@@ -180,9 +180,10 @@ export class CourtViewComponent implements OnInit {
       ? tags.join(' • ')
       : court.sport;
 
-    // Get minimum price from availability rules
+    // Get minimum price and currency from availability rules
     const prices = court.availabilityRules.map(rule => rule.price);
     const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+    const firstCurrency = court.availabilityRules[0]?.currency || 'EUR';
 
     // Generate 7-day calendar for this court
     const schedules = this.build7DayCalendar(court.availabilityRules);
@@ -193,7 +194,7 @@ export class CourtViewComponent implements OnInit {
       subtitle,
       price: minPrice > 0 ? `€${minPrice}` : 'N/A',
       priceValue: minPrice,
-      currency: 'EUR',
+      currency: firstCurrency,
       imageUrl,
       status: 'Active',
       tags,
@@ -285,7 +286,7 @@ export class CourtViewComponent implements OnInit {
           note: `every ${rule.slotMinutes} min`,
           price: `€${rule.price}`,
           priceValue: rule.price,
-          currency: 'EUR',
+          currency: rule.currency || 'EUR',
           tone: tones[toneIndex % tones.length]
           , startHHmm: rule.startTime
           , endHHmm: rule.endTime

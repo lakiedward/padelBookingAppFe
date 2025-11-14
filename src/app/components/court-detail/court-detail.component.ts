@@ -240,7 +240,8 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
         date: this.dateKey(this.selectedDate),
         start: this.selectedSlot.start,
         end: this.selectedSlot.end,
-        price: this.selectedSlot.price
+        price: this.selectedSlot.price,
+        currency: this.selectedSlot.currency || 'EUR'
       }
     });
   }

@@ -1329,6 +1329,25 @@ $white: #fff;
   gap: 10px;
 }
 
+.booking-modal__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr);
+  gap: 20px;
+}
+
+.booking-modal__column {
+  min-width: 0;
+}
+
+.booking-modal__column--summary {
+  border-right: 1px solid rgba(214, 221, 230, 0.12);
+  padding-right: 16px;
+}
+
+.booking-modal__column--reschedule {
+  padding-left: 16px;
+}
+
 .booking-modal__row {
   display: grid;
   grid-template-columns: 120px 1fr;
@@ -1367,11 +1386,173 @@ $white: #fff;
   font-size: 16px;
 }
 
+.booking-modal__section {
+  margin-top: 4px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(214, 221, 230, 0.12);
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.booking-modal__section-header {
+  margin-bottom: 4px;
+}
+
+.booking-modal__section-title {
+  color: $text;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.booking-modal__section-subtitle {
+  color: $muted;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.booking-modal__row--compact {
+  padding: 6px 0;
+  border-bottom: none;
+}
+
+.btn--primary {
+  background: $accent;
+  color: #000a14;
+  border-color: $accent-border;
+  box-shadow: 0 0 0 1px rgba(167, 238, 67, 0.3);
+
+  &:hover {
+    background: lighten($accent, 4%);
+    box-shadow: 0 0 0 1px rgba(167, 238, 67, 0.45);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.reschedule-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.reschedule-group {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(214, 221, 230, 0.15);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reschedule-group__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reschedule-group__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: $text;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.tag--current-court {
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+.reschedule-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slot-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(214, 221, 230, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 6px 10px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slot-chip__time {
+  font-size: 12px;
+  font-weight: 700;
+  color: $text;
+}
+
+.slot-chip__price {
+  font-size: 11px;
+  font-weight: 700;
+  color: $accent;
+}
+
+.slot-chip__badge {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(167, 238, 67, 0.16);
+  color: $accent;
+}
+
+.slot-chip:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(214, 221, 230, 0.25);
+  transform: translateY(-1px);
+}
+
+.slot-chip:disabled {
+  cursor: default;
+}
+
+.slot-chip--current {
+  border-color: $accent-border;
+  box-shadow: 0 0 0 1px rgba(167, 238, 67, 0.4);
+}
+
+.slot-chip--unavailable {
+  opacity: 0.45;
+}
+
 @media (min-width: 769px) and (max-width: 1024px) {
+  .modal-container {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
   .modal-content {
-    width: calc(100vw - 48px); /* safe gutters on tablets */
+    width: 100vw; /* safe gutters on tablets */
     padding: 20px;
-    border-radius: 16px;
+    top: 0;
+    left: 0;
+    transform: none;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
   }
 }
 
@@ -1399,6 +1580,33 @@ $white: #fff;
 
   .booking-modal__row .value {
     font-size: 13px;
+  }
+
+  .booking-modal__layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .booking-modal__column--summary {
+    border-right: 0;
+    padding-right: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(214, 221, 230, 0.12);
+  }
+
+  .booking-modal__column--reschedule {
+    padding-left: 0;
+  }
+
+  .reschedule-slots {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .slot-chip {
+    width: 100%;
   }
 }
 

@@ -72,7 +72,7 @@
               <!-- Price Highlight -->
               <div class="price-card">
                 <span class="price-label">Total Price</span>
-                <span class="price-value">${{ slotDetails.price.toFixed(2) }}</span>
+                <span class="price-value">{{ slotDetails.price | convertMoney:(slotDetails.currency || 'EUR') }}</span>
               </div>
             </div>
 

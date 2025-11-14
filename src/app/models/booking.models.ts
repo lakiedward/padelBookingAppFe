@@ -65,3 +65,46 @@ export interface BookingResponse {
   };
   createdAt: string;
 }
+
+export interface RescheduleTimeSlotOptionResponse {
+  timeSlotId: number;
+  courtId: number;
+  courtName: string;
+  startTime: string;
+  endTime: string;
+  price: number;
+  available: boolean;
+  currency?: string | null;
+  isCurrentSlot: boolean;
+}
+
+export interface RescheduleCourtOptionsResponse {
+  courtId: number;
+  courtName: string;
+  isCurrentCourt: boolean;
+  slots: RescheduleTimeSlotOptionResponse[];
+}
+
+export interface AdminBookingDetailsResponse {
+  id: number;
+  status: string;
+  timeSlotId: number;
+  courtId: number;
+  courtName: string;
+  courtPicture?: string | null;
+  activityName: string;
+  sportKey: string;
+  clubId: number;
+  clubName: string;
+  startTime: string; // ISO DateTime string
+  endTime: string;   // ISO DateTime string
+  price: number;
+  currency?: string | null;
+  createdAt: string; // ISO DateTime string
+  durationMinutes: number;
+  userId: number;
+  username: string;
+  userEmail?: string | null;
+  userPhone?: string | null;
+  paymentType?: string | null;
+}

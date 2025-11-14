@@ -5,7 +5,9 @@ import { environment } from '../../environments/environment';
 import {
   CreateBookingRequest,
   BookingSummaryResponse,
-  AdminBookingResponse
+  AdminBookingResponse,
+  RescheduleCourtOptionsResponse,
+  AdminBookingDetailsResponse
 } from '../models/booking.models';
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +25,16 @@ export class BookingService {
     return this.http.post<BookingSummaryResponse>(
       `${this.apiBase}/api/bookings`,
       request,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * ADMIN: Get detailed information for a specific booking (requires ROLE_ADMIN)
+   */
+  getAdminBookingDetails(bookingId: number): Observable<AdminBookingDetailsResponse> {
+    return this.http.get<AdminBookingDetailsResponse>(
+      `${this.apiBase}/api/admin/bookings/${bookingId}/details`,
       { headers: this.getAuthHeaders() }
     );
   }
@@ -83,6 +95,39 @@ export class BookingService {
   getBookingsByCourtId(courtId: number): Observable<AdminBookingResponse[]> {
     return this.http.get<AdminBookingResponse[]>(
       `${this.apiBase}/api/admin/bookings/court/${courtId}`,
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  /**
+   * ADMIN: Get reschedule options for a booking and date across all courts of the same sport
+   */
+  getRescheduleOptions(
+    bookingId: number,
+    date: string
+  ): Observable<RescheduleCourtOptionsResponse[]> {
+    return this.http.get<RescheduleCourtOptionsResponse[]>(
+      `${this.apiBase}/api/admin/bookings/reschedule-options`,
+      {
+        headers: this.getAuthHeaders(),
+        params: {
+          bookingId: bookingId.toString(),
+          date
+        }
+      }
+    );
+  }
+
+  /**
+   * ADMIN: Reschedule a booking to a new time slot
+   */
+  rescheduleBooking(
+    bookingId: number,
+    newTimeSlotId: number
+  ): Observable<AdminBookingResponse> {
+    return this.http.put<AdminBookingResponse>(
+      `${this.apiBase}/api/admin/bookings/${bookingId}/reschedule`,
+      { newTimeSlotId },
       { headers: this.getAuthHeaders() }
     );
   }

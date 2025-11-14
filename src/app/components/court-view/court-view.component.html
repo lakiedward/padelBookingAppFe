@@ -50,14 +50,14 @@
                 <span class="chip" *ngIf="c.tags.length > 3">+{{ c.tags.length - 3 }} more</span>
               </div>
               <div class="price mobile">
-                <div class="val" *ngIf="c.priceValue !== undefined; else naPrice">{{ c.priceValue | convertMoney:'EUR' }}</div>
+                <div class="val" *ngIf="c.priceValue !== undefined; else naPrice">{{ c.priceValue | convertMoney:(c.currency || 'EUR') }}</div>
                 <ng-template #naPrice><div class="val">N/A</div></ng-template>
                 <div class="note">per slot</div>
               </div>
             </div>
           </div>
           <div class="right price desktop">
-            <div class="val" *ngIf="c.priceValue !== undefined; else naPrice2">{{ c.priceValue | convertMoney:'EUR' }}</div>
+            <div class="val" *ngIf="c.priceValue !== undefined; else naPrice2">{{ c.priceValue | convertMoney:(c.currency || 'EUR') }}</div>
             <ng-template #naPrice2><div class="val">N/A</div></ng-template>
             <div class="note">per slot</div>
           </div>
@@ -80,7 +80,7 @@
               <div class="slot" *ngFor="let s of d.slots; trackBy: trackByIndex" [class.green]="s.tone === 'green'" [class.blue]="s.tone === 'blue'" [class.gray]="!s.tone || s.tone === 'gray'">
                 <div class="label">{{ s.label }}</div>
                 <div class="note" *ngIf="s.note">{{ s.note }}</div>
-                <div class="price" *ngIf="s.priceValue !== undefined">{{ s.priceValue | convertMoney:'EUR' }}</div>
+                <div class="price" *ngIf="s.priceValue !== undefined">{{ s.priceValue | convertMoney:(s.currency || c.currency || 'EUR') }}</div>
               </div>
             </div>
             <ng-template #emptyDay>

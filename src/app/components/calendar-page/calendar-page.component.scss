@@ -402,6 +402,60 @@ $white: #fff;
 @media (min-width: 768px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
 
+/* Tablet-specific adjustments */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Enable horizontal scroll for calendar on tablets */
+  .calendar-panel {
+    overflow-x: auto;
+    padding: 16px 8px;
+  }
+  
+  .month-grid { 
+    gap: 2px; 
+    min-width: 700px; /* Force minimum width for 7-day grid */
+    margin: 0 auto;
+  }
+  
+  .weekdays {
+    min-width: 700px;
+    margin: 8px auto 0;
+  }
+  
+  .cal-day { 
+    min-height: 110px; 
+    height: 110px;
+    padding: 8px; 
+  }
+  .cal-day__title { font-size: 10px; }
+  .cal-day__content { gap: 8px; }
+  .cal-day__num { font-size: 20px; }
+  .cal-day__badge { min-width: 18px; height: 18px; font-size: 10px; }
+  .cal-day__body { gap: 4px; }
+  .cal-event { padding: 3px 4px; min-height: 20px; }
+  .cal-event__icon { font-size: 12px; }
+  .cal-event__text { font-size: 10px; }
+  .cal-day__footer { font-size: 9px; }
+  
+  /* Week view tablet adjustments */
+  .week-cols { 
+    gap: 6px; 
+    min-width: 700px;
+    margin: 0 auto;
+  }
+  .week-col { min-height: 160px; padding: 6px; }
+  
+  /* Toolbar adjustments */
+  .toolbar { gap: 10px; }
+  .btn, .pill { 
+    height: 32px; 
+    font-size: 12px; 
+    padding: 0 12px;
+  }
+  
+  /* Container padding adjustments */
+  .container { padding: 0 8px; }
+}
+
 /* Responsive tweaks */
 @media (max-width: 768px) {
   /* Mobile toolbar - perfect alignment */

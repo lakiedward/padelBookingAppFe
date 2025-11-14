@@ -3,6 +3,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
+import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { BookingService } from '../../services/booking.service';
 import { PublicService } from '../../services/public.service';
 import { BookingSummaryResponse } from '../../models/booking.models';
@@ -21,12 +22,13 @@ interface SlotDetails {
   startTime: string;
   endTime: string;
   price: number;
+  currency?: string;
 }
 
 @Component({
   selector: 'app-booking-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppHeaderComponent],
+  imports: [CommonModule, FormsModule, AppHeaderComponent, ConvertMoneyPipe],
   templateUrl: './booking-page.component.html',
   styleUrl: './booking-page.component.scss'
 })
@@ -55,6 +57,7 @@ export class BookingPageComponent implements OnInit {
     const start = this.route.snapshot.queryParamMap.get('start');
     const end = this.route.snapshot.queryParamMap.get('end');
     const price = this.route.snapshot.queryParamMap.get('price');
+    const currency = this.route.snapshot.queryParamMap.get('currency');
 
     console.log('[BookingPage] Route params:', {
       timeSlotIdParam,
@@ -92,7 +95,8 @@ export class BookingPageComponent implements OnInit {
           date,
           startTime: start,
           endTime: end,
-          price: priceNum
+          price: priceNum,
+          currency: currency || 'EUR'
         };
         console.log('[BookingPage] slotDetails set:', this.slotDetails);
         this.isLoading = false;
@@ -129,7 +133,7 @@ export class BookingPageComponent implements OnInit {
           window.location.href = res.url;
         },
         error: (err) => {
-          this.bookingError = err.error?.error || err.message || 'Failed to start checkout.';
+          this.bookingError = err.error?.message || err.error?.error || err.message || 'Failed to start checkout.';
           this.isSubmitting = false;
         }
       });
@@ -147,7 +151,7 @@ export class BookingPageComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error creating booking:', err);
-        this.bookingError = err.error?.error || err.message || 'Failed to create booking. Please try again.';
+        this.bookingError = err.error?.message || err.error?.error || err.message || 'Failed to create booking. Please try again.';
         this.isSubmitting = false;
       }
     });

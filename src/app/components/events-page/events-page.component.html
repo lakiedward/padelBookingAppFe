@@ -115,7 +115,7 @@
               </div>
             </div>
             <div class="event-hero__price" *ngIf="event.price">
-              <span class="price">{{ event.price | convertMoney:'EUR' }}</span>
+              <span class="price">{{ event.price | convertMoney:(event.currency || 'EUR') }}</span>
               <span class="note">Entry fee</span>
             </div>
           </div>

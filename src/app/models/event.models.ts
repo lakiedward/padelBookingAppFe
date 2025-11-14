@@ -143,6 +143,7 @@ export interface EventResponse {
   maxParticipants: number | null;
   currentParticipants: number;
   price: number | null;
+  currency?: string | null;
   status: string;
   coverImageUrl: string | null;
   courts: CourtSummaryResponse[];
@@ -164,6 +165,7 @@ export interface EventSummaryResponse {
   maxParticipants: number | null;
   currentParticipants: number;
   price: number | null;
+  currency?: string | null;
   status: string;
   coverImageUrl: string | null;
   courtCount: number;
@@ -187,6 +189,7 @@ export interface EventPanelData {
   maxParticipants: number | null;
   currentParticipants: number;
   price: number | null;
+  currency?: string | null;
   status: EventStatus;
   coverImageUrl: string | null;
   courtCount: number;
@@ -208,6 +211,7 @@ export function eventSummaryToPanelData(summary: EventSummaryResponse): EventPan
     maxParticipants: summary.maxParticipants,
     currentParticipants: summary.currentParticipants,
     price: summary.price,
+    currency: summary.currency,
     status: summary.status as EventStatus,
     coverImageUrl: summary.coverImageUrl,
     courtCount: summary.courtCount,
@@ -238,6 +242,7 @@ export function eventResponseToDetailsData(response: EventResponse): EventDetail
     maxParticipants: response.maxParticipants,
     currentParticipants: response.currentParticipants,
     price: response.price,
+    currency: response.currency,
     status: response.status as EventStatus,
     coverImageUrl: response.coverImageUrl,
     courtCount: response.courts.length,

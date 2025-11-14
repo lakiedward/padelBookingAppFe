@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, signal, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
 import { BookingService } from '../../services/booking.service';
 import { CourtService } from '../../services/court.service';
 import { CourtSummaryResponse } from '../../models/court.models';
-import { AdminBookingResponse } from '../../models/booking.models';
+import { AdminBookingResponse, RescheduleCourtOptionsResponse, RescheduleTimeSlotOptionResponse } from '../../models/booking.models';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Time24Pipe } from '../../pipes/time24.pipe';
@@ -27,6 +28,7 @@ type AdminBooking = {
   userPhone?: string | null;
   paymentType?: string | null;
   price: number;
+  currency?: string | null;
 };
 
 interface CourtOption {
@@ -44,7 +46,8 @@ interface CourtOption {
 export class ManageBookingComponent implements OnInit, OnChanges {
   constructor(
     private bookingService: BookingService,
-    private courtService: CourtService
+    private courtService: CourtService,
+    private router: Router
   ) {}
 
   // State
@@ -59,6 +62,12 @@ export class ManageBookingComponent implements OnInit, OnChanges {
   bookings = signal<AdminBooking[]>([]);
   selectedBooking = signal<AdminBooking | null>(null);
   showBookingModal = signal(false);
+
+  // Reschedule state
+  rescheduleDate = signal<string | null>(null); // YYYY-MM-DD
+  rescheduleOptions = signal<RescheduleCourtOptionsResponse[] | null>(null);
+  rescheduleLoading = signal(false);
+  rescheduleError = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadCourts();
@@ -152,6 +161,7 @@ export class ManageBookingComponent implements OnInit, OnChanges {
             userPhone: booking.userPhone ?? undefined,
             paymentType: booking.paymentType ?? 'Card',
             price: booking.price,
+            currency: booking.currency ?? 'EUR',
           };
         });
 
@@ -213,11 +223,127 @@ export class ManageBookingComponent implements OnInit, OnChanges {
   openBooking(booking: AdminBooking) {
     this.selectedBooking.set(booking);
     this.showBookingModal.set(true);
+
+    // Initialize reschedule state
+    this.rescheduleDate.set(booking.date);
+    this.rescheduleOptions.set(null);
+    this.rescheduleError.set(null);
+    this.rescheduleLoading.set(false);
+  }
+
+  openBookingFullPage(booking: AdminBooking | null) {
+    const b = booking ?? this.selectedBooking();
+    if (!b) {
+      return;
+    }
+
+    const idNum = Number(b.id);
+    if (!idNum || Number.isNaN(idNum)) {
+      return;
+    }
+
+    this.router.navigate(['/admin', 'bookings', idNum]);
   }
 
   closeBooking() {
     this.showBookingModal.set(false);
     this.selectedBooking.set(null);
+    this.rescheduleOptions.set(null);
+    this.rescheduleError.set(null);
+    this.rescheduleLoading.set(false);
+  }
+
+  onRescheduleDateChange(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const value = input?.value || '';
+    this.rescheduleDate.set(value || null);
+  }
+
+  loadRescheduleOptions() {
+    const booking = this.selectedBooking();
+    if (!booking) {
+      return;
+    }
+
+    const date = this.rescheduleDate() || booking.date;
+    if (!date) {
+      this.rescheduleError.set('Please select a date for rescheduling.');
+      return;
+    }
+
+    this.rescheduleLoading.set(true);
+    this.rescheduleError.set(null);
+
+    this.bookingService.getRescheduleOptions(Number(booking.id), date).subscribe({
+      next: (groups: RescheduleCourtOptionsResponse[]) => {
+        this.rescheduleOptions.set(groups);
+        this.rescheduleLoading.set(false);
+      },
+      error: (err) => {
+        console.error('[ManageBooking] Error loading reschedule options:', err);
+        this.rescheduleError.set('Could not load reschedule options.');
+        this.rescheduleLoading.set(false);
+      }
+    });
+  }
+
+  rescheduleToSlot(slot: RescheduleTimeSlotOptionResponse) {
+    const booking = this.selectedBooking();
+    if (!booking) {
+      return;
+    }
+
+    this.rescheduleLoading.set(true);
+    this.bookingService.rescheduleBooking(Number(booking.id), slot.timeSlotId).subscribe({
+      next: (updated) => {
+        const startDateTime = new Date(updated.startTime);
+        const endDateTime = new Date(updated.endTime);
+
+        const updatedBooking: AdminBooking = {
+          id: updated.id.toString(),
+          courtId: updated.courtId,
+          date: this.formatDateToKey(startDateTime),
+          start: this.formatTimeToHHMM(startDateTime),
+          end: this.formatTimeToHHMM(endDateTime),
+          club: 'Club',
+          court: updated.courtName,
+          sport: this.getSportEmoji(updated.activityName),
+          username: updated.username,
+          userId: updated.userId,
+          userEmail: updated.userEmail ?? undefined,
+          userPhone: updated.userPhone ?? undefined,
+          paymentType: updated.paymentType ?? 'Card',
+          price: updated.price,
+          currency: updated.currency ?? 'EUR',
+        };
+
+        const currentCourtId = this.selectedCourtId();
+        const currentList = this.bookings();
+        const filtered = currentList.filter(b => b.id !== booking.id);
+
+        if (currentCourtId != null && updatedBooking.courtId === currentCourtId) {
+          filtered.push(updatedBooking);
+        }
+
+        this.bookings.set(filtered);
+
+        if (currentCourtId != null && updatedBooking.courtId === currentCourtId) {
+          this.selectedBooking.set(updatedBooking);
+        } else {
+          // Booking moved to another court; close modal in current view
+          this.closeBooking();
+        }
+
+        this.rescheduleLoading.set(false);
+        this.rescheduleOptions.set(null);
+        this.rescheduleError.set(null);
+      },
+      error: (err) => {
+        console.error('[ManageBooking] Error rescheduling booking:', err);
+        this.rescheduleError.set('Failed to reschedule booking.');
+        this.rescheduleLoading.set(false);
+      }
+    });
   }
 
   goPrev() {

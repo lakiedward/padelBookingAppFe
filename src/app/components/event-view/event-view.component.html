@@ -50,13 +50,13 @@
                 </span>
               </div>
               <div class="price mobile" *ngIf="e.price">
-                <div class="val">{{ e.price | convertMoney:'EUR' }}</div>
+                <div class="val">{{ e.price | convertMoney:(e.currency || 'EUR') }}</div>
                 <div class="note">entry fee</div>
               </div>
             </div>
           </div>
           <div class="right price desktop" *ngIf="e.price">
-            <div class="val">{{ e.price | convertMoney:'EUR' }}</div>
+            <div class="val">{{ e.price | convertMoney:(e.currency || 'EUR') }}</div>
             <div class="note">entry fee</div>
           </div>
         </div>

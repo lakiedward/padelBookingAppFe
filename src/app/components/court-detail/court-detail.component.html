@@ -131,7 +131,7 @@
           <div class="equipment-list">
             <div class="equipment-item" *ngFor="let eq of (court?.equipment || [])">
               <span class="equipment-name">{{ eq.name }}</span>
-              <span class="equipment-price">{{ eq.pricePerHour | convertMoney:'EUR' }}/hr</span>
+              <span class="equipment-price">{{ eq.pricePerHour | convertMoney:(eq.currency || 'EUR') }}/hr</span>
             </div>
           </div>
         </div>
@@ -150,7 +150,7 @@
                   {{ rule.date }}
                 </div>
               </div>
-              <div class="rule-price">{{ rule.price | convertMoney:'EUR' }}</div>
+              <div class="rule-price">{{ rule.price | convertMoney:(rule.currency || 'EUR') }}</div>
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@
           </div>
           <div class="detail-summary-row" *ngIf="selectedSlot && selectedSlot.price > 0">
             <span class="detail-summary-label">Price</span>
-            <span class="detail-summary-value">{{ selectedSlot.price | convertMoney:'EUR' }}</span>
+            <span class="detail-summary-value">{{ selectedSlot.price | convertMoney:(selectedSlot.currency || 'EUR') }}</span>
           </div>
         </div>
         <button class="book-now-btn" [disabled]="!selectedSlot" (click)="onBookNow()">
