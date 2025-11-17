@@ -1,109 +1,217 @@
-<div class="admin-booking-details" *ngIf="!isLoading && !error && details as d">
-  <div class="admin-booking-details__header">
-    <button class="btn" type="button" (click)="onBack()">Back to admin</button>
-    <div class="admin-booking-details__title">
-      <span class="admin-booking-details__label">Booking</span>
-      <span class="admin-booking-details__id">#{{ d.id }}</span>
-      <span class="status-chip" [ngClass]="'status-chip--' + (d.status || 'ACTIVE').toLowerCase()">
-        {{ d.status }}
-      </span>
-    </div>
-  </div>
+<p-confirmDialog appendTo="body"></p-confirmDialog>
 
-  <div class="admin-booking-details__grid">
-    <section class="admin-card">
-      <h2 class="admin-card__title">Booking summary</h2>
-      <div class="admin-card__row">
-        <span class="label">Date</span>
-        <span class="value">{{ d.startTime | date: 'fullDate' }}</span>
-      </div>
-      <div class="admin-card__row">
-        <span class="label">Time</span>
-        <span class="value">{{ d.startTime | date: 'shortTime' }} – {{ d.endTime | date: 'shortTime' }}</span>
-      </div>
-      <div class="admin-card__row">
-        <span class="label">Court</span>
-        <span class="value">{{ d.courtName }}</span>
-      </div>
-      <div class="admin-card__row">
-        <span class="label">Club</span>
-        <span class="value">{{ d.clubName }}</span>
-      </div>
-      <div class="admin-card__row">
-        <span class="label">Sport</span>
-        <span class="value">{{ d.activityName }} ({{ d.sportKey }})</span>
-      </div>
-      <div class="admin-card__row">
-        <span class="label">Duration</span>
-        <span class="value">{{ d.durationMinutes }} min</span>
-      </div>
-      <div class="admin-card__row">
-        <span class="label">Created at</span>
-        <span class="value">{{ d.createdAt | date: 'medium' }}</span>
-      </div>
-      <div class="admin-card__row">
-        <span class="label">Price</span>
-        <span class="value price">{{ d.price | convertMoney:(d.currency || 'EUR') }}</span>
-      </div>
-    </section>
+<div class="admin-booking-page page-gradient-bg">
+  <div class="admin-booking-page__inner">
 
-    <section class="admin-card">
-      <h2 class="admin-card__title">Client & contact</h2>
-      <div class="admin-card__row">
-        <span class="label">User</span>
-        <span class="value">{{ d.username }} (ID {{ d.userId }})</span>
-      </div>
-      <div class="admin-card__row" *ngIf="d.userEmail">
-        <span class="label">Email</span>
-        <span class="value">
-          {{ d.userEmail }}
-          <button class="link-btn" type="button" (click)="copyEmail()">Copy</button>
-        </span>
-      </div>
-      <div class="admin-card__row" *ngIf="d.userPhone">
-        <span class="label">Phone</span>
-        <span class="value">
-          {{ d.userPhone }}
-          <button class="link-btn" type="button" (click)="copyPhone()">Copy</button>
-        </span>
-      </div>
-      <div class="admin-card__row" *ngIf="d.paymentType">
-        <span class="label">Payment</span>
-        <span class="value">{{ d.paymentType }}</span>
-      </div>
-    </section>
-
-    <section class="admin-card admin-card--actions">
-      <h2 class="admin-card__title">Actions</h2>
-      <p class="admin-card__hint">
-        Use these controls to manage this booking. Advanced actions (no-show, check-in, lock) will be added later.
-      </p>
-      <div class="admin-card__actions">
-        <button
-          type="button"
-          class="btn btn--primary"
-          [disabled]="isCancelling || !details"
-          (click)="onCancelBooking()"
-        >
-          Cancel booking
+    <!-- Main booking details card -->
+    <section
+      class="admin-booking-page__card admin-booking-details"
+      *ngIf="!isLoading && !error && details as d"
+    >
+      <div class="admin-booking-details__header">
+        <button class="btn btn--ghost admin-booking-details__back" type="button" (click)="onBack()">
+          <span class="admin-booking-details__back-icon">←</span>
+          <span>Back to admin</span>
         </button>
-        <button
-          type="button"
-          class="btn btn--ghost"
-          (click)="onBack()"
-        >
-          Back to manage bookings
-        </button>
+        <div class="admin-booking-details__title">
+          <div class="admin-booking-details__title-main">
+            <span class="admin-booking-details__label">Booking</span>
+            <span class="admin-booking-details__id">#{{ d.id }}</span>
+            <span class="status-chip" [ngClass]="'status-chip--' + ((d.status || 'ACTIVE') | lowercase)">
+              {{ d.status || 'ACTIVE' }}
+            </span>
+          </div>
+          <div class="admin-booking-details__subtitle">
+            {{ d.courtName }} • {{ d.startTime | date: 'mediumDate' }} •
+            {{ d.startTime | date: 'shortTime' }} – {{ d.endTime | date: 'shortTime' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-booking-details__grid">
+        <section class="admin-card">
+          <h2 class="admin-card__title">Booking summary</h2>
+          <div class="admin-card__row">
+            <span class="label">Date</span>
+            <span class="value">{{ d.startTime | date: 'fullDate' }}</span>
+          </div>
+          <div class="admin-card__row">
+            <span class="label">Time</span>
+            <span class="value">{{ d.startTime | date: 'shortTime' }} – {{ d.endTime | date: 'shortTime' }}</span>
+          </div>
+          <div class="admin-card__row">
+            <span class="label">Court</span>
+            <span class="value">{{ d.courtName }}</span>
+          </div>
+          <div class="admin-card__row">
+            <span class="label">Club</span>
+            <span class="value">{{ d.clubName }}</span>
+          </div>
+          <div class="admin-card__row">
+            <span class="label">Sport</span>
+            <span class="value">{{ d.activityName }} ({{ d.sportKey }})</span>
+          </div>
+          <div class="admin-card__row">
+            <span class="label">Duration</span>
+            <span class="value">{{ d.durationMinutes }} min</span>
+          </div>
+          <div class="admin-card__row">
+            <span class="label">Created at</span>
+            <span class="value">{{ d.createdAt | date: 'medium' }}</span>
+          </div>
+          <div class="admin-card__row">
+            <span class="label">Price</span>
+            <span class="value price">{{ d.price | convertMoney:(d.currency || 'EUR') }}</span>
+          </div>
+        </section>
+
+        <section class="admin-card">
+          <h2 class="admin-card__title">Client & contact</h2>
+          <div class="admin-card__row">
+            <span class="label">User</span>
+            <span class="value">{{ d.username }} (ID {{ d.userId }})</span>
+          </div>
+          <div class="admin-card__row" *ngIf="d.userEmail">
+            <span class="label">Email</span>
+            <span class="value">
+              {{ d.userEmail }}
+              <button class="link-btn" type="button" (click)="copyEmail()">Copy</button>
+            </span>
+          </div>
+          <div class="admin-card__row" *ngIf="d.userPhone">
+            <span class="label">Phone</span>
+            <span class="value">
+              {{ d.userPhone }}
+              <button class="link-btn" type="button" (click)="copyPhone()">Copy</button>
+            </span>
+          </div>
+          <div class="admin-card__row">
+            <span class="label">Payment</span>
+            <span class="value">{{ d.paymentType || 'Card' }}</span>
+          </div>
+        </section>
+
+        <section class="admin-card admin-card--reschedule" *ngIf="details as d">
+          <h2 class="admin-card__title">Reschedule booking</h2>
+          <p class="admin-card__hint">
+            Select a new date and slot for this booking.
+          </p>
+
+          <div class="admin-card__row admin-card__row--compact">
+            <span class="label">New date</span>
+            <span class="value">
+              <input
+                type="date"
+                [value]="rescheduleDate || (d.startTime | date: 'yyyy-MM-dd')"
+                (change)="onRescheduleDateChange($event)"
+              />
+            </span>
+          </div>
+
+          <div class="admin-card__row admin-card__row--compact">
+            <button
+              class="btn btn--primary"
+              type="button"
+              (click)="loadRescheduleOptions()"
+              [disabled]="rescheduleLoading || !details"
+            >
+              Show available slots
+            </button>
+          </div>
+
+          <div class="admin-card__row admin-card__row--compact" *ngIf="rescheduleLoading">
+            <span class="value">Loading reschedule options...</span>
+          </div>
+
+          <div class="admin-card__row admin-card__row--compact" *ngIf="rescheduleError as err">
+            <span class="value error">{{ err }}</span>
+          </div>
+
+          <ng-container *ngIf="rescheduleOptions as groups">
+            <div class="admin-card__row admin-card__row--compact" *ngIf="groups.length === 0">
+              <span class="value">No available slots for this date.</span>
+            </div>
+
+            <div class="reschedule-groups" *ngIf="groups.length > 0">
+              <div class="reschedule-group" *ngFor="let g of groups">
+                <div class="reschedule-group__header">
+                  <div class="reschedule-group__title">
+                    {{ g.courtName }}
+                    <span *ngIf="g.isCurrentCourt" class="tag tag--current-court">current court</span>
+                  </div>
+                </div>
+
+                <div class="reschedule-slots">
+                  <button
+                    class="slot-chip"
+                    type="button"
+                    *ngFor="let s of g.slots"
+                    [class.slot-chip--current]="s.isCurrentSlot"
+                    [class.slot-chip--unavailable]="!s.available && !s.isCurrentSlot"
+                    [disabled]="rescheduleLoading || (!s.available && !s.isCurrentSlot)"
+                    (click)="rescheduleToSlot(s)"
+                  >
+                    <span class="slot-chip__time">
+                      {{ s.startTime | date: 'shortTime' }} – {{ s.endTime | date: 'shortTime' }}
+                    </span>
+                    <span class="slot-chip__price">
+                      {{ s.price | convertMoney:(s.currency || 'EUR') }}
+                    </span>
+                    <span *ngIf="s.isCurrentSlot" class="slot-chip__badge">current</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </section>
+
+        <section class="admin-card admin-card--actions">
+          <h2 class="admin-card__title">Actions</h2>
+          <p class="admin-card__hint">
+            Use these controls to manage this booking. Advanced actions (no-show, check-in, lock) will be added later.
+          </p>
+          <div class="admin-card__actions">
+            <button
+              type="button"
+              class="btn btn--primary"
+              [disabled]="isCancelling || !details"
+              (click)="onCancelBooking()"
+            >
+              Cancel booking
+            </button>
+            <button
+              type="button"
+              class="btn btn--ghost"
+              (click)="onBack()"
+            >
+              Back to manage bookings
+            </button>
+          </div>
+        </section>
       </div>
     </section>
+
+    <!-- Loading state -->
+    <section
+      class="admin-booking-page__card admin-booking-details admin-booking-details--loading"
+      *ngIf="isLoading"
+    >
+      <div class="admin-booking-details__state">
+        <div class="u-spinner u-spinner--lg"></div>
+        <p>Loading booking details...</p>
+      </div>
+    </section>
+
+    <!-- Error state -->
+    <section
+      class="admin-booking-page__card admin-booking-details admin-booking-details--error"
+      *ngIf="!isLoading && error"
+    >
+      <div class="admin-booking-details__state">
+        <p>{{ error }}</p>
+        <button class="btn btn--primary" type="button" (click)="onBack()">Back to admin</button>
+      </div>
+    </section>
+
   </div>
-</div>
-
-<div class="admin-booking-details admin-booking-details--loading" *ngIf="isLoading">
-  <p>Loading booking details...</p>
-</div>
-
-<div class="admin-booking-details admin-booking-details--error" *ngIf="!isLoading && error">
-  <p>{{ error }}</p>
-  <button class="btn" type="button" (click)="onBack()">Back</button>
 </div>

@@ -1,5 +1,27 @@
+/* Page-level wrapper to align with admin layout */
+.admin-booking-page {
+  min-height: 100vh;
+  padding: 32px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.admin-booking-page__inner {
+  width: min(1100px, 100%);
+}
+
+.admin-booking-page__card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  padding: 24px;
+}
+
 .admin-booking-details {
-  padding: 16px;
   color: #ffffff;
 
   &__header {
@@ -10,7 +32,24 @@
     gap: 12px;
   }
 
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  &__back-icon {
+    font-size: 14px;
+  }
+
   &__title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__title-main {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -28,20 +67,33 @@
     font-variant-numeric: tabular-nums;
   }
 
+  &__subtitle {
+    font-size: 12px;
+    color: #8aa0b5;
+  }
+
   &__grid {
+    margin-top: 16px;
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr);
     gap: 16px;
     align-items: flex-start;
   }
 
-  &--loading,
-  &--error {
+  &__state {
+    display: flex;
+    flex-direction: column;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 200px;
     text-align: center;
+    gap: 12px;
+    color: #d6dde6;
+  }
+
+  &--error .admin-booking-details__state p {
+    color: #fecaca;
   }
 }
 
@@ -101,6 +153,11 @@
   border-bottom: none;
 }
 
+.admin-card__row--compact {
+  grid-template-columns: 1fr;
+  align-items: center;
+}
+
 .admin-card__row .label {
   font-size: 13px;
   font-weight: 600;
@@ -115,6 +172,10 @@
 
 .admin-card__row .value.price {
   color: #a7ee43;
+}
+
+.admin-card__row .value.error {
+  color: #fecaca;
 }
 
 .admin-card--actions {
@@ -155,15 +216,139 @@
   border-color: rgba(214, 221, 230, 0.3);
 }
 
+/* Reschedule slots styling (aligned with manage-booking modal) */
+.admin-card--reschedule {
+  gap: 10px;
+}
+
+.admin-card--reschedule .admin-card__row {
+  border-bottom: none;
+  padding: 4px 0;
+}
+
+.reschedule-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.reschedule-group {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(214, 221, 230, 0.15);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reschedule-group__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reschedule-group__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #d6dde6;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.tag--current-court {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(167, 238, 67, 0.16);
+  color: #a7ee43;
+  border: 1px solid rgba(167, 238, 67, 0.4);
+}
+
+.reschedule-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slot-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(214, 221, 230, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 6px 10px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slot-chip__time {
+  font-size: 12px;
+  font-weight: 700;
+  color: #d6dde6;
+}
+
+.slot-chip__price {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a7ee43;
+}
+
+.slot-chip__badge {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(167, 238, 67, 0.16);
+  color: #a7ee43;
+}
+
+.slot-chip:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(214, 221, 230, 0.25);
+  transform: translateY(-1px);
+}
+
+.slot-chip:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.slot-chip--current {
+  border-color: rgba(167, 238, 67, 0.4);
+  box-shadow: 0 0 0 1px rgba(167, 238, 67, 0.4);
+}
+
+.slot-chip--unavailable {
+  opacity: 0.45;
+}
+
 @media (max-width: 1024px) {
+  .admin-booking-page {
+    padding: 24px 12px;
+  }
+
+  .admin-booking-page__card {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
   .admin-booking-details__grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .admin-booking-details {
-    padding: 12px;
+  .admin-booking-details__header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .admin-card__row {

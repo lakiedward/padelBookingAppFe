@@ -9,6 +9,8 @@ import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Time24Pipe } from '../../pipes/time24.pipe';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -39,15 +41,17 @@ interface CourtOption {
 @Component({
   selector: 'app-manage-booking',
   standalone: true,
-  imports: [CommonModule, Select, FormsModule, Time24Pipe, ConvertMoneyPipe],
+  imports: [CommonModule, Select, FormsModule, Time24Pipe, ConvertMoneyPipe, ConfirmDialogModule],
   templateUrl: './manage-booking.component.html',
-  styleUrl: './manage-booking.component.scss'
+  styleUrl: './manage-booking.component.scss',
+  providers: [ConfirmationService]
 })
 export class ManageBookingComponent implements OnInit, OnChanges {
   constructor(
     private bookingService: BookingService,
     private courtService: CourtService,
-    private router: Router
+    private router: Router,
+    private confirmationService: ConfirmationService
   ) {}
 
   // State
@@ -68,6 +72,9 @@ export class ManageBookingComponent implements OnInit, OnChanges {
   rescheduleOptions = signal<RescheduleCourtOptionsResponse[] | null>(null);
   rescheduleLoading = signal(false);
   rescheduleError = signal<string | null>(null);
+
+  // Payment operations
+  isMarkingPaidCash = signal(false);
 
   ngOnInit(): void {
     this.loadCourts();
@@ -342,6 +349,51 @@ export class ManageBookingComponent implements OnInit, OnChanges {
         console.error('[ManageBooking] Error rescheduling booking:', err);
         this.rescheduleError.set('Failed to reschedule booking.');
         this.rescheduleLoading.set(false);
+      }
+    });
+  }
+
+  onMarkPaidCash() {
+    const b = this.selectedBooking();
+    if (!b || this.isMarkingPaidCash()) {
+      return;
+    }
+
+    const idNum = Number(b.id);
+    if (!idNum || Number.isNaN(idNum)) {
+      return;
+    }
+
+    this.confirmationService.confirm({
+      header: 'Mark as paid (cash)',
+      message: 'This will mark this booking as paid in cash. Continue?',
+      icon: 'pi pi-exclamation-triangle',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Mark as paid',
+      accept: () => {
+        this.isMarkingPaidCash.set(true);
+        this.bookingService.markBookingPaidCash(idNum).subscribe({
+          next: (details) => {
+            const list = this.bookings();
+            const updatedList = list.map(item =>
+              item.id === b.id
+                ? { ...item, paymentType: details.paymentType ?? 'CASH' }
+                : item
+            );
+            this.bookings.set(updatedList);
+
+            this.selectedBooking.set({
+              ...b,
+              paymentType: details.paymentType ?? 'CASH'
+            });
+
+            this.isMarkingPaidCash.set(false);
+          },
+          error: (err) => {
+            console.error('[ManageBooking] Error marking booking as paid cash:', err);
+            this.isMarkingPaidCash.set(false);
+          }
+        });
       }
     });
   }

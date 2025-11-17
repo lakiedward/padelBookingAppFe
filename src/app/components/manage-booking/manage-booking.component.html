@@ -57,7 +57,11 @@
             <div class="cal-day__content">
               <div class="cal-day__num">{{ c.date.getDate() }}</div>
               <div class="cal-day__body">
-                <div class="cal-event" *ngFor="let b of (bookingsByDay(c.date) | slice:0:3)" (click)="openBooking(b); $event.stopPropagation()">
+                <div
+                  class="cal-event"
+                  *ngFor="let b of (bookingsByDay(c.date) | slice:0:3)"
+                  (click)="openBookingFullPage(b); $event.stopPropagation()"
+                >
                   <span class="cal-event__icon">{{ b.sport }}</span>
                   <span class="cal-event__text" [title]="b.username || 'User'">{{ b.username || 'User' }}</span>
                 </div>
@@ -89,7 +93,11 @@
                 <div class="cal-day__content">
                   <div class="cal-day__num">{{ day.date.getDate() }}</div>
                   <div class="cal-day__body">
-                    <div class="cal-event" *ngFor="let b of (bookingsByDay(day.date) | slice:0:1)" (click)="openBooking(b); $event.stopPropagation()">
+                    <div
+                      class="cal-event"
+                      *ngFor="let b of (bookingsByDay(day.date) | slice:0:1)"
+                      (click)="openBookingFullPage(b); $event.stopPropagation()"
+                    >
                       <span class="cal-event__icon">{{ b.sport }}</span>
                       <span class="cal-event__text" [title]="b.username || 'User'">{{ b.username || 'User' }}</span>
                     </div>
@@ -125,7 +133,11 @@
                 <div class="cal-day__num">{{ d.getDate() }}</div>
                 <div class="cal-day__body">
                   <!-- Detailed booking cards inside calendar cells -->
-                  <div class="booking-card booking-card--compact" *ngFor="let b of bookingsByDay(d)" (click)="openBooking(b)">
+                  <div
+                    class="booking-card booking-card--compact"
+                    *ngFor="let b of bookingsByDay(d)"
+                    (click)="openBookingFullPage(b)"
+                  >
                     <div class="booking-card__compact-header">
                       <div class="booking-card__sport booking-card__sport--small">{{ b.sport }}</div>
                       <div class="booking-card__time booking-card__time--small">{{ b.start | time24 }} – {{ b.end | time24 }}</div>
@@ -152,7 +164,11 @@
         <div class="day-list">
           <div class="empty" *ngIf="bookingsByDay(anchor()).length === 0">No bookings for this day</div>
           <div class="day-grid">
-            <div class="booking-card booking-card--day" *ngFor="let b of bookingsByDay(anchor())" (click)="openBooking(b)">
+            <div
+              class="booking-card booking-card--day"
+              *ngFor="let b of bookingsByDay(anchor())"
+              (click)="openBookingFullPage(b)"
+            >
               <div class="booking-card__header">
                 <div class="booking-card__sport">{{ b.sport }}</div>
                 <div class="booking-card__time">{{ b.start | time24 }} – {{ b.end | time24 }}</div>
@@ -216,7 +232,10 @@
               <div class="booking-modal__row"><span class="label">User</span><span class="value">{{ sb.username }}</span></div>
               <div class="booking-modal__row" *ngIf="sb.userEmail"><span class="label">Email</span><span class="value">{{ sb.userEmail }}</span></div>
               <div class="booking-modal__row" *ngIf="sb.userPhone"><span class="label">Phone</span><span class="value">{{ sb.userPhone }}</span></div>
-              <div class="booking-modal__row"><span class="label">Payment</span><span class="value tag">{{ sb.paymentType }}</span></div>
+              <div class="booking-modal__row">
+                <span class="label">Payment</span>
+                <span class="value tag">{{ sb.paymentType || 'Unknown' }}</span>
+              </div>
               <div class="booking-modal__row"><span class="label">Price</span><span class="value price">{{ sb.price | convertMoney:(sb.currency || 'EUR') }}</span></div>
             </div>
 
@@ -286,6 +305,30 @@
                     </div>
                   </div>
                 </ng-container>
+              </div>
+
+              <!-- Payment quick actions -->
+              <div class="booking-modal__section" *ngIf="sb.paymentType !== 'CASH'">
+                <div class="booking-modal__section-header">
+                  <div class="booking-modal__section-title">Payment actions</div>
+                  <div class="booking-modal__section-subtitle">
+                    Mark this booking as paid in cash without leaving the calendar.
+                  </div>
+                </div>
+
+                <div class="booking-modal__row booking-modal__row--compact">
+                  <span class="label">Status</span>
+                  <span class="value">
+                    <button
+                      type="button"
+                      class="btn btn--primary"
+                      (click)="onMarkPaidCash()"
+                      [disabled]="isMarkingPaidCash()"
+                    >
+                      Mark as paid (cash)
+                    </button>
+                  </span>
+                </div>
               </div>
             </div>
           </div>

@@ -109,7 +109,6 @@ export class BookingService {
     return this.http.get<RescheduleCourtOptionsResponse[]>(
       `${this.apiBase}/api/admin/bookings/reschedule-options`,
       {
-        headers: this.getAuthHeaders(),
         params: {
           bookingId: bookingId.toString(),
           date
@@ -127,23 +126,56 @@ export class BookingService {
   ): Observable<AdminBookingResponse> {
     return this.http.put<AdminBookingResponse>(
       `${this.apiBase}/api/admin/bookings/${bookingId}/reschedule`,
-      { newTimeSlotId },
-      { headers: this.getAuthHeaders() }
+      { newTimeSlotId }
     );
   }
 
   /**
-   * Helper to get authorization headers with JWT token
+   * ADMIN: Mark a booking as paid in cash.
+   * Uses the admin-only endpoint and returns refreshed booking details.
+   */
+  markBookingPaidCash(bookingId: number): Observable<AdminBookingDetailsResponse> {
+    return this.http.post<AdminBookingDetailsResponse>(
+      `${this.apiBase}/api/admin/bookings/${bookingId}/payment/cash`,
+      {}
+    );
+  }
+
+  /**
+   * Helper to get authorization headers with JWT token.
+   * Kept for backward compatibility but made SSR-safe and non-throwing.
+   * NOTE: The auth interceptor already attaches the Authorization header,
+   * so this is only used to add JSON content type when needed.
    */
   private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token'); // Changed from 'authToken' to 'token' to match AuthService
-    if (!token) {
-      console.error('[BookingService] No token found in localStorage');
-      throw new Error('No authentication token found');
+    // Guard against SSR / non-browser environments
+    const hasWindow = typeof window !== 'undefined';
+    const hasLocalStorage = hasWindow && typeof localStorage !== 'undefined';
+
+    if (!hasLocalStorage) {
+      // In non-browser environments, just return basic JSON headers.
+      return new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
     }
-    console.log('[BookingService] Token found, length:', token.length);
+
+    let token: string | null = null;
+    try {
+      token = localStorage.getItem('token');
+    } catch {
+      // Swallow storage errors and fall back to no auth header
+    }
+
+    if (!token) {
+      console.warn('[BookingService] No token found when building auth headers');
+      return new HttpHeaders({
+        'Content-Type': 'application/json'
+      });
+    }
+
+    console.log('[BookingService] Token found when building auth headers, length:', token.length);
     return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
   }
