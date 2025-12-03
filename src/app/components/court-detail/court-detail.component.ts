@@ -2,6 +2,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DatePickerModule } from 'primeng/datepicker';
 import { PublicService } from '../../services/public.service';
 import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse, CourtPhotoResponse, CourtResponse } from '../../models/court.models';
@@ -15,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-court-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppHeaderComponent, ConvertMoneyPipe],
+  imports: [CommonModule, FormsModule, DatePickerModule, AppHeaderComponent, ConvertMoneyPipe],
   templateUrl: './court-detail.component.html',
   styleUrl: './court-detail.component.scss'
 })
@@ -139,7 +140,6 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
 
   onSelectDay(d: Date) {
     this.selectedDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    console.log('[CourtDetail] onSelectDay called', { oldDate: this.selectedDate, newDate: d, dateKey: this.dateKey(this.selectedDate) });
     
     // Ensure selected date is in days array
     this.ensureDateInDaysArray(this.selectedDate);
@@ -156,7 +156,6 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
     const exists = this.days.some(d => this.dateKey(d) === dateKey);
     
     if (!exists) {
-      console.log('[CourtDetail] Adding date to days array', { dateKey, date });
       // Add the date and regenerate a 7-day window around it
       const today = new Date();
       const selectedDay = new Date(date);
@@ -167,7 +166,6 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
       const endDay = Math.max(6, diffDays + 3); // Show at least 7 days, or selected date + 3 days
       
       this.days = Array.from({ length: endDay - startDay + 1 }, (_, i) => this.addDays(today, startDay + i));
-      console.log('[CourtDetail] Updated days array', { startDay, endDay, count: this.days.length });
       
       // Force Angular to detect changes and re-render
       this.cdr.detectChanges();
@@ -188,21 +186,35 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  onDateSelect(date: Date) {
+    if (date) {
+      this.onSelectDay(date);
+    }
+  }
+
   setToday() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     this.onSelectDay(today);
   }
 
+  isToday(): boolean {
+    if (!this.selectedDate) return false;
+    const today = new Date();
+    return (
+      this.selectedDate.getFullYear() === today.getFullYear() &&
+      this.selectedDate.getMonth() === today.getMonth() &&
+      this.selectedDate.getDate() === today.getDate()
+    );
+  }
+
   private loadSlotsForSelectedDate() {
     this.slotsForDay = [];
     this.selectedSlot = undefined; // Clear selected slot when reloading
     const dateKey = this.dateKey(this.selectedDate);
-    console.log('[CourtDetail] loadSlotsForSelectedDate START', { courtId: this.courtId, dateKey, selectedDate: this.selectedDate });
     
     this.publicService.getAllTimeSlotsByCourtAndDate(this.courtId, dateKey).subscribe({
       next: (resp) => {
-        console.log('[CourtDetail] slots response SUCCESS', { courtId: this.courtId, dateKey, count: resp?.items?.length, items: resp?.items });
         const items = (resp?.items || []).slice().sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
         this.slotsForDay = items.map(s => ({
           id: s.id,
@@ -212,12 +224,10 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
           price: s.price || 0,
           currency: (s as any).currency || 'EUR'
         }));
-        console.log('[CourtDetail] slotsForDay mapped', { count: this.slotsForDay.length, slots: this.slotsForDay });
         this.cdr.detectChanges();
         this.handleInitialSlotSelection();
       },
-      error: (err) => {
-        console.error('[CourtDetail] slots fetch FAILED', { courtId: this.courtId, dateKey, error: err });
+      error: () => {
         this.slotsForDay = [];
         this.cdr.detectChanges();
         this.handleInitialSlotSelection();
@@ -247,23 +257,10 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
   }
 
   private scrollToSelectedDay() {
-    if (!this.isBrowser) {
-      console.log('[CourtDetail] scrollToSelectedDay - not browser, skipping');
-      return;
-    }
+    if (!this.isBrowser) return;
     
     const selectedDateKey = this.dateKey(this.selectedDate);
-    console.log('[CourtDetail] scrollToSelectedDay', { 
-      selectedDateKey, 
-      selectedDate: this.selectedDate,
-      daysCount: this.days.length 
-    });
-    
     const selectedButton = document.querySelector(`[data-date-key="${selectedDateKey}"]`) as HTMLElement;
-    console.log('[CourtDetail] scrollToSelectedDay - found button', { 
-      selectedButton,
-      selector: `[data-date-key="${selectedDateKey}"]`
-    });
     
     if (selectedButton) {
       selectedButton.scrollIntoView({
@@ -271,12 +268,6 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
         block: 'nearest',
         inline: 'center'
       });
-      console.log('[CourtDetail] scrollToSelectedDay - scrolled to button');
-    } else {
-      console.warn('[CourtDetail] scrollToSelectedDay - button not found!');
-      // Debug: log all available date keys
-      const allButtons = document.querySelectorAll('.detail-day-btn');
-      console.log('[CourtDetail] Available day buttons:', Array.from(allButtons).map(b => b.getAttribute('data-date-key')));
     }
   }
 

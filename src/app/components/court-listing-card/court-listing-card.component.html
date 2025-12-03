@@ -34,7 +34,7 @@
       <span class="chip" *ngFor="let s of slots">{{ s }}</span>
     </div>
 
-    <button class="btn-cta" *ngIf="mode === 'booking'" (click)="onPrimaryAction($event)">Book Court</button>
+    <button class="btn-cta" *ngIf="mode === 'booking'" (click)="onPrimaryAction($event)">{{ isAdmin ? 'View Bookings' : 'Book Now' }}</button>
     <button class="btn-cta" *ngIf="mode === 'reservation'" (click)="onPrimaryAction($event)">View Details</button>
   </div>
 </div>

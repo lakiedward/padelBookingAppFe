@@ -82,7 +82,6 @@ export class RegisterComponent implements AfterViewInit {
             try { window.location.href = res.url; } catch {}
           },
           error: (err) => {
-            console.error('Owner onboarding failed:', err);
             const msg = err?.error?.message || 'Stripe onboarding could not be started. Please try again.';
             this.messageService.add({ key: 'auth', severity: 'error', summary: 'Onboarding error', detail: msg, life: 4000 });
           }
@@ -107,7 +106,6 @@ export class RegisterComponent implements AfterViewInit {
           this.cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Registration failed:', error);
           this.handleRegistrationError(error);
         }
       });
@@ -115,22 +113,25 @@ export class RegisterComponent implements AfterViewInit {
 
   private handleRegistrationError(error: unknown) {
     const message = this.extractErrorMessage(error);
+    let userFriendlyMessage = 'Registration failed. Please try again.';
+    
     if (message) {
       const normalized = message.toLowerCase();
-      if (normalized.includes('username')) {
-        this.setServerError('username', message);
+      if (normalized.includes('username') && (normalized.includes('exists') || normalized.includes('taken') || normalized.includes('already'))) {
+        this.setServerError('username', 'Username already exists');
+        userFriendlyMessage = 'Username already exists';
       }
-      if (normalized.includes('email')) {
-        this.setServerError('email', message);
+      if (normalized.includes('email') && (normalized.includes('exists') || normalized.includes('taken') || normalized.includes('already'))) {
+        this.setServerError('email', 'Email already exists');
+        userFriendlyMessage = 'Email already exists';
       }
     }
 
-    const detail = message || 'Registration failed. Please try again.';
     this.messageService.add({
       key: 'auth',
       severity: 'error',
       summary: 'Registration failed',
-      detail,
+      detail: userFriendlyMessage,
       life: 5000
     });
     this.cdr.markForCheck();
@@ -253,7 +254,6 @@ export class RegisterComponent implements AfterViewInit {
           life: 4000
         });
       }
-      console.warn('[RegisterComponent] googleClientId is not configured.');
       setTimeout(() => {
         this.useGoogleButton = false;
         this.cdr.detectChanges();
@@ -272,7 +272,6 @@ export class RegisterComponent implements AfterViewInit {
           life: 4000
         });
       }
-      console.error('[RegisterComponent] Google Identity Services SDK not available.');
       setTimeout(() => {
         this.useGoogleButton = false;
         this.cdr.detectChanges();
@@ -331,7 +330,6 @@ export class RegisterComponent implements AfterViewInit {
 
   private readonly handleGoogleCredential = (response: google.accounts.id.CredentialResponse) => {
     if (!response.credential) {
-      console.warn('[RegisterComponent] Received Google callback without credential.');
       return;
     }
 
@@ -348,8 +346,7 @@ export class RegisterComponent implements AfterViewInit {
           this.router.navigate(['/']);
         }
       },
-      error: (error) => {
-        console.error('Google sign-up failed:', error);
+      error: () => {
         this.loading = false;
         this.messageService.add({
           key: 'auth',

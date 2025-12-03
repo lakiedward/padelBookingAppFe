@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CourtService } from '../../services/court.service';
-import { CourtSummaryResponse, CourtResponse, CourtAvailabilityRuleResponse, BackendAvailabilityRuleType } from '../../models/court.models';
+import { CourtSummaryResponse, CourtResponse, CourtAvailabilityRuleResponse, BackendAvailabilityRuleType, CourtEquipmentResponse } from '../../models/court.models';
 import { forkJoin } from 'rxjs';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
@@ -39,6 +39,7 @@ interface CourtPanelData {
   sport: string;
   availabilityRules: CourtAvailabilityRuleResponse[];
   schedules: DaySchedule[];
+  equipment: CourtEquipmentResponse[];
 }
 
 @Component({
@@ -54,6 +55,7 @@ export class CourtViewComponent implements OnInit {
 
   @Output() addCourt = new EventEmitter<void>();
   @Output() editCourt = new EventEmitter<number>();
+  @Output() viewBookings = new EventEmitter<number>();
 
   courts: CourtPanelData[] = [];
   isLoading = false;
@@ -69,20 +71,17 @@ export class CourtViewComponent implements OnInit {
     // Load courts after a brief delay to ensure component is fully mounted
     // This fixes the "need to click twice" issue with *ngIf mounting/unmounting
     setTimeout(() => {
-      console.log('[CourtView] ngOnInit - Loading courts after delay');
       this.loadCourts();
     }, 100);
   }
 
   loadCourts() {
-    console.log('[CourtView] loadCourts() called');
     this.isLoading = true;
     this.loadError = null;
     this.cdr.detectChanges();
     
     this.courtService.getCourts().subscribe({
       next: (courts) => {
-        console.log('[CourtView] Courts summary loaded:', courts);
         
         if (courts.length === 0) {
           this.courts = [];
@@ -98,28 +97,20 @@ export class CourtViewComponent implements OnInit {
 
         forkJoin(detailRequests).subscribe({
           next: (detailedCourts) => {
-            console.log('[CourtView] Court details loaded:', detailedCourts);
-            this.courts = detailedCourts.map(c => {
-              const panel = this.mapCourtToPanel(c);
-              console.log(`[CourtView] Court "${panel.title}" - Image URL:`, panel.imageUrl);
-              return panel;
-            });
+            this.courts = detailedCourts.map(c => this.mapCourtToPanel(c));
             // Prices are already available from availabilityRules in court details
             // No need to fetch time slots separately
             this.isLoading = false;
-            console.log('[CourtView] Courts array length:', this.courts.length);
             this.cdr.detectChanges();
           },
-          error: (err) => {
-            console.error('[CourtView] Failed to load court details:', err);
+          error: () => {
             this.loadError = 'Failed to load court details';
             this.isLoading = false;
             this.cdr.detectChanges();
           }
         });
       },
-      error: (err) => {
-        console.error('[CourtView] Failed to load courts:', err);
+      error: () => {
         this.loadError = 'Failed to load courts';
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -134,6 +125,11 @@ export class CourtViewComponent implements OnInit {
     this.editCourt.emit(courtId);
   }
 
+  onViewBookings(courtId: number) {
+    // Emit event with court ID to navigate to booking calendar
+    this.viewBookings.emit(courtId);
+  }
+
   onDeleteCourt(courtId: number, courtName: string) {
     this.confirmationService.confirm({
       header: 'Delete Court',
@@ -141,14 +137,14 @@ export class CourtViewComponent implements OnInit {
       icon: 'pi pi-exclamation-triangle',
       rejectLabel: 'Cancel',
       acceptLabel: 'Delete',
+      acceptButtonStyleClass: 'confirm-delete-btn',
+      rejectButtonStyleClass: 'confirm-cancel-btn',
       accept: () => {
         this.courtService.deleteCourt(courtId).subscribe({
           next: () => {
-            console.log('Court deleted successfully');
             this.loadCourts(); // Refresh the list
           },
           error: (err) => {
-            console.error('Failed to delete court:', err);
             alert('Failed to delete court: ' + (err.error?.error || err.message));
           }
         });
@@ -200,7 +196,8 @@ export class CourtViewComponent implements OnInit {
       tags,
       sport: court.sport,
       availabilityRules: court.availabilityRules,
-      schedules
+      schedules,
+      equipment: court.equipment || []
     };
   }
 

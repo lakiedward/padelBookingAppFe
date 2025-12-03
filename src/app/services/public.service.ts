@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment';
 import { CourtSummaryResponse, PublicAvailableTimeSlot, CourtResponse } from '../models/court.models';
 import { SlotsForDateResponse } from '../models/booking.models';
 import { EventSummaryResponse } from '../models/event.models';
+import { ClubDetails } from '../models/club.models';
 
 @Injectable({ providedIn: 'root' })
 export class PublicService {
@@ -14,6 +15,10 @@ export class PublicService {
 
   getPublicCourts(): Observable<CourtSummaryResponse[]> {
     return this.http.get<CourtSummaryResponse[]>(`${this.apiBase}/api/public/courts`);
+  }
+  
+  getPublicClubs(): Observable<ClubDetails[]> {
+    return this.http.get<ClubDetails[]>(`${this.apiBase}/api/public/clubs`);
   }
 
   getAvailableTimeSlotsByCourt(courtId: number): Observable<PublicAvailableTimeSlot[]> {

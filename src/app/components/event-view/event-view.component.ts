@@ -30,27 +30,22 @@ export class EventViewComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {
-      console.log('[EventView] ngOnInit - Loading events after delay');
       this.loadEvents();
     }, 100);
   }
 
   loadEvents() {
-    console.log('[EventView] loadEvents() called');
     this.isLoading = true;
     this.loadError = null;
     this.cdr.detectChanges();
 
     this.eventService.getEvents().subscribe({
       next: (events) => {
-        console.log('[EventView] Events loaded:', events);
         this.events = events.map(e => eventSummaryToPanelData(e));
         this.isLoading = false;
-        console.log('[EventView] Events array length:', this.events.length);
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('[EventView] Failed to load events:', err);
+      error: () => {
         this.loadError = 'Failed to load events';
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -76,11 +71,9 @@ export class EventViewComponent implements OnInit {
       accept: () => {
         this.eventService.deleteEvent(eventId).subscribe({
           next: () => {
-            console.log('Event deleted successfully');
             this.loadEvents();
           },
           error: (err) => {
-            console.error('Failed to delete event:', err);
             alert('Failed to delete event: ' + (err.error?.error || err.message));
           }
         });

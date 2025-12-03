@@ -18,57 +18,75 @@
   </div>
 
   <div class="panels" *ngIf="!isLoading && courts.length > 0">
-    <section class="court-panel" *ngFor="let c of courts; trackBy: trackByIndex">
+    <section class="court-panel" *ngFor="let c of courts; trackBy: trackByIndex" (click)="onViewBookings(c.id)">
       <div class="hero">
         <div class="img" [style.background-image]="c.imageUrl ? 'url(' + c.imageUrl + ')' : ''"></div>
         <div class="hero-gradient" aria-hidden="true"></div>
 
-        <div class="badge" *ngIf="c.status === 'Active'">
-          <span class="badge-pill primary">Active</span>
-        </div>
+        <div class="icon-box" aria-hidden="true">🎾</div>
 
         <div class="hero-actions desktop">
-          <button type="button" class="btn btn--ghost btn--xs green-outline">Availability &amp; Pricing</button>
-          <button type="button" class="btn btn--ghost btn--xs">Equipment</button>
-          <button type="button" class="btn btn--primary btn--xs" (click)="onEditCourt(c.id)">Edit</button>
-          <button type="button" class="btn btn--ghost btn--xs btn--danger" (click)="onDeleteCourt(c.id, c.title)">Delete</button>
+          <button type="button" class="btn btn--primary btn--sm" (click)="onEditCourt(c.id); $event.stopPropagation()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            Edit
+          </button>
+          <button type="button" class="btn btn--danger btn--sm" (click)="onDeleteCourt(c.id, c.title); $event.stopPropagation()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              <path d="M10 11v6"></path>
+              <path d="M14 11v6"></path>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+            </svg>
+            Delete
+          </button>
         </div>
 
         <div class="hero-bottom">
-          <div class="left">
-            <div class="icon-box" aria-hidden="true">🎾</div>
-            <div class="text">
-              <h3>{{ c.title }}</h3>
-              <p class="muted">{{ c.subtitle }}</p>
-              <div class="chips">
-                <span class="chip chip--primary" *ngFor="let tag of c.tags.slice(0, 3); let i = index" [class.chip--primary]="i === 0">
-                  <svg class="check" *ngIf="i === 0" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                    <path d="M3 8l3 3 7-7" />
-                  </svg>
-                  {{ tag }}
-                </span>
-                <span class="chip" *ngIf="c.tags.length > 3">+{{ c.tags.length - 3 }} more</span>
+          <div class="court-info">
+            <h3 class="court-title">{{ c.title }}</h3>
+            <div class="court-meta">
+              <div class="tags-row">
+                <span class="tag" *ngFor="let tag of c.tags.slice(0, 3)">{{ tag }}</span>
+                <span class="tag more" *ngIf="c.tags.length > 3">+{{ c.tags.length - 3 }}</span>
               </div>
-              <div class="price mobile">
-                <div class="val" *ngIf="c.priceValue !== undefined; else naPrice">{{ c.priceValue | convertMoney:(c.currency || 'EUR') }}</div>
-                <ng-template #naPrice><div class="val">N/A</div></ng-template>
-                <div class="note">per slot</div>
+              <div class="equipment-row" *ngIf="c.equipment && c.equipment.length > 0">
+                <span class="eq-label">Equipment:</span>
+                <span class="eq-item" *ngFor="let eq of c.equipment">
+                  {{ eq.name }} · {{ eq.pricePerHour | convertMoney:(eq.currency || c.currency || 'EUR') }}/hr
+                </span>
               </div>
             </div>
-          </div>
-          <div class="right price desktop">
-            <div class="val" *ngIf="c.priceValue !== undefined; else naPrice2">{{ c.priceValue | convertMoney:(c.currency || 'EUR') }}</div>
-            <ng-template #naPrice2><div class="val">N/A</div></ng-template>
-            <div class="note">per slot</div>
+            <div class="court-price">
+              <span class="price-val" *ngIf="c.priceValue !== undefined; else naPrice">{{ c.priceValue | convertMoney:(c.currency || 'EUR') }}</span>
+              <ng-template #naPrice><span class="price-val">N/A</span></ng-template>
+              <span class="price-note">/slot</span>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="hero-actions mobile">
-        <button type="button" class="btn btn--ghost btn--xs green-outline wide">Availability &amp; Pricing</button>
-        <button type="button" class="btn btn--ghost btn--xs">Equipment</button>
-        <button type="button" class="btn btn--primary btn--xs" (click)="onEditCourt(c.id)">Edit</button>
-        <button type="button" class="btn btn--ghost btn--xs btn--danger" (click)="onDeleteCourt(c.id, c.title)">Delete</button>
+        <button type="button" class="btn btn--primary btn--sm" (click)="onEditCourt(c.id); $event.stopPropagation()">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          Edit
+        </button>
+        <button type="button" class="btn btn--danger btn--sm" (click)="onDeleteCourt(c.id, c.title); $event.stopPropagation()">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+            <path d="M10 11v6"></path>
+            <path d="M14 11v6"></path>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+          </svg>
+          Delete
+        </button>
       </div>
 
       <div class="calendar">
@@ -88,7 +106,7 @@
             </ng-template>
           </div>
         </div>
-        <button type="button" class="btn btn--primary wide book">Book Court</button>
+        <button type="button" class="btn btn--primary wide book" (click)="onViewBookings(c.id); $event.stopPropagation()">View Bookings</button>
       </div>
     </section>
   </div>

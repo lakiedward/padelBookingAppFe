@@ -184,14 +184,29 @@
   }
 
   .field {
-    label { color: #d6dde6; font-weight: 700; font-size: 14px; display: block; margin-bottom: 8px; }
+    label { color: #d6dde6; font-weight: 700; font-size: 13px; display: block; margin-bottom: 6px; }
     input[pInputText] {
       width: 100%;
-      padding: 14px;
-      background: rgba(15, 27, 38, 0.85);
-      border: 1px solid rgba(214, 221, 230, 0.25);
-      border-radius: 12px;
-      color: #e2e8f0;
+      height: 40px;
+      padding: 0 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+
+      &::placeholder {
+        color: #ffffff;
+        opacity: 0.7;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: #a7ee43;
+        background: rgba(255, 255, 255, 0.08);
+      }
     }
 
     .location-input { position: relative; }
@@ -222,39 +237,40 @@
 
   .textarea {
     width: 100%;
-    min-height: 160px;
-    padding: 14px;
-    background: rgba(15, 27, 38, 0.85);
-    border: 1px solid rgba(214, 221, 230, 0.25);
-    border-radius: 12px;
-    color: #e2e8f0;
+    min-height: 80px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: #ffffff;
     font-size: 14px;
+    font-family: inherit;
     /* Match placeholder/text styling to inputs */
-    &::placeholder { color: #7e8ea2; opacity: 1; }
+    &::placeholder { color: #ffffff; opacity: 0.7; }
     resize: vertical;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: all 0.2s ease;
 
     &:focus,
     &:focus-visible {
-      border-color: #a7ee43;
-      box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.15) inset;
       outline: none;
+      border-color: #a7ee43;
+      background: rgba(255, 255, 255, 0.08);
     }
   }
 
   /* Show red border for invalid textareas only after save attempt */
   form.submitted .textarea.ng-invalid {
-    border-color: #ef4444; /* red */
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) inset;
+    border-color: rgba(255, 59, 48, 0.5); /* matching Create Court error state */
   }
 
   .section { margin-top: 24px; }
-  .section > h3 { color: #d6dde6; font-size: 16px; margin: 0 0 12px 0; }
+  .section > h3 { color: #a7ee43; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px 0; }
 
   .section-separator {
     margin: 16px 0;
     border: none;
-    border-top: 1px solid rgba(214, 221, 230, 0.15);
+    height: 1px;
+    background: rgba(214, 221, 230, 0.15);
   }
 
   /* Location white container */
@@ -316,16 +332,23 @@
       justify-items: center;
       align-items: center;
       padding: 16px 10px;
-      border-radius: 16px;
-      background: rgba(15, 27, 38, 0.5);
-      border: 1px solid rgba(214, 221, 230, 0.25);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(214, 221, 230, 0.15);
       color: #d6dde6;
       cursor: pointer;
+      transition: all 0.2s ease;
 
-      &.active { background: rgba(167, 238, 67, 0.1); border-color: #a7ee43; }
+      &:hover { background: rgba(255, 255, 255, 0.12); }
+      &.active { 
+        background: #a7ee43; 
+        color: #000a14;
+        border-color: rgba(167, 238, 67, 0.4);
+        box-shadow: 0 2px 8px rgba(167, 238, 67, 0.2);
+      }
       .sport-icon { width: 40px; height: 40px; }
       .sport-icon img, .sport-icon svg { width: 40px; height: 40px; display: block; }
-      .label { font-size: 14px; font-weight: 700; margin-top: 4px; }
+      .label { font-size: 13px; font-weight: 700; margin-top: 4px; }
     }
   }
 
@@ -336,38 +359,37 @@
   }
 
   .media-card {
-    .title { color: #d6dde6; font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+    .title { color: #d6dde6; font-weight: 700; font-size: 13px; margin-bottom: 8px; }
     .drop {
-      background: rgba(15, 27, 38, 0.85);
-      border: 2px solid rgba(214, 221, 230, 0.25);
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
       border-radius: 12px;
-      padding: 32px; /* a bit bigger */
+      padding: 20px 12px;
       text-align: center;
-      color: #c9d5e1;
-      min-height: 320px; /* bigger box */
-      max-height: 320px; /* lock height to prevent growing */
+      color: #d6dde6;
+      min-height: 320px;
+      max-height: 320px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      cursor: pointer; /* clickable hint */
+      cursor: pointer;
       position: relative;
       overflow: hidden;
       box-sizing: border-box;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, border-style 0.15s ease;
+      transition: all 0.2s ease;
     }
     .drop:hover,
     .drop:focus-visible {
-      border-color: #a7ee43;
-      border-style: dashed; /* discontinuous */
-      box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.15) inset;
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(167, 238, 67, 0.4);
       outline: none;
     }
 
     /* Drag over state */
     .drop.drag-over {
-      border-color: #a7ee43;
+      border: 2px solid #a7ee43;
       border-style: dashed;
       background: rgba(167, 238, 67, 0.1);
       box-shadow: 0 0 0 3px rgba(167, 238, 67, 0.25) inset;
@@ -376,8 +398,7 @@
 
     /* Invalid state for required images after submit */
     .drop.invalid {
-      border-color: #ef4444 !important;
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) inset;
+      border-color: rgba(255, 59, 48, 0.5) !important;
     }
 
     /* Ensure different aspect media keep fixed container height */
@@ -397,38 +418,38 @@
     /* Overlay actions on top-right of image */
     .overlay-actions {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 8px;
+      right: 8px;
       display: flex;
       gap: 8px;
       z-index: 2;
     }
     .icon-btn {
-      width: 40px;
-      height: 40px;
+      width: 28px;
+      height: 28px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 10px;
-      background: rgba(15, 27, 38, 0.85);
-      border: 1px solid rgba(214, 221, 230, 0.35);
-      color: #a7ee43; /* green for edit */
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      color: #fff;
       cursor: pointer;
-      font-size: 18px;
-      transition: background 0.15s ease, border-color 0.15s ease;
+      font-size: 16px;
+      line-height: 1;
+      transition: all 0.2s ease;
     }
-    .icon-btn:hover { background: rgba(15, 27, 38, 0.95); border-color: rgba(214, 221, 230, 0.6); }
-    .icon-btn img, .icon-btn svg { width: 20px; height: 20px; }
-    .icon-btn.danger { color: #ee6363; border-color: rgba(238, 99, 99, 0.6); }
-    .icon-btn.danger:hover { background: rgba(238, 99, 99, 0.15); }
+    .icon-btn:hover { background: rgba(167, 238, 67, 0.8); }
+    .icon-btn img, .icon-btn svg { width: 16px; height: 16px; }
+    .icon-btn.danger:hover { background: rgba(255, 59, 48, 0.8); }
 
     /* dropzone spinner visuals moved to global .u-spinner */
 
-    .drop-emoji { font-size: 32px; display: flex; align-items: center; justify-content: center; }
-    .drop-emoji img { width: 40px; height: 40px; display: inline-block; }
-    .drop-title { color: #d6dde6; font-weight: 700; margin-top: 8px; font-size: 15px; }
-    .drop-sub { color: #8aa0b5; font-size: 13px; }
-    .drop-hint { color: #6b7a8b; font-size: 12px; margin-top: 6px; }
+    .drop-emoji { font-size: 32px; display: flex; align-items: center; justify-content: center; color: #a7ee43; }
+    .drop-emoji img { width: 32px; height: 32px; display: inline-block; }
+    .drop-title { color: #d6dde6; font-weight: 600; margin-top: 8px; font-size: 13px; }
+    .drop-sub { color: #8aa0b5; font-size: 11px; text-align: center; }
+    .drop-hint { color: #6b7a8b; font-size: 11px; margin-top: 6px; }
   }
 
   .footer {
@@ -438,17 +459,17 @@
     justify-content: space-between;
     gap: 16px;
     margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(214, 221, 230, 0.15);
+    padding: 16px 0 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     .hint {
       color: #6b7a8b;
-      font-size: 14px;
+      font-size: 12px;
       text-align: left;
     }
 
     /* Make only the Save/Update button a bit wider without affecting other small buttons */
     .btn.btn--sm {
-      min-width: 140px; /* was 120px globally */
+      min-width: 140px;
     }
     /* save button visuals moved to global .btn */
   }
@@ -457,33 +478,40 @@
 :host ::ng-deep {
   .p-inputtext {
     width: 100%;
-    padding: 14px;
-    background: rgba(15, 27, 38, 0.85);
-    border: 1px solid rgba(214, 221, 230, 0.25);
-    border-radius: 12px;
-    color: #e2e8f0;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    height: 40px;
+    padding: 0 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: #ffffff;
+      opacity: 0.7;
+    }
   }
 
-  /* Focus state: green border like login page */
+  /* Focus state: green border matching Create Court popup */
   .p-inputtext:focus,
   .p-inputtext:focus-visible {
-    border-color: #a7ee43 !important;
-    box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.15) inset;
     outline: none;
+    border-color: #a7ee43 !important;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
   }
 
   /* When typing/has content and valid (Angular adds ng-dirty ng-valid) */
   .p-inputtext.ng-dirty.ng-valid,
   .p-inputtext.ng-touched.ng-valid {
     border-color: #a7ee43;
-    box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.12) inset;
   }
 
   /* Show red border for invalid inputs only after save attempt */
   form.submitted .p-inputtext.ng-invalid {
-    border-color: #ef4444 !important; /* red */
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) inset;
+    border-color: rgba(255, 59, 48, 0.5) !important; /* matching Create Court error state */
   }
 }
 
@@ -500,25 +528,24 @@
   }
   .map {
     height: 320px;
-    border-radius: 12px;
+    border-radius: 10px;
     margin-top: 12px;
     overflow: hidden;
-    border: 1px solid rgba(214, 221, 230, 0.15);
-    background: rgba(15, 27, 38, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
   }
   .map.invalid {
-    border-color: #ef4444;
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18) inset;
+    border-color: rgba(255, 59, 48, 0.5);
   }
   .error-text {
     margin-top: 10px;
     padding: 10px 12px;
     border-radius: 10px;
-    background: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.45);
-    color: #ef4444; /* stronger red */
-    font-size: 14px;
-    font-weight: 700;
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff6b6b;
+    font-size: 12px;
+    font-weight: 500;
   }
   .saved-locations {
     margin-top: 12px;
@@ -526,78 +553,131 @@
     gap: 10px;
   }
   .loc-card {
-    background: rgba(15, 27, 38, 0.85);
-    border: 1px solid rgba(214, 221, 230, 0.25);
-    border-radius: 12px;
-    padding: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(214, 221, 230, 0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     color: #d6dde6;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: rgba(167, 238, 67, 0.4);
+      background: rgba(255, 255, 255, 0.08);
+    }
   }
-  .loc-title { font-weight: 700; color: #e2e8f0; }
+  .loc-title { font-weight: 700; color: #d6dde6; font-size: 13px; }
   .loc-sub { color: #8aa0b5; font-size: 12px; }
   /* remove button now uses global .btn --danger */
 }
 
-/* PrimeNG Select dark styling to match inputs */
+/* PrimeNG Select styling - matching Create Court popup */
 :host ::ng-deep {
   .p-select {
     width: 100%;
-    padding: 0; /* internal structure handles paddings */
-    background: rgba(15, 27, 38, 0.85);
-    border: 1px solid rgba(214, 221, 230, 0.25);
-    border-radius: 12px;
-    color: #e2e8f0;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .p-select:not(.p-disabled):hover { border-color: rgba(214, 221, 230, 0.35); }
-  .p-select.p-focus {
-    border-color: #a7ee43 !important;
-    box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.15) inset;
-  }
-  .p-select .p-select-label {
-    padding: 14px;
-    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 10px !important;
+    color: #ffffff !important;
+    transition: all 0.2s ease;
+
+    &:not(.p-disabled):hover {
+      border-color: rgba(167, 238, 67, 0.4) !important;
+    }
+
+    &.p-focus {
+      border-color: #a7ee43 !important;
+      box-shadow: none !important;
+    }
+
+    &.invalid {
+      border-color: rgba(255, 59, 48, 0.5) !important;
+    }
+
+    .p-select-label {
+      color: #ffffff !important;
+    }
+
+    .p-select-label.p-placeholder {
+      color: #ffffff !important;
+      opacity: 0.7;
+    }
   }
   .p-select .p-select-trigger {
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
-    color: #c9d5e1;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: #ffffff;
   }
   .p-select-panel {
-    background: #0f1b26;
-    color: #e2e8f0;
-    border: 1px solid rgba(214, 221, 230, 0.25);
-    border-radius: 12px;
+    background: rgba(15, 27, 38, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 10px !important;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
   }
-  .p-select-items .p-select-option { color: #e2e8f0; }
+  .p-select-items .p-select-option { color: #d6dde6; }
   .p-select-items .p-select-option.p-highlight { background: rgba(167, 238, 67, 0.12); color: #a7ee43; }
 }
 
 // Loading state styles
 .club-details {
+  position: relative;
+
+  // Saving overlay - covers entire component
+  .saving-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 27, 38, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+
+    .saving-overlay-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 40px;
+      background: rgba(15, 27, 38, 0.95);
+      border-radius: 16px;
+      border: 1px solid rgba(214, 221, 230, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+      .saving-text {
+        color: #d6dde6;
+        font-size: 16px;
+        font-weight: 700;
+        text-align: center;
+      }
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   form {
     position: relative;
     transition: opacity 0.2s ease;
 
     &.saving {
       pointer-events: none;
-      opacity: 0.8;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 10, 20, 0.1);
-        backdrop-filter: blur(2px);
-        z-index: 10;
-        border-radius: 12px;
-      }
+      opacity: 0.6;
     }
   }
 }
@@ -615,9 +695,9 @@
       display: block;
     }
 
-    // Add top padding to form to account for fixed header
+    // Add padding to form to account for fixed header and side margins
     form {
-      padding-top: 80px;
+      padding: 16px 16px 20px 16px;
     }
 
     // Stack grid items vertically on mobile

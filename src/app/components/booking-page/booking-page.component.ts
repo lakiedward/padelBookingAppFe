@@ -50,7 +50,6 @@ export class BookingPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('[BookingPage] ngOnInit START');
     const timeSlotIdParam = this.route.snapshot.paramMap.get('timeSlotId');
     const courtIdParam = this.route.snapshot.queryParamMap.get('courtId');
     const date = this.route.snapshot.queryParamMap.get('date');
@@ -59,17 +58,7 @@ export class BookingPageComponent implements OnInit {
     const price = this.route.snapshot.queryParamMap.get('price');
     const currency = this.route.snapshot.queryParamMap.get('currency');
 
-    console.log('[BookingPage] Route params:', {
-      timeSlotIdParam,
-      courtIdParam,
-      date,
-      start,
-      end,
-      price
-    });
-
     if (!timeSlotIdParam || !courtIdParam || !date || !start || !end || !price) {
-      console.error('[BookingPage] Missing params!', { timeSlotIdParam, courtIdParam, date, start, end, price });
       this.bookingError = 'Missing booking information. Please try again.';
       this.isLoading = false;
       return;
@@ -79,13 +68,9 @@ export class BookingPageComponent implements OnInit {
     const courtId = Number(courtIdParam);
     const priceNum = Number(price);
 
-    console.log('[BookingPage] Parsed params:', { timeSlotId, courtId, priceNum });
-    console.log('[BookingPage] Calling getPublicCourtById...');
-
     // Load court details to get full information
     this.publicService.getPublicCourtById(courtId).subscribe({
       next: (court: CourtResponse) => {
-        console.log('[BookingPage] Court details received:', court);
         this.slotDetails = {
           timeSlotId,
           courtId,
@@ -98,23 +83,16 @@ export class BookingPageComponent implements OnInit {
           price: priceNum,
           currency: currency || 'EUR'
         };
-        console.log('[BookingPage] slotDetails set:', this.slotDetails);
         this.isLoading = false;
-        console.log('[BookingPage] isLoading set to false');
         this.cdr.detectChanges();
-        console.log('[BookingPage] detectChanges called');
       },
-      error: (err) => {
-        console.error('[BookingPage] Error loading court details:', err);
+      error: () => {
         this.bookingError = 'Failed to load booking information. Please try again.';
         this.isLoading = false;
-        console.log('[BookingPage] isLoading set to false (error)');
         this.cdr.detectChanges();
-        console.log('[BookingPage] detectChanges called (error)');
       }
     });
 
-    console.log('[BookingPage] ngOnInit END (async call started)');
   }
 
   onSelectPaymentMethod(method: PaymentMethod): void {
@@ -141,8 +119,7 @@ export class BookingPageComponent implements OnInit {
     }
 
     this.bookingService.createBooking(this.slotDetails.timeSlotId).subscribe({
-      next: (booking: BookingSummaryResponse) => {
-        console.log('Booking successful:', booking);
+      next: () => {
         this.isSubmitting = false;
         // Navigate to calendar with success message
         this.router.navigate(['/calendar'], {
@@ -150,7 +127,6 @@ export class BookingPageComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Error creating booking:', err);
         this.bookingError = err.error?.message || err.error?.error || err.message || 'Failed to create booking. Please try again.';
         this.isSubmitting = false;
       }

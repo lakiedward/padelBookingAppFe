@@ -24,7 +24,21 @@
 
 .panels { display: grid; gap: 16px; }
 
-.court-panel { border: 1px solid rgba(255,255,255,0.25); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,0.08); }
+.court-panel { 
+  border: 1px solid rgba(255,255,255,0.25); 
+  border-radius: 16px; 
+  overflow: hidden; 
+  background: rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.court-panel:hover {
+  border-color: rgba(167, 238, 67, 0.4);
+  background: rgba(255,255,255,0.10);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 
 .court-panel .hero { position: relative; height: 180px; background: linear-gradient(135deg, rgba(167, 238, 67, 0.1), rgba(96, 165, 250, 0.1)); }
 .court-panel .hero .img { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.7; }
@@ -35,24 +49,111 @@
 .badge-pill.primary { background: #a7ee43; color: #000a14; border-color: rgba(167,238,67,0.4); }
 
 .hero-actions.desktop { position: absolute; top: 12px; right: 12px; display: none; gap: 8px; z-index: 2; }
-.hero-actions.mobile { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 12px; }
+.hero-actions.mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
+.hero-actions .icon { width: 16px; height: 16px; }
 
-.hero-bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; z-index: 2; }
-.hero-bottom .left { display: flex; align-items: flex-end; gap: 10px; }
-.icon-box { width: 40px; height: 40px; border-radius: 10px; background: rgba(167,238,67,0.2); border: 1px solid rgba(167,238,67,0.3); display: inline-flex; align-items: center; justify-content: center; font-size: 20px; }
-.hero-bottom .text h3 { margin: 0; color: #fff; font-size: 18px; font-weight: 800; }
-.hero-bottom .text .muted { color: #8aa0b5; font-size: 12px; margin-top: 2px; }
-.hero-bottom .price { display: none !important; }
+.icon-box { 
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  width: 36px; 
+  height: 36px; 
+  border-radius: 8px; 
+  background: rgba(167,238,67,0.2); 
+  border: 1px solid rgba(167,238,67,0.3); 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 18px; 
+}
 
-.chips { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #d6dde6; background: rgba(255,255,255,0.08); border: 1px solid rgba(214,221,230,0.15); }
-.chip--primary { background: #a7ee43; color: #000a14; border-color: rgba(167,238,67,0.4); }
-.check { width: 12px; height: 12px; color: #000a14; }
+.hero-bottom { 
+  position: absolute; 
+  left: 12px; 
+  right: 12px; 
+  bottom: 12px; 
+  z-index: 2; 
+}
 
-.price { text-align: right; }
-.price .val { color: #a7ee43; font-weight: 800; font-size: 18px; line-height: 1; }
-.price .note { color: #8aa0b5; font-size: 11px; }
-.price.mobile { display: none; margin-top: 8px; text-align: left; }
+.court-info { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px; 
+}
+
+.court-title { 
+  margin: 0; 
+  color: #fff; 
+  font-size: 18px; 
+  font-weight: 800; 
+}
+
+.court-meta { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 4px; 
+}
+
+.court-price { 
+  display: inline-flex; 
+  align-items: baseline; 
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
+  width: fit-content;
+}
+
+.court-price .price-val { 
+  color: #a7ee43; 
+  font-weight: 800; 
+  font-size: 16px; 
+}
+
+.court-price .price-note { 
+  color: #8aa0b5; 
+  font-size: 12px; 
+}
+
+.tags-row { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 6px; 
+}
+
+.tag { 
+  padding: 2px 8px; 
+  border-radius: 4px; 
+  font-size: 11px; 
+  font-weight: 600; 
+  color: #d6dde6; 
+  background: rgba(255,255,255,0.12); 
+}
+
+.tag.more { 
+  color: #8aa0b5; 
+  background: rgba(255,255,255,0.08); 
+}
+
+.equipment-row { 
+  display: flex; 
+  flex-wrap: wrap; 
+  align-items: center; 
+  gap: 6px; 
+  font-size: 11px; 
+}
+
+.equipment-row .eq-label { 
+  color: #8aa0b5; 
+  font-weight: 600; 
+}
+
+.equipment-row .eq-item { 
+  color: #a7ee43; 
+  font-weight: 600; 
+}
 
 .calendar { padding: 12px; }
 .calendar .label { color: #d6dde6; font-size: 12px; font-weight: 800; margin-bottom: 8px; }
@@ -78,14 +179,42 @@
 
 /* Mobile calendar - 2 days per row with equal height */
 @media (max-width: 767px) {
+  .courts-wrap {
+    padding: 0;
+  }
+
+  .courts-header {
+    padding: 0 16px;
+  }
+  
+  .panels {
+    padding: 0 16px;
+  }
+  
+  .court-panel {
+    overflow: hidden !important;
+    max-width: 100% !important;
+  }
+  
+  .calendar {
+    padding: 12px;
+    overflow: hidden;
+    max-width: 100%;
+  }
+  
+  .calendar .label {
+    padding: 0 4px;
+  }
+
   .calendar .scroll {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important; /* 2 equal columns */
-    grid-auto-rows: 1fr !important; /* Force equal row heights */
+    grid-template-columns: 1fr 1fr !important;
+    grid-auto-rows: 1fr !important;
     gap: 12px !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
+    overflow: visible !important;
     padding-bottom: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .day {
@@ -94,14 +223,22 @@
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    height: 100% !important; /* Ensure full height of grid cell */
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .slot {
+    min-width: unset !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .slots {
-    flex: 1 !important; /* Expand to fill available space */
+    flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important; /* Center content vertically */
+    justify-content: center !important;
+    width: 100% !important;
   }
 
   .empty {
@@ -135,5 +272,152 @@
 @media (max-width: 1023.98px) {
   .price.desktop { display: none; }
   .price.mobile { display: block; }
+}
+
+/* PrimeNG Confirm Dialog - Match create-court popup styling */
+::ng-deep {
+  .p-confirmdialog {
+    background: rgba(255, 255, 255, 0.08) !important;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 2px solid #a7ee43 !important;
+    border-radius: 20px !important;
+    box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.3) !important;
+    overflow: hidden;
+    min-width: 400px;
+    max-width: 500px;
+
+    .p-confirmdialog-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+
+      .p-confirmdialog-title {
+        color: #d6dde6;
+        font-weight: 800;
+        font-size: 20px;
+        margin: 0;
+        flex: 1;
+      }
+    }
+
+    .p-confirmdialog-content {
+      padding: 24px;
+      background: transparent;
+
+      .p-confirmdialog-message {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        color: #d6dde6;
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      .p-confirmdialog-icon {
+        color: #ffcc00;
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+    }
+
+    .p-confirmdialog-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  /* Dialog overlay backdrop */
+  .p-dialog-mask {
+    background: rgba(0, 0, 0, 0.68) !important;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Button styling inside confirm dialog */
+  .p-confirmdialog-footer {
+    .p-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 20px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    /* Cancel/Reject button - neutral style */
+    .p-confirmdialog-reject-button {
+      background: rgba(138, 160, 181, 0.15) !important;
+      border: 1px solid rgba(138, 160, 181, 0.3) !important;
+      color: #d6dde6 !important;
+
+      &:hover {
+        background: rgba(138, 160, 181, 0.25) !important;
+        border-color: rgba(138, 160, 181, 0.4) !important;
+      }
+
+      &:focus {
+        box-shadow: none !important;
+      }
+    }
+
+    /* Delete/Accept button - danger red style */
+    .p-confirmdialog-accept-button {
+      background: #ff4757 !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 71, 87, 0.4) !important;
+
+      &:hover {
+        background: #ff6b7a !important;
+        transform: translateY(-1px);
+      }
+
+      &:focus {
+        box-shadow: none !important;
+      }
+    }
+  }
+
+  /* Close button in header (if present) */
+  .p-confirmdialog-header {
+    .p-dialog-header-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(214, 221, 230, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+      color: #d6dde6;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      &:focus {
+        box-shadow: none !important;
+      }
+
+      .p-dialog-header-close-icon {
+        font-size: 14px;
+      }
+    }
+  }
 }
 

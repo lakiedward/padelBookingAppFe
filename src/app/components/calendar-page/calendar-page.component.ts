@@ -53,30 +53,15 @@ export class CalendarPageComponent implements OnInit {
   }
 
   private loadUserBookings(): void {
-    console.log('[CalendarPage] Loading user bookings...');
     this.isLoading = true;
     
     this.bookingService.getMyBookings().subscribe({
       next: (bookings) => {
-        console.log('[CalendarPage] Bookings received:', bookings);
-        console.log('[CalendarPage] Booking details:', bookings.map(b => ({
-          id: b.id,
-          courtId: b.courtId,
-          courtName: b.courtName,
-          timeSlotId: b.timeSlotId
-        })));
         
         // Transform backend BookingSummaryResponse to Reservation format
         const reservations: Reservation[] = bookings.map(booking => {
           const startDateTime = new Date(booking.startTime);
           const endDateTime = new Date(booking.endTime);
-          
-          console.log('[CalendarPage] Processing booking:', {
-            bookingId: booking.id,
-            courtId: booking.courtId,
-            courtName: booking.courtName,
-            imageUrl: this.getCourtImage(booking.courtId)
-          });
           
           return {
             id: booking.id.toString(),
@@ -93,11 +78,9 @@ export class CalendarPageComponent implements OnInit {
         });
         
         this.reservations.set(reservations);
-        console.log('[CalendarPage] Reservations set:', reservations);
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error('[CalendarPage] Error loading bookings:', err);
+      error: () => {
         this.reservations.set([]);
         this.isLoading = false;
       }
@@ -128,9 +111,7 @@ export class CalendarPageComponent implements OnInit {
   logout() { this.auth.logout(); this.router.navigate(['/auth']); }
 
   setView(mode: ViewMode) { 
-    console.log('[CalendarPage] setView called', { mode, currentReservations: this.reservations().length });
     this.viewMode.set(mode); 
-    console.log('[CalendarPage] viewMode set, uniqueCourts:', this.getUniqueCourts());
   }
   
   onDayClick(date: Date) {
@@ -225,41 +206,22 @@ export class CalendarPageComponent implements OnInit {
     const currentAnchor = this.anchor();
     const anchorDateKey = this.toDateKey(currentAnchor);
     
-    console.log('[CalendarPage] ===== getUniqueCourts DEBUG START =====');
-    console.log('[CalendarPage] View Mode:', currentViewMode);
-    console.log('[CalendarPage] Anchor Date:', currentAnchor);
-    console.log('[CalendarPage] Anchor Date Key:', anchorDateKey);
-    console.log('[CalendarPage] Total Reservations:', this.reservations().length);
-    console.log('[CalendarPage] All Reservations:', this.reservations());
-    
     // Filter reservations based on current view mode
     let filteredReservations: Reservation[];
     
     if (currentViewMode === 'day') {
-      filteredReservations = this.reservations().filter(r => {
-        const matches = r.date === anchorDateKey;
-        console.log(`[CalendarPage] Day filter: ${r.date} === ${anchorDateKey}? ${matches}`);
-        return matches;
-      });
+      filteredReservations = this.reservations().filter(r => r.date === anchorDateKey);
     } else if (currentViewMode === 'week') {
       const weekStart = this.startOfWeekMon(currentAnchor);
       const weekEnd = this.endOfWeekMon(currentAnchor);
       const weekStartKey = this.toDateKey(weekStart);
       const weekEndKey = this.toDateKey(weekEnd);
       
-      console.log('[CalendarPage] Week range:', { weekStartKey, weekEndKey });
-      
-      filteredReservations = this.reservations().filter(r => {
-        const matches = r.date >= weekStartKey && r.date <= weekEndKey;
-        console.log(`[CalendarPage] Week filter: ${r.date} in [${weekStartKey}, ${weekEndKey}]? ${matches}`);
-        return matches;
-      });
+      filteredReservations = this.reservations().filter(r => r.date >= weekStartKey && r.date <= weekEndKey);
     } else {
       // Month view - show all reservations
       filteredReservations = this.reservations();
     }
-    
-    console.log('[CalendarPage] Filtered Reservations:', filteredReservations.length, filteredReservations);
     
     filteredReservations.forEach(r => {
       const key = `${r.court}-${r.club}`;
@@ -269,8 +231,6 @@ export class CalendarPageComponent implements OnInit {
     });
     
     const result = Array.from(unique.values());
-    console.log('[CalendarPage] Unique Courts Result:', result);
-    console.log('[CalendarPage] ===== getUniqueCourts DEBUG END =====');
     return result;
   }
 

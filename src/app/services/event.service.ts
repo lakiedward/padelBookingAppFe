@@ -18,7 +18,6 @@ export class EventService {
 
   // GET /api/admin/events - Get all events for current admin
   getEvents(): Observable<EventSummaryResponse[]> {
-    console.log('[EventService] getEvents() - Making request to:', this.eventsUrl);
     return this.http.get<EventSummaryResponse[]>(this.eventsUrl);
   }
 

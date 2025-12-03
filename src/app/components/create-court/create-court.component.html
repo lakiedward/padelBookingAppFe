@@ -7,9 +7,10 @@
     <button type="button" class="icon-close" (click)="onCancel()" aria-label="Close">×</button>
   </div>
 
-  <div class="error-banner" *ngIf="saveError">
-    <strong>Error:</strong> {{ saveError }}
-  </div>
+  <div class="content">
+    <div class="error-banner" *ngIf="saveError">
+      <strong>Error:</strong> {{ saveError }}
+    </div>
 
   <form [formGroup]="form" class="form">
     <div class="grid-2">
@@ -117,29 +118,35 @@
   <!-- Media section -->
   <div class="section">
     <div class="section-title">Media</div>
-    <div class="media-upload">
-      <input type="file" multiple accept="image/*" #mediaInput (change)="onMediaSelected($event)" hidden>
-      <div class="drop" (click)="mediaInput.click()">
-        <div class="drop-emoji">📷</div>
-        <div class="drop-title">Upload Images</div>
-        <div class="drop-sub">Click to browse</div>
+    <div class="media-layout">
+      <div class="upload-section">
+        <input type="file" multiple accept="image/*" #mediaInput (change)="onMediaSelected($event)" hidden id="courtMedia">
+        <label for="courtMedia" class="upload-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <span>Click to upload images</span>
+          <span class="help-text">PNG, JPG up to 10MB</span>
+        </label>
       </div>
-    </div>
-    <div class="media-grid" *ngIf="mediaPreviews.length">
-      <div
-        class="media-item"
-        *ngFor="let src of mediaPreviews; let i = index"
-        [class.drag-over]="dragOverMediaIndex === i"
-        draggable="true"
-        (dragstart)="onMediaDragStart(i, $event)"
-        (dragenter)="onMediaDragEnter(i, $event)"
-        (dragover)="onMediaDragOver(i, $event)"
-        (dragleave)="onMediaDragLeave(i, $event)"
-        (drop)="onMediaDrop(i, $event)"
-        (dragend)="onMediaDragEnd($event)"
-      >
-        <img [src]="src" alt="Media preview" />
-        <button type="button" class="remove" (click)="removeMedia(i)" aria-label="Remove image">×</button>
+      <div class="media-grid" *ngIf="mediaPreviews.length">
+        <div
+          class="media-item"
+          *ngFor="let src of mediaPreviews; let i = index"
+          [class.drag-over]="dragOverMediaIndex === i"
+          draggable="true"
+          (dragstart)="onMediaDragStart(i, $event)"
+          (dragenter)="onMediaDragEnter(i, $event)"
+          (dragover)="onMediaDragOver(i, $event)"
+          (dragleave)="onMediaDragLeave(i, $event)"
+          (drop)="onMediaDrop(i, $event)"
+          (dragend)="onMediaDragEnd($event)"
+        >
+          <img [src]="src" alt="Media preview" />
+          <button type="button" class="remove" (click)="removeMedia(i)" aria-label="Remove image">×</button>
+        </div>
       </div>
     </div>
   </div>
@@ -159,8 +166,17 @@
       </div>
 
       <div class="date-row" *ngIf="isDateMode()">
-        <label class="sr-only" for="rule-date">Date</label>
-        <input id="rule-date" type="date" formControlName="date" />
+        <label for="rule-date">Date</label>
+        <p-datepicker
+          inputId="rule-date"
+          formControlName="date"
+          dateFormat="yy-mm-dd"
+          [showIcon]="true"
+          iconDisplay="input"
+          placeholder="Select date"
+          [style]="{'width':'100%'}"
+          styleClass="custom-date-picker">
+        </p-datepicker>
       </div>
 
       <div class="grid-2">
@@ -244,8 +260,8 @@
         </div>
         <div class="field add-field">
           <label class="sr-only" for="equip-add">Add</label>
-          <button id="equip-add" type="button" class="btn btn--primary btn--square" (click)="addEquipment()">+
-            <span class="sr-only">Add</span>
+          <button id="equip-add" type="button" class="btn btn--primary btn--square" (click)="addEquipment()" aria-label="Add equipment">
+            +
           </button>
         </div>
       </div>
@@ -254,19 +270,18 @@
         <div class="equip-card" *ngFor="let e of equipment; let i = index">
           <span class="name">{{ e.name }}</span>
           <span class="price">€{{ e.pricePerHour }}/h</span>
-          <button type="button" class="remove" (click)="removeEquipment(i)" aria-label="Remove equipment">Remove</button>
+          <button type="button" class="remove" (click)="removeEquipment(i)" aria-label="Remove equipment">×</button>
         </div>
       </div>
     </form>
   </div>
+  </div>
 
   <div class="footer">
-    <div class="hint">Review details before saving</div>
-    <div class="actions">
-      <button type="button" class="btn" (click)="onCancel()" [disabled]="isLoading">Cancel</button>
-      <button type="button" class="btn btn--primary" (click)="onSave()" [disabled]="isLoading">
-        {{ isLoading ? 'Saving...' : (isEditMode ? 'Update' : 'Save') }}
-      </button>
-    </div>
+    <button type="button" class="btn btn--ghost" (click)="onCancel()" [disabled]="isLoading">Cancel</button>
+    <button type="button" class="btn btn--primary" (click)="onSave()" [disabled]="isLoading">
+      <span *ngIf="!isLoading">{{ isEditMode ? 'Update' : 'Save' }}</span>
+      <span *ngIf="isLoading">Saving...</span>
+    </button>
   </div>
 </div>

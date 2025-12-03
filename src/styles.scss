@@ -306,3 +306,140 @@ html {
       linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
   }
 }
+
+/* PrimeNG Confirm Dialog - Global styles for delete confirmation */
+.p-confirmdialog {
+  background: rgba(255, 255, 255, 0.08) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 2px solid #a7ee43 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.3) !important;
+  overflow: hidden;
+  min-width: 400px;
+  max-width: 500px;
+}
+
+.p-confirmdialog .p-confirmdialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.p-confirmdialog .p-confirmdialog-header .p-confirmdialog-title {
+  color: #d6dde6;
+  font-weight: 800;
+  font-size: 20px;
+  margin: 0;
+  flex: 1;
+}
+
+.p-confirmdialog .p-confirmdialog-content {
+  padding: 24px;
+  background: transparent;
+}
+
+.p-confirmdialog .p-confirmdialog-content .p-confirmdialog-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  color: #d6dde6;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.p-confirmdialog .p-confirmdialog-content .p-confirmdialog-icon {
+  color: #ffcc00;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.p-confirmdialog .p-confirmdialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Dialog overlay backdrop */
+.p-dialog-mask.p-component-overlay {
+  background: rgba(0, 0, 0, 0.68) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Button styling inside confirm dialog */
+.p-confirmdialog .p-confirmdialog-footer .p-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+/* Cancel button - neutral slate style */
+.confirm-cancel-btn.p-button {
+  background: rgba(138, 160, 181, 0.15) !important;
+  border: 1px solid rgba(138, 160, 181, 0.3) !important;
+  color: #d6dde6 !important;
+}
+
+.confirm-cancel-btn.p-button:hover {
+  background: rgba(138, 160, 181, 0.25) !important;
+  border-color: rgba(138, 160, 181, 0.4) !important;
+}
+
+.confirm-cancel-btn.p-button:focus {
+  box-shadow: none !important;
+}
+
+/* Delete button - danger red style */
+.confirm-delete-btn.p-button {
+  background: #ff4757 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 71, 87, 0.4) !important;
+}
+
+.confirm-delete-btn.p-button:hover {
+  background: #ff6b7a !important;
+  transform: translateY(-1px);
+}
+
+.confirm-delete-btn.p-button:focus {
+  box-shadow: none !important;
+}
+
+/* Close button in header */
+.p-confirmdialog .p-confirmdialog-header .p-dialog-header-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(214, 221, 230, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #d6dde6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.p-confirmdialog .p-confirmdialog-header .p-dialog-header-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.p-confirmdialog .p-confirmdialog-header .p-dialog-header-close:focus {
+  box-shadow: none !important;
+}

@@ -61,7 +61,6 @@ export class StateService {
   setUser(user: User | null): void {
     this._currentUser.set(user);
     this._isAuthenticated.set(user !== null);
-    console.log('[StateService] User updated:', user ? user.username : 'null');
   }
 
   /**
@@ -71,7 +70,6 @@ export class StateService {
     this._currentUser.set(null);
     this._isAuthenticated.set(false);
     this._courts.set([]);
-    console.log('[StateService] User cleared (logout)');
   }
 
   /**
@@ -89,7 +87,6 @@ export class StateService {
   setCourts(courts: CourtSummaryResponse[]): void {
     this._courts.set(courts);
     this._courtsError.set(null);
-    console.log(`[StateService] Courts updated: ${courts.length} items`);
   }
 
   /**
@@ -97,7 +94,6 @@ export class StateService {
    */
   addCourt(court: CourtSummaryResponse): void {
     this._courts.update(current => [...current, court]);
-    console.log('[StateService] Court added:', court.name);
   }
 
   /**
@@ -107,7 +103,6 @@ export class StateService {
     this._courts.update(current =>
       current.map(court => court.id === id ? updatedCourt : court)
     );
-    console.log('[StateService] Court updated:', id);
   }
 
   /**
@@ -115,7 +110,6 @@ export class StateService {
    */
   removeCourt(id: number): void {
     this._courts.update(current => current.filter(court => court.id !== id));
-    console.log('[StateService] Court removed:', id);
   }
 
   /**
@@ -130,9 +124,6 @@ export class StateService {
    */
   setCourtsError(error: string | null): void {
     this._courtsError.set(error);
-    if (error) {
-      console.error('[StateService] Courts error:', error);
-    }
   }
 
   /**
@@ -141,7 +132,6 @@ export class StateService {
   clearCourts(): void {
     this._courts.set([]);
     this._courtsError.set(null);
-    console.log('[StateService] Courts cleared');
   }
 
   // ==================== GLOBAL LOADING ACTIONS ====================

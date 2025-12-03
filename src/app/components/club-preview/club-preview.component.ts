@@ -46,10 +46,6 @@ export class ClubPreviewComponent implements OnInit {
   constructor(private courtService: CourtService) {}
 
   ngOnInit(): void {
-    console.log('[ClubPreview] ngOnInit called - loading courts');
-    console.log('[ClubPreview] Club details:', this.details);
-    console.log('[ClubPreview] Club sports:', this.details?.sports);
-    console.log('[ClubPreview] Active filter:', this.activeCourtFilter());
     this.loadRealCourts();
   }
 
@@ -59,8 +55,6 @@ export class ClubPreviewComponent implements OnInit {
     
     this.courtService.getCourts().subscribe({
       next: (courts) => {
-        console.log('[ClubPreview] Real courts loaded:', courts);
-        console.log('[ClubPreview] Number of courts:', courts.length);
         
         if (courts.length === 0) {
           this.realCourts.set([]);
@@ -77,14 +71,11 @@ export class ClubPreviewComponent implements OnInit {
         import('rxjs').then(rxjs => {
           rxjs.forkJoin(detailRequests).subscribe({
             next: (detailedCourts) => {
-              console.log('[ClubPreview] Court details loaded:', detailedCourts);
               const mappedCourts = detailedCourts.map(c => this.mapCourtDetailsToListing(c));
-              console.log('[ClubPreview] Mapped courts:', mappedCourts);
               this.realCourts.set(mappedCourts);
               this.isLoadingCourts.set(false);
             },
-            error: (err) => {
-              console.error('[ClubPreview] Failed to load court details:', err);
+            error: () => {
               // Fallback to summary data without prices/slots
               const mappedCourts = courts.map(c => this.mapCourtSummaryToCourt(c));
               this.realCourts.set(mappedCourts);
@@ -93,8 +84,7 @@ export class ClubPreviewComponent implements OnInit {
           });
         });
       },
-      error: (err) => {
-        console.error('[ClubPreview] Failed to load courts:', err);
+      error: () => {
         this.courtsLoadError.set('Failed to load courts');
         this.isLoadingCourts.set(false);
         this.realCourts.set([]);
@@ -337,12 +327,8 @@ export class ClubPreviewComponent implements OnInit {
 
   courtsBySport(s: SportKey | 'all'): CourtListingData[] {
     const all = this.realCourts();
-    console.log('[ClubPreview] courtsBySport called with:', s);
-    console.log('[ClubPreview] All courts:', all);
     if (s === 'all') return all;
-    const filtered = all.filter(c => c.sport === s);
-    console.log('[ClubPreview] Filtered courts:', filtered);
-    return filtered;
+    return all.filter(c => c.sport === s);
   }
 
   // Get unique sports from actual courts
@@ -351,7 +337,6 @@ export class ClubPreviewComponent implements OnInit {
     const sportsSet = new Set<SportKey>();
     courts.forEach(c => sportsSet.add(c.sport));
     const uniqueSports = Array.from(sportsSet);
-    console.log('[ClubPreview] Unique sports from courts:', uniqueSports);
     return uniqueSports;
   }
 }

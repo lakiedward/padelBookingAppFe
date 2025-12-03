@@ -69,7 +69,6 @@
 .price.mobile { display: none; margin-top: 8px; text-align: left; }
 
 .event-details { padding: 16px; display: grid; gap: 16px; }
-.detail-section { }
 .detail-section .label { color: #6b7a8b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .detail-section .value { color: #d6dde6; font-size: 14px; display: flex; align-items: center; gap: 8px; }
 .detail-section .value .icon { width: 16px; height: 16px; color: #a7ee43; flex-shrink: 0; }
@@ -87,6 +86,18 @@
 }
 
 @media (max-width: 1023.98px) {
+  .events-wrap {
+    padding: 16px;
+  }
+
+  .events-header {
+    margin-bottom: 8px;
+  }
+
+  .events-header .titles .title {
+    font-size: 18px;
+  }
+
   .price.desktop { display: none; }
   .price.mobile { display: block; }
 }

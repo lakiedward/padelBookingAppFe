@@ -119,8 +119,7 @@ export class LoginComponent implements AfterViewInit {
     const { email, password } = this.loginForm.value;
 
     this.authService.login(email, password).subscribe({
-      next: (response) => {
-        console.log('Login successful:', response);
+      next: () => {
         this.loading = false;
         if (this.authService.isAdmin()) {
           this.router.navigate(['/admin']);
@@ -128,11 +127,9 @@ export class LoginComponent implements AfterViewInit {
           this.router.navigate(['/user']);
         } else {
           // Fallback: no recognized role
-          console.warn('Logged in without recognized role; staying on auth');
         }
       },
-      error: (error) => {
-        console.error('Login failed:', error);
+      error: () => {
         this.loading = false;
         this.authError = true;
         // Mark fields as having auth error (non-validation) to show red state
@@ -159,7 +156,7 @@ export class LoginComponent implements AfterViewInit {
   }
 
   onForgotPassword() {
-    console.log('Navigate to forgot password');
+    // Navigate to forgot password
   }
 
   onGoogleSignIn() {
@@ -190,7 +187,6 @@ export class LoginComponent implements AfterViewInit {
           life: 4000
         });
       }
-      console.warn('[LoginComponent] googleClientId is not configured.');
       setTimeout(() => {
         this.useGoogleButton = false;
         this.cdr.detectChanges();
@@ -209,7 +205,6 @@ export class LoginComponent implements AfterViewInit {
           life: 4000
         });
       }
-      console.error('[LoginComponent] Google Identity Services SDK not available.');
       setTimeout(() => {
         this.useGoogleButton = false;
         this.cdr.detectChanges();
@@ -268,7 +263,6 @@ export class LoginComponent implements AfterViewInit {
 
   private readonly handleGoogleCredential = (response: google.accounts.id.CredentialResponse) => {
     if (!response.credential) {
-      console.warn('[LoginComponent] Received Google callback without credential.');
       return;
     }
 
@@ -286,8 +280,7 @@ export class LoginComponent implements AfterViewInit {
           this.router.navigate(['/']);
         }
       },
-      error: (error) => {
-        console.error('Google login failed:', error);
+      error: () => {
         this.loading = false;
         this.authError = true;
         this.messageService.add({

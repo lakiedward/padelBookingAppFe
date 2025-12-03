@@ -43,6 +43,29 @@
   }
 
   /* Background handled globally via .page-gradient-bg */
+
+  /* Mobile responsive */
+  @media (max-width: 480px) {
+    padding: 16px;
+    min-height: 100dvh;
+
+    .auth-content-box {
+      padding: 24px 20px;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 100%;
+
+      h2 {
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+
+      p {
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+    }
+  }
 }
 
 @keyframes zoomIn { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }

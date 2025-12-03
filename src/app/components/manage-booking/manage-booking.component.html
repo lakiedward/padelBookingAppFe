@@ -1,17 +1,35 @@
 <div class="manage-booking-container">
-  <!-- Court Selection Dropdown -->
-  <div class="court-selector">
-    <label class="court-selector__label">Select Court</label>
-    <p-select
-      [options]="courts()"
-      [ngModel]="selectedCourtId()"
-      (onChange)="onCourtChange($event)"
-      optionLabel="label"
-      optionValue="value"
-      placeholder="Choose a court..."
-      [style]="{'width': '100%', 'min-width': '250px'}"
-      styleClass="custom-dropdown"
-    />
+  <!-- Sport Selection Dropdown -->
+  <div class="selector-group">
+    <div class="sport-selector">
+      <label class="selector__label">Select Sport</label>
+      <p-select
+        [options]="sports()"
+        [ngModel]="selectedSport()"
+        (onChange)="onSportChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Choose a sport..."
+        [style]="{'width': '100%', 'min-width': '200px'}"
+        styleClass="custom-dropdown"
+      />
+    </div>
+
+    <!-- Court Selection Dropdown -->
+    <div class="court-selector">
+      <label class="selector__label">Select Court</label>
+      <p-select
+        [options]="courts()"
+        [ngModel]="selectedCourtId()"
+        (onChange)="onCourtChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Choose a court..."
+        [disabled]="!selectedSport()"
+        [style]="{'width': '100%', 'min-width': '250px'}"
+        styleClass="custom-dropdown"
+      />
+    </div>
   </div>
 
   <!-- Loading State -->
@@ -24,11 +42,30 @@
   <section *ngIf="!isLoading() && selectedCourtId()" class="calendar-panel">
     <div class="toolbar">
       <div class="toolbar__left">
-        <button class="btn" (click)="goPrev()">Prev</button>
-        <button class="btn" (click)="goToday()">Today</button>
-        <button class="btn" (click)="goNext()">Next</button>
+        <button class="btn nav-btn" (click)="goPrev()">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button class="btn today-btn" (click)="goToday()">Today</button>
+        <button class="btn nav-btn" (click)="goNext()">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+        <div class="date-picker-wrapper">
+          <p-datepicker 
+            [ngModel]="anchorDate" 
+            (ngModelChange)="goToDate($event)"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            iconDisplay="input"
+            placeholder="Pick a date"
+            styleClass="calendar-date-picker"
+          />
+        </div>
       </div>
-      <div class="toolbar__right">
+      <div class="toolbar__right desktop-only">
         <button class="pill" [class.pill--active]="viewMode() === 'month'" (click)="setView('month')">Month</button>
         <button class="pill" [class.pill--active]="viewMode() === 'week'" (click)="setView('week')">Week</button>
         <button class="pill" [class.pill--active]="viewMode() === 'day'" (click)="setView('day')">Day</button>

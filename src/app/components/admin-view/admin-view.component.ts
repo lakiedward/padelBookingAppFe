@@ -41,12 +41,8 @@ export class AdminViewComponent implements AfterViewInit {
   ) {
     // Load club data on initialization to populate sports dropdown
     this.clubService.getMyClub().subscribe({
-      next: (club) => {
-        console.log('[AdminView] Club data loaded:', club);
-      },
-      error: (err) => {
-        console.error('[AdminView] Failed to load club data:', err);
-      }
+      next: () => {},
+      error: () => {}
     });
   }
 
@@ -56,7 +52,6 @@ export class AdminViewComponent implements AfterViewInit {
   }
 
   select(menu: AdminMenuKey) {
-    console.log('[AdminView] select() called with menu:', menu);
     this.selectedMenu = menu;
     this.mobileMenuOpen = false; // Close mobile menu after selection
     
@@ -65,7 +60,6 @@ export class AdminViewComponent implements AfterViewInit {
 
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
-    console.log('[AdminView] toggleMobileMenu - mobileMenuOpen:', this.mobileMenuOpen);
   }
 
   onCourtsRequestedFromChild() {
@@ -130,7 +124,13 @@ export class AdminViewComponent implements AfterViewInit {
   }
 
   onManageBookingFromClub(courtId: number) {
-    console.log('[AdminView] manage booking requested for court:', courtId);
+    this.preselectCourtId = courtId;
+    this.select('manage-booking');
+    // Optionally scroll to the section
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+  }
+
+  onManageBookingFromCourt(courtId: number) {
     this.preselectCourtId = courtId;
     this.select('manage-booking');
     // Optionally scroll to the section

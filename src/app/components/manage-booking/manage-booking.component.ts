@@ -6,6 +6,7 @@ import { CourtService } from '../../services/court.service';
 import { CourtSummaryResponse } from '../../models/court.models';
 import { AdminBookingResponse, RescheduleCourtOptionsResponse, RescheduleTimeSlotOptionResponse } from '../../models/booking.models';
 import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
 import { FormsModule } from '@angular/forms';
 import { Time24Pipe } from '../../pipes/time24.pipe';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
@@ -36,12 +37,18 @@ type AdminBooking = {
 interface CourtOption {
   label: string;
   value: number;
+  sport: string;
+}
+
+interface SportOption {
+  label: string;
+  value: string;
 }
 
 @Component({
   selector: 'app-manage-booking',
   standalone: true,
-  imports: [CommonModule, Select, FormsModule, Time24Pipe, ConvertMoneyPipe, ConfirmDialogModule],
+  imports: [CommonModule, Select, DatePicker, FormsModule, Time24Pipe, ConvertMoneyPipe, ConfirmDialogModule],
   templateUrl: './manage-booking.component.html',
   styleUrl: './manage-booking.component.scss',
   providers: [ConfirmationService]
@@ -56,7 +63,14 @@ export class ManageBookingComponent implements OnInit, OnChanges {
 
   // State
   isLoading = signal(true);
-  courts = signal<CourtOption[]>([]);
+  allCourts = signal<CourtOption[]>([]);
+  sports = signal<SportOption[]>([]);
+  selectedSport = signal<string | null>(null);
+  courts = computed(() => {
+    const sport = this.selectedSport();
+    if (!sport) return [];
+    return this.allCourts().filter(c => c.sport === sport);
+  });
   selectedCourtId = signal<number | null>(null);
   @Input() preselectCourtId: number | null = null;
   private pendingPreselectId: number | null = null;
@@ -77,6 +91,10 @@ export class ManageBookingComponent implements OnInit, OnChanges {
   isMarkingPaidCash = signal(false);
 
   ngOnInit(): void {
+    // Force week view on mobile/tablet
+    if (window.innerWidth <= 1023) {
+      this.viewMode.set('week');
+    }
     this.loadCourts();
   }
 
@@ -85,10 +103,14 @@ export class ManageBookingComponent implements OnInit, OnChanges {
       const val: number | null = changes['preselectCourtId'].currentValue ?? null;
       if (val != null) {
         // If courts are already loaded, apply immediately; else store pending
-        const exists = this.courts().some(c => c.value === val);
+        const exists = this.allCourts().some(c => c.value === val);
         if (exists) {
-          this.selectedCourtId.set(val);
-          this.loadBookingsForCourt(val);
+          const court = this.allCourts().find(c => c.value === val);
+          if (court) {
+            this.selectedSport.set(court.sport);
+            this.selectedCourtId.set(val);
+            this.loadBookingsForCourt(val);
+          }
         } else {
           this.pendingPreselectId = val;
         }
@@ -97,43 +119,64 @@ export class ManageBookingComponent implements OnInit, OnChanges {
   }
 
   private loadCourts(): void {
-    console.log('[ManageBooking] Loading courts...');
     this.isLoading.set(true);
 
     this.courtService.getCourts().subscribe({
       next: (courts: CourtSummaryResponse[]) => {
-        console.log('[ManageBooking] Courts loaded:', courts);
-        const courtOptions = courts.map(court => ({
+        const courtOptions: CourtOption[] = courts.map(court => ({
           label: `${court.name} - ${court.sport}`,
-          value: court.id
+          value: court.id,
+          sport: court.sport
         }));
-        this.courts.set(courtOptions);
+        this.allCourts.set(courtOptions);
+
+        // Extract unique sports
+        const uniqueSports = Array.from(new Set(courtOptions.map(c => c.sport)));
+        const sportOptions: SportOption[] = uniqueSports.map(sport => ({
+          label: sport,
+          value: sport
+        }));
+        this.sports.set(sportOptions);
 
         // Apply preselection if provided and present in options
         const pre = this.preselectCourtId ?? this.pendingPreselectId;
-        const match = pre != null ? courtOptions.find(c => c.value === pre) : undefined;
-        if (match) {
-          this.selectedCourtId.set(match.value);
-          this.loadBookingsForCourt(match.value);
-          this.pendingPreselectId = null;
-        } else if (courtOptions.length > 0) {
-          // Fallback: auto-select first
-          this.selectedCourtId.set(courtOptions[0].value);
-          this.loadBookingsForCourt(courtOptions[0].value);
-        } else {
-          this.isLoading.set(false);
+        if (pre != null) {
+          const match = courtOptions.find(c => c.value === pre);
+          if (match) {
+            this.selectedSport.set(match.sport);
+            this.selectedCourtId.set(match.value);
+            this.loadBookingsForCourt(match.value);
+            this.pendingPreselectId = null;
+          }
+        } else if (sportOptions.length > 0) {
+          // Auto-select first sport
+          this.selectedSport.set(sportOptions[0].value);
         }
+        
+        this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('[ManageBooking] Error loading courts:', err);
+      error: () => {
         this.isLoading.set(false);
       }
     });
   }
 
+  onSportChange(event: any): void {
+    const sport = event.value;
+    this.selectedSport.set(sport);
+    this.selectedCourtId.set(null);
+    this.bookings.set([]);
+    
+    // Auto-select first court of this sport
+    const courtsForSport = this.courts();
+    if (courtsForSport.length > 0) {
+      this.selectedCourtId.set(courtsForSport[0].value);
+      this.loadBookingsForCourt(courtsForSport[0].value);
+    }
+  }
+
   onCourtChange(event: any): void {
     const courtId = event.value;
-    console.log('[ManageBooking] Court changed to:', courtId);
     this.selectedCourtId.set(courtId);
     if (courtId) {
       this.loadBookingsForCourt(courtId);
@@ -141,12 +184,10 @@ export class ManageBookingComponent implements OnInit, OnChanges {
   }
 
   private loadBookingsForCourt(courtId: number): void {
-    console.log('[ManageBooking] Loading bookings for court:', courtId);
     this.isLoading.set(true);
 
     this.bookingService.getBookingsByCourtId(courtId).subscribe({
       next: (bookings: AdminBookingResponse[]) => {
-        console.log('[ManageBooking] Bookings received:', bookings);
 
         // Transform backend AdminBookingResponse to AdminBooking format
         const adminBookings: AdminBooking[] = bookings.map((booking) => {
@@ -173,11 +214,9 @@ export class ManageBookingComponent implements OnInit, OnChanges {
         });
 
         this.bookings.set(adminBookings);
-        console.log('[ManageBooking] Bookings set:', adminBookings);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('[ManageBooking] Error loading bookings:', err);
+      error: () => {
         this.bookings.set([]);
         this.isLoading.set(false);
       }
@@ -217,7 +256,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
 
   // View mode handlers
   setView(mode: ViewMode) {
-    console.log('[ManageBooking] setView called', { mode });
     this.viewMode.set(mode);
   }
 
@@ -286,8 +324,7 @@ export class ManageBookingComponent implements OnInit, OnChanges {
         this.rescheduleOptions.set(groups);
         this.rescheduleLoading.set(false);
       },
-      error: (err) => {
-        console.error('[ManageBooking] Error loading reschedule options:', err);
+      error: () => {
         this.rescheduleError.set('Could not load reschedule options.');
         this.rescheduleLoading.set(false);
       }
@@ -345,8 +382,7 @@ export class ManageBookingComponent implements OnInit, OnChanges {
         this.rescheduleOptions.set(null);
         this.rescheduleError.set(null);
       },
-      error: (err) => {
-        console.error('[ManageBooking] Error rescheduling booking:', err);
+      error: () => {
         this.rescheduleError.set('Failed to reschedule booking.');
         this.rescheduleLoading.set(false);
       }
@@ -389,8 +425,7 @@ export class ManageBookingComponent implements OnInit, OnChanges {
 
             this.isMarkingPaidCash.set(false);
           },
-          error: (err) => {
-            console.error('[ManageBooking] Error marking booking as paid cash:', err);
+          error: () => {
             this.isMarkingPaidCash.set(false);
           }
         });
@@ -423,6 +458,15 @@ export class ManageBookingComponent implements OnInit, OnChanges {
   goToday() {
     const t = new Date();
     this.anchor.set(new Date(t.getFullYear(), t.getMonth(), t.getDate()));
+  }
+
+  goToDate(date: Date | null) {
+    if (!date) return;
+    this.anchor.set(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+  }
+
+  get anchorDate(): Date {
+    return this.anchor();
   }
 
   // Headline
@@ -534,9 +578,26 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     const daysInPrev = new Date(year, month0, 0).getDate();
     const mondayIndex = (first.getDay() + 6) % 7;
     const cells: { date: Date; inCurrent: boolean }[] = [];
-    for (let i = mondayIndex - 1; i >= 0; i--) cells.push({ date: new Date(year, month0 - 1, daysInPrev - i), inCurrent: false });
-    for (let d = 1; d <= daysInMonth; d++) cells.push({ date: new Date(year, month0, d), inCurrent: true });
-    while (cells.length < 42) { const nextIndex = cells.length - (mondayIndex + daysInMonth) + 1; cells.push({ date: new Date(year, month0 + 1, nextIndex), inCurrent: false }); }
+    
+    // Add days from previous month
+    for (let i = mondayIndex - 1; i >= 0; i--) {
+      cells.push({ date: new Date(year, month0 - 1, daysInPrev - i), inCurrent: false });
+    }
+    
+    // Add days from current month
+    for (let d = 1; d <= daysInMonth; d++) {
+      cells.push({ date: new Date(year, month0, d), inCurrent: true });
+    }
+    
+    // Only add next month days to complete the last week (not a full extra week)
+    const remainder = cells.length % 7;
+    if (remainder > 0) {
+      const daysToAdd = 7 - remainder;
+      for (let i = 1; i <= daysToAdd; i++) {
+        cells.push({ date: new Date(year, month0 + 1, i), inCurrent: false });
+      }
+    }
+    
     return cells;
   }
 }

@@ -25,22 +25,32 @@
         <span>Events</span>
       </button>
     </nav>
+    
+    <!-- Mobile-only logout section -->
+    <div class="mobile-logout-section">
+      <div class="menu-separator"></div>
+      <button class="logout-btn-mobile" (click)="onLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Logout</span>
+      </button>
+    </div>
   </aside>
 
   <!-- Mobile menu overlay (placed after sidebar for correct z-index stacking) -->
   <div class="mobile-menu-overlay" *ngIf="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
 
   <header class="topbar">
-    <!-- Hamburger button (mobile only) -->
-    <button class="hamburger-btn" (click)="toggleMobileMenu()" aria-label="Toggle menu">
-      <svg *ngIf="!mobileMenuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <path d="M4 6H20M4 12H20M4 18H20" />
-      </svg>
-      <svg *ngIf="mobileMenuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <path d="M6 6L18 18M6 18L18 6" />
-      </svg>
-    </button>
+    <!-- PLAYORA logo (left side) -->
+    <div class="topbar-logo">
+      <span class="logo-text">PLAYORA</span>
+      <span class="separator">|</span>
+    </div>
     
+    <!-- Page title -->
     <div class="page">
       <div class="name">
         {{
@@ -60,11 +70,20 @@
       </div>
     </div>
     <div class="spacer"></div>
-    <button class="admin-chip">
+    <button class="admin-chip desktop-only">
       <span>Admin Panel</span>
     </button>
-    <button class="logout-btn" (click)="onLogout()">
+    <button class="logout-btn desktop-only" (click)="onLogout()">
       <span>Logout</span>
+    </button>
+    <!-- Hamburger button (mobile only - now on right) -->
+    <button class="hamburger-btn" (click)="toggleMobileMenu()" aria-label="Toggle menu">
+      <svg *ngIf="!mobileMenuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 6H20M4 12H20M4 18H20" />
+      </svg>
+      <svg *ngIf="mobileMenuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M6 6L18 18M6 18L18 6" />
+      </svg>
     </button>
   </header>
 
@@ -75,7 +94,8 @@
     <section class="content-card" *ngIf="selectedMenu === 'courts'">
       <app-court-view
         (addCourt)="onAddCourtFromView()"
-        (editCourt)="onEditCourtFromView($event)">
+        (editCourt)="onEditCourtFromView($event)"
+        (viewBookings)="onManageBookingFromCourt($event)">
       </app-court-view>
     </section>
     <section class="content-card" *ngIf="selectedMenu === 'manage-booking'">

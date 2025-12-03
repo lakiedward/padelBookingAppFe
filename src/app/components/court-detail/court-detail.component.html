@@ -30,13 +30,18 @@
         <div class="detail-date-header">
           <span class="detail-date-label">Date</span>
           <div class="date-controls">
-            <button class="today-btn" (click)="setToday()">Today</button>
-            <input
-              type="date"
-              class="date-input"
-              [value]="dateKey(selectedDate)"
-              (change)="onDateInputChange($event)"
-            />
+            <button class="today-btn" [class.active]="isToday()" (click)="setToday()">Today</button>
+            <p-datepicker
+              [(ngModel)]="selectedDate"
+              dateFormat="yy-mm-dd"
+              [showIcon]="true"
+              iconDisplay="input"
+              placeholder="Select date"
+              [style]="{'flex':'1'}"
+              styleClass="custom-date-picker"
+              appendTo="body"
+              (onSelect)="onDateSelect($event)">
+            </p-datepicker>
           </div>
         </div>
         <div class="detail-day-scroll">

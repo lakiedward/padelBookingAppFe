@@ -9,6 +9,7 @@ import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse } from '../../models/court.models';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { DatePickerModule } from 'primeng/datepicker';
+import { Select } from 'primeng/select';
 import { sportEmoji } from '../../utils/sport-emoji.util';
 
 type SportFilter =
@@ -20,6 +21,8 @@ type SportFilter =
   | 'volleyball'
   | 'badminton'
   | 'squash'
+  | 'handball'
+  | 'pingpong'
   | 'table-tennis';
 type VenueFilter = 'all' | 'indoor' | 'outdoor';
 type HeatedFilter = 'all' | 'heated' | 'unheated';
@@ -46,7 +49,7 @@ interface CourtItem {
 @Component({
   selector: 'app-browse-courts-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CourtListingCardComponent, AppHeaderComponent, DatePickerModule],
+  imports: [CommonModule, FormsModule, CourtListingCardComponent, AppHeaderComponent, DatePickerModule, Select],
   templateUrl: './browse-courts-page.component.html',
   styleUrl: './browse-courts-page.component.scss'
 })
@@ -61,6 +64,19 @@ export class BrowseCourtsPageComponent implements OnInit {
     { label: 'Price: Low to High', value: 'price-asc' },
     { label: 'Price: High to Low', value: 'price-desc' }
   ];
+  
+  // City filter
+  selectedCity: string = 'all';
+  cityOptions: { label: string; value: string }[] = [
+    { label: 'All cities', value: 'all' }
+  ];
+  
+  // Club filter
+  selectedClub: string = 'all';
+  clubOptions: { label: string; value: string }[] = [
+    { label: 'All clubs', value: 'all' }
+  ];
+  
   moreSportsOpen = false;
   selectedDate: Date | null = null;
   selectedDateStr = '';
@@ -164,16 +180,72 @@ export class BrowseCourtsPageComponent implements OnInit {
     this.timeFromStr = this.timeFromStr;
     this.timeToStr = this.timeToStr;
     
+    // Load clubs first to populate dropdowns
+    this.loadClubs();
+    
     setTimeout(() => {
       this.loadCourts();
     }, 0);
+  }
+  
+  private loadClubs(): void {
+    this.publicService.getPublicClubs().subscribe({
+      next: (clubs) => {
+        
+        // Extract unique club names for the club dropdown
+        const clubNames = new Set<string>();
+        const cities = new Set<string>();
+        
+        clubs.forEach(club => {
+          if (club.name) {
+            clubNames.add(club.name);
+          }
+          // Extract cities from club locations
+          if (club.locations && club.locations.length > 0) {
+            club.locations.forEach(loc => {
+              // Extract city from address (assuming format like "Street, City, Country")
+              // Adjust this logic based on your actual address format
+              const parts = loc.address.split(',');
+              if (parts.length > 1) {
+                const city = parts[parts.length - 2].trim(); // Usually city is second to last
+                if (city) {
+                  cities.add(city);
+                }
+              }
+            });
+          }
+        });
+        
+        // Populate club dropdown
+        this.clubOptions = [
+          { label: 'All clubs', value: 'all' },
+          ...Array.from(clubNames).sort().map(name => ({
+            label: name,
+            value: name
+          }))
+        ];
+        
+        // Populate city dropdown
+        this.cityOptions = [
+          { label: 'All cities', value: 'all' },
+          ...Array.from(cities).sort().map(city => ({
+            label: city,
+            value: city
+          }))
+        ];
+        
+        this.cdr.detectChanges();
+      },
+      error: () => {
+      }
+    });
   }
 
   private loadCourts(): void {
     this.isLoading = true;
     this.publicService.getPublicCourts().subscribe({
       next: (courts) => {
-        console.log('[BrowseCourts] Loaded courts from BE:', courts);
+        
         this.items = courts.map(c => ({
           courtId: c.id,
           image: this.courtService.toAbsoluteUrl(c.primaryPhotoUrl) || 'https://placehold.co/1200x800?text=Court',
@@ -197,8 +269,7 @@ export class BrowseCourtsPageComponent implements OnInit {
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('[BrowseCourts] Failed to load courts:', err);
+      error: () => {
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -284,25 +355,19 @@ export class BrowseCourtsPageComponent implements OnInit {
   }
 
   private loadAvailabilityFor(index: number, courtId: number) {
-    console.log('[BrowseCourts] Loading availability for court', courtId);
-    
     // Use today's date or selected date for availability check
     const targetDate = this.selectedDate || new Date();
     const dateStr = this.formatDateForInput(targetDate);
     
     this.publicService.getAllTimeSlotsByCourtAndDate(courtId, dateStr).subscribe({
       next: (response) => {
-        console.log('[BrowseCourts] All timeslots for court', courtId, ':', response);
         const slots = response?.items || [];
         
         if (!Array.isArray(slots) || slots.length === 0) {
-          console.log('[BrowseCourts] No timeslots found, trying fallback from rules for court', courtId);
           this.publicService.getPublicCourtById(courtId).subscribe({
             next: (court) => {
-              console.log('[BrowseCourts] Court details for fallback:', court);
               const fallback = this.computeFromRules(court.availabilityRules);
               if (fallback) {
-                console.log('[BrowseCourts] Fallback availability computed:', fallback);
                 this.items[index] = {
                   ...this.items[index],
                   availableDate: fallback.dateStr,
@@ -312,11 +377,11 @@ export class BrowseCourtsPageComponent implements OnInit {
                 this.items = [...this.items];
                 this.cdr.detectChanges();
               } else {
-                console.warn('[BrowseCourts] No fallback could be computed from rules for court', courtId);
+                
               }
             },
             error: (err) => {
-              console.error('[BrowseCourts] Failed to load court details for fallback:', err);
+              
             }
           });
           return;
@@ -336,12 +401,6 @@ export class BrowseCourtsPageComponent implements OnInit {
         const availableIntervals = intervals.filter(i => i.available !== false);
         const chips: string[] = this.toChipLabels(availableIntervals.map(i => i.start));
         
-        console.log('[BrowseCourts] Setting availability for court', courtId, ':', { 
-          date: dateStr, 
-          totalSlots: intervals.length,
-          availableSlots: availableIntervals.length,
-          chips 
-        });
         
         // Create new object to force change detection
         this.items[index] = {
@@ -353,8 +412,7 @@ export class BrowseCourtsPageComponent implements OnInit {
         this.items = [...this.items]; // Force array reference change
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('[BrowseCourts] Failed to load availability for court', courtId, ':', err);
+      error: () => {
       }
     });
   }
@@ -404,7 +462,6 @@ export class BrowseCourtsPageComponent implements OnInit {
     // Validate time range
     if (this.timeFromStr && this.timeToStr) {
       if (this.timeFromStr >= this.timeToStr) {
-        console.warn('End time must be after start time');
         // Reset the invalid time
         if (which === 'to') {
           this.timeToStr = '';
@@ -539,6 +596,17 @@ export class BrowseCourtsPageComponent implements OnInit {
     this.items.forEach((item, idx) => {
       this.loadAvailabilityFor(idx, item.courtId);
     });
+    this.cdr.detectChanges();
+  }
+
+  isToday(): boolean {
+    if (!this.selectedDate) return false;
+    const today = new Date();
+    return (
+      this.selectedDate.getFullYear() === today.getFullYear() &&
+      this.selectedDate.getMonth() === today.getMonth() &&
+      this.selectedDate.getDate() === today.getDate()
+    );
   }
 
   onDateChange(event: any) {
@@ -555,6 +623,19 @@ export class BrowseCourtsPageComponent implements OnInit {
     this.items.forEach((item, idx) => {
       this.loadAvailabilityFor(idx, item.courtId);
     });
+  }
+  
+  onDateSelect(date: Date) {
+    if (date) {
+      this.selectedDate = date;
+      this.selectedDateStr = this.formatDateForInput(date);
+      
+      // Reload availability for all courts with new date
+      this.items.forEach((item, idx) => {
+        this.loadAvailabilityFor(idx, item.courtId);
+      });
+      this.cdr.detectChanges();
+    }
   }
 
   private formatDateForInput(date: Date): string {

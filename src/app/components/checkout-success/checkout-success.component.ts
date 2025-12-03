@@ -28,13 +28,9 @@ export class CheckoutSuccessComponent implements OnInit {
           this.created = res.created;
           this.bookingId = res.bookingId ?? null;
           if (!res.created && res.message) this.error = res.message;
-          // eslint-disable-next-line no-console
-          console.log('[CheckoutSuccess] confirm result', res);
         },
         error: (err) => {
           this.error = err?.error?.message || 'Confirm failed';
-          // eslint-disable-next-line no-console
-          console.error('[CheckoutSuccess] confirm error', err);
         },
         complete: () => { this.confirming = false; }
       });

@@ -20,6 +20,7 @@ export class CourtListingCardComponent {
   @Input() availableDate = '';
   @Input() slots: string[] = [];
   @Input() mode: 'booking' | 'reservation' = 'booking'; // 'booking' for browse, 'reservation' for calendar
+  @Input() isAdmin = false; // New: indicates if this is shown in admin context
   @Output() cardClick = new EventEmitter<void>();
 
   handleCardClick() {

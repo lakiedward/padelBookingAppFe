@@ -167,13 +167,11 @@ export class BookingService {
     }
 
     if (!token) {
-      console.warn('[BookingService] No token found when building auth headers');
       return new HttpHeaders({
         'Content-Type': 'application/json'
       });
     }
 
-    console.log('[BookingService] Token found when building auth headers, length:', token.length);
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'

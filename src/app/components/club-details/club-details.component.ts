@@ -343,7 +343,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     const lat = this.currentLat();
     const lng = this.currentLng();
     if (!address || lat == null || lng == null) {
-      console.log('Please pick an address on map or type a valid address before adding.');
       return;
     }
     this.savedLocations.push({ address, lat, lng });

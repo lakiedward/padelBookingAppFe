@@ -23,7 +23,6 @@ export class CourtService {
 
   // GET /api/admin/courts - Get all courts for current admin
   getCourts(): Observable<CourtSummaryResponse[]> {
-    console.log('[CourtService] getCourts() - Making request to:', this.courtsUrl);
     return this.http.get<CourtSummaryResponse[]>(this.courtsUrl);
   }
 

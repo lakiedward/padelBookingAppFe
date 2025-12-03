@@ -3,6 +3,14 @@
   <p-toast key="success" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
   <p-confirmDialog appendTo="body"></p-confirmDialog>
 
+  <!-- Loading overlay for save/update operations -->
+  <div *ngIf="isSaving()" class="saving-overlay" aria-busy="true" aria-live="polite">
+    <div class="saving-overlay-content">
+      <div class="u-spinner u-spinner--xl text-green"></div>
+      <div class="saving-text">{{ hasExistingClub ? 'Updating Club...' : 'Creating Club...' }}</div>
+    </div>
+  </div>
+
   <ng-container *ngIf="!isLoading(); else loadingTpl">
   <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted" [class.saving]="isSaving()">
 

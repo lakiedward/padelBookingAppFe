@@ -160,6 +160,70 @@
   padding: 8px 0 0 0;
 }
 
+/* Mobile responsive styles */
+@media (max-width: 480px) {
+  .login-container {
+    .login-title {
+      font-size: 26px;
+      margin: 4px 0 4px 0;
+    }
+
+    .login-subtitle {
+      font-size: 13px;
+      margin: 0 0 14px 0;
+    }
+
+    .login-form {
+      .form-field {
+        margin-bottom: 12px;
+      }
+
+      label {
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+
+      .form-actions {
+        margin-top: 10px;
+      }
+
+      .divider {
+        margin: 10px 0 8px 0;
+        font-size: 11px;
+
+        &::before, &::after {
+          width: 38%;
+        }
+      }
+
+      .google-btn {
+        padding: 10px 14px;
+        font-size: 14px;
+      }
+    }
+
+    .signup-link {
+      margin-top: 10px;
+
+      p {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+/* Toast positioning - outside container on the right */
+::ng-deep .p-toast.p-toast-top-right {
+  top: 20px !important;
+  right: 20px !important;
+  left: auto !important;
+  z-index: 10001 !important;
+}
+
+::ng-deep .p-toast-message {
+  max-width: 320px;
+}
+
 :host ::ng-deep {
   .p-inputtext {
     width: 100%;
@@ -270,5 +334,33 @@
     &:disabled { opacity: 0.7; cursor: not-allowed; }
 
     .p-button-label { font-weight: 700; color: inherit; }
+  }
+
+  /* Mobile responsive for inputs */
+  @media (max-width: 480px) {
+    .p-inputtext {
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 8px;
+    }
+
+    .p-password {
+      .p-password-input {
+        padding: 12px;
+        padding-right: 40px;
+        font-size: 14px;
+        border-radius: 8px;
+      }
+
+      .p-password-toggle-mask {
+        right: 10px;
+      }
+    }
+
+    .p-button {
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 8px;
+    }
   }
 }

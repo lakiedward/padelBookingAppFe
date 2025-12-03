@@ -15,28 +15,27 @@
       </div>
 
       <div class="filters">
-        <!-- Sports and Venue Filters -->
-        <div class="filters__section">
+        <!-- Row 1: Sports -->
+        <div class="filters__row">
           <div class="filters__group">
             <div class="filters__label">Sports</div>
             <div class="pills">
-              <!-- First row: All Sports, Tennis, Football -->
               <button class="pill" [class.pill--active]="sportFilter==='all'" (click)="selectSport('all')">All Sports</button>
               <button class="pill" [class.pill--active]="sportFilter==='tennis'" (click)="selectSport('tennis')">🎾 Tennis</button>
               <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="selectSport('football')">⚽ Football</button>
-              
-              <!-- Second row: Basketball, Padel, +4 more -->
               <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="selectSport('basketball')">🏀 Basketball</button>
               <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="selectSport('padel')">🏓 Padel</button>
-              <button class="pill pill--more" (click)="toggleMoreSports($event)">+4 more</button>
-              
-              <!-- Additional sports when expanded -->
-              <div class="more-inline" *ngIf="moreSportsOpen">
-                <button class="pill" *ngFor="let s of additionalSports" [class.pill--active]="sportFilter===s.key" (click)="selectSport(s.key)">{{ s.label }}</button>
-              </div>
+              <button class="pill" [class.pill--active]="sportFilter==='volleyball'" (click)="selectSport('volleyball')">🏐 Volleyball</button>
+              <button class="pill" [class.pill--active]="sportFilter==='badminton'" (click)="selectSport('badminton')">🏸 Badminton</button>
+              <button class="pill" [class.pill--active]="sportFilter==='squash'" (click)="selectSport('squash')">🎾 Squash</button>
+              <button class="pill" [class.pill--active]="sportFilter==='handball'" (click)="selectSport('handball')">🤾 Handball</button>
+              <button class="pill" [class.pill--active]="sportFilter==='pingpong'" (click)="selectSport('pingpong')">🏓 Ping Pong</button>
             </div>
           </div>
+        </div>
 
+        <!-- Row 2: Venue Type and Heated -->
+        <div class="filters__row filters__row--two-groups">
           <div class="filters__group">
             <div class="filters__label">Venue Type</div>
             <div class="pills">
@@ -56,20 +55,68 @@
           </div>
         </div>
 
-        <!-- Minimal Filter Controls -->
-        <div class="filters__section filters__section--minimal">
-          <div class="filter-row">
+        <!-- Row 3: City, Sports Club, Sort -->
+        <div class="filters__row filters__row--inputs">
+          <div class="filter-row filter-row--first">
+            <!-- City Filter -->
+            <div class="filter-item">
+              <label class="filter-label">City</label>
+              <p-select 
+                [options]="cityOptions"
+                [(ngModel)]="selectedCity"
+                placeholder="All cities"
+                [style]="{'width':'100%'}"
+                styleClass="custom-dropdown"
+                appendTo="body">
+              </p-select>
+            </div>
+
+            <!-- Sports Club Filter -->
+            <div class="filter-item">
+              <label class="filter-label">Sports Club</label>
+              <p-select 
+                [options]="clubOptions"
+                [(ngModel)]="selectedClub"
+                placeholder="All clubs"
+                [style]="{'width':'100%'}"
+                styleClass="custom-dropdown"
+                appendTo="body">
+              </p-select>
+            </div>
+
+            <!-- Sort Filter -->
+            <div class="filter-item">
+              <label class="filter-label">Sort</label>
+              <p-select 
+                [options]="sortOptions"
+                [(ngModel)]="sortBy"
+                optionLabel="label"
+                optionValue="value"
+                [style]="{'width':'100%'}"
+                styleClass="custom-dropdown"
+                appendTo="body">
+              </p-select>
+            </div>
+          </div>
+
+          <!-- Row 4: Date and Time -->
+          <div class="filter-row filter-row--second">
             <!-- Date Filter -->
             <div class="filter-item">
               <label class="filter-label">Date</label>
               <div class="date-controls">
-                <button class="today-btn" (click)="setToday()">Today</button>
-                <input 
-                  type="date" 
-                  class="date-input"
-                  [(ngModel)]="selectedDateStr"
-                  (change)="onDateChange($event)"
-                />
+                <button class="today-btn" [class.active]="isToday()" (click)="setToday()">Today</button>
+                <p-datepicker
+                  [(ngModel)]="selectedDate"
+                  dateFormat="yy-mm-dd"
+                  [showIcon]="true"
+                  iconDisplay="input"
+                  placeholder="Select date"
+                  [style]="{'flex':'1'}"
+                  styleClass="custom-date-picker"
+                  [appendTo]="overlayAppendTarget"
+                  (onSelect)="onDateSelect($event)">
+                </p-datepicker>
               </div>
             </div>
 
@@ -88,7 +135,7 @@
                   styleClass="time-input minimal-datepicker"
                   panelStyleClass="minimal-datepicker-panel"
                   [appendTo]="overlayAppendTarget"
-                  [style]="{'width':'100%'}">
+                  [style]="{'flex':'1'}">
                 </p-datepicker>
                 <span class="time-separator">—</span>
                 <p-datepicker 
@@ -102,32 +149,11 @@
                   styleClass="time-input minimal-datepicker"
                   panelStyleClass="minimal-datepicker-panel"
                   [appendTo]="overlayAppendTarget"
-                  [style]="{'width':'100%'}">
+                  [style]="{'flex':'1'}">
                 </p-datepicker>
-                <button class="clear-btn" type="button" (click)="clearTime()" *ngIf="timeFromStr || timeToStr">×</button>
+                <button class="clear-time-btn" type="button" (click)="clearTime()" *ngIf="timeFrom || timeTo" aria-label="Clear time">×</button>
               </div>
             </div>
-
-            <!-- City Filter -->
-            <div class="filter-item">
-              <label class="filter-label">City</label>
-              <select class="minimal-select">
-                <option>All cities</option>
-                <option>Downtown</option>
-                <option>North District</option>
-                <option>East Side</option>
-                <option>West End</option>
-              </select>
-            </div>
-
-            <!-- Sort Filter -->
-            <div class="filter-item">
-              <label class="filter-label">Sort</label>
-              <select class="minimal-select" [(ngModel)]="sortBy">
-                <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
-              </select>
-            </div>
-
           </div>
         </div>
       </div>

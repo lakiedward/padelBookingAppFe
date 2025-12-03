@@ -77,8 +77,7 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
           this.loadExistingCourt(court);
           this.isLoading = false;
         },
-        error: (err) => {
-          console.error('Failed to load court:', err);
+        error: () => {
           this.saveError = 'Failed to load court data';
           this.isLoading = false;
         }
@@ -337,12 +336,10 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
     operation.subscribe({
       next: (result) => {
         this.isLoading = false;
-        console.log(this.isEditMode ? 'Court updated:' : 'Court created:', result);
         this.saved.emit(result);
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Failed to save court:', err);
         
         // Check if error is about sport not configured
         const errorMsg = err.error?.error || err.message || 'Failed to save court';
@@ -457,11 +454,8 @@ export class CreateCourtComponent implements OnInit, OnDestroy {
     if (photoId !== null) {
       // Delete from server
       this.courtService.deleteCourtPhoto(photoId).subscribe({
-        next: () => {
-          console.log(`Photo ${photoId} deleted successfully from server`);
-        },
-        error: (err) => {
-          console.error('Failed to delete photo from server:', err);
+        next: () => {},
+        error: () => {
           // Photo was removed from UI but failed to delete from server
           // Could show a subtle notification here if needed
         }
