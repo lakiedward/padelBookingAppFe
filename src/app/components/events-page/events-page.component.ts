@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal, ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { PublicService } from '../../services/public.service';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import {
   EventPanelData,
   EventStatus,
@@ -22,7 +25,7 @@ interface StatusFilterOption {
 @Component({
   selector: 'app-events-page',
   standalone: true,
-  imports: [CommonModule, AppHeaderComponent, ConvertMoneyPipe],
+  imports: [CommonModule, FormsModule, AppHeaderComponent, ConvertMoneyPipe, SelectModule, DatePickerModule],
   templateUrl: './events-page.component.html',
   styleUrls: ['./events-page.component.scss']
 })
@@ -50,7 +53,6 @@ export class EventsPageComponent implements OnInit {
     return Array.from(uniqueSports.values());
   });
 
-  // Sports pills: show first N like Courts and toggle the rest
   private readonly maxSportPills = 5;
   protected readonly moreSportsOpen = signal(false);
   private readonly fallbackSports: string[] = [
@@ -83,7 +85,35 @@ export class EventsPageComponent implements OnInit {
 
   protected readonly hasResults = computed(() => this.filteredEvents().length > 0);
 
-  constructor(private readonly publicService: PublicService) {}
+  selectedLocation: string = 'all';
+  locationOptions: { label: string; value: string }[] = [
+    { label: 'All locations', value: 'all' }
+  ];
+  
+  selectedClub: string = 'all';
+  clubOptions: { label: string; value: string }[] = [
+    { label: 'All clubs', value: 'all' }
+  ];
+  
+  private clubToLocationMap = new Map<string, string>();
+  private allClubOptions: { label: string; value: string }[] = [];
+  
+  sortBy: string = 'date-asc';
+  sortOptions: { label: string; value: string }[] = [
+    { label: 'Date: Earliest first', value: 'date-asc' },
+    { label: 'Date: Latest first', value: 'date-desc' },
+    { label: 'Price: Low to High', value: 'price-asc' },
+    { label: 'Price: High to Low', value: 'price-desc' }
+  ];
+  
+  selectedDate: Date | null = null;
+  timeFrom: Date | null = null;
+  timeTo: Date | null = null;
+
+  constructor(
+    private readonly publicService: PublicService,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.fetchEvents();
@@ -174,24 +204,77 @@ export class EventsPageComponent implements OnInit {
     return sport;
   }
 
-  protected toggleMoreSports(event?: Event) {
-    if (event) event.preventDefault();
-    this.moreSportsOpen.set(!this.moreSportsOpen());
+  protected toggleMoreSports(event: Event): void {
+    event.stopPropagation();
+    this.moreSportsOpen.update((v) => !v);
+  }
+
+  onLocationChange(): void {
+    if (this.selectedLocation === 'all') {
+      this.clubOptions = [...this.allClubOptions];
+    } else {
+      this.clubOptions = [
+        { label: 'All clubs', value: 'all' },
+        ...this.allClubOptions
+          .filter(opt => opt.value !== 'all')
+          .filter(opt => this.clubToLocationMap.get(opt.value) === this.selectedLocation)
+      ];
+    }
+    
+    if (this.selectedClub !== 'all') {
+      const clubLocation = this.clubToLocationMap.get(this.selectedClub);
+      if (clubLocation !== this.selectedLocation && this.selectedLocation !== 'all') {
+        this.selectedClub = 'all';
+      }
+    }
+    
+    this.cdr.detectChanges();
+  }
+
+  isToday(): boolean {
+    if (!this.selectedDate) return false;
+    const today = new Date();
+    return (
+      this.selectedDate.getFullYear() === today.getFullYear() &&
+      this.selectedDate.getMonth() === today.getMonth() &&
+      this.selectedDate.getDate() === today.getDate()
+    );
+  }
+
+  setToday(): void {
+    const now = new Date();
+    this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    this.cdr.detectChanges();
+  }
+
+  clearTime(): void {
+    this.timeFrom = null;
+    this.timeTo = null;
+    this.cdr.detectChanges();
+  }
+
+  clearAllFilters(): void {
+    this.selectedSport.set('all');
+    this.selectedStatus.set('all');
+    this.selectedLocation = 'all';
+    this.selectedClub = 'all';
+    this.clubOptions = [...this.allClubOptions];
+    this.sortBy = 'date-asc';
+    this.moreSportsOpen.set(false);
+    this.cdr.detectChanges();
   }
 
   private fetchEvents(): void {
     this.loading.set(true);
     this.loadError.set(null);
-
     this.publicService.getPublicEvents().subscribe({
       next: (response: EventSummaryResponse[]) => {
-        const mapped = response.map((summary) => eventSummaryToPanelData(summary));
-        this.events.set(mapped);
+        const panels = response.map(eventSummaryToPanelData);
+        this.events.set(panels);
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('[EventsPage] Failed to load events:', err);
-        this.loadError.set('We could not load events right now. Please try again later.');
+        this.loadError.set('Failed to load events. Please try again later.');
         this.loading.set(false);
       }
     });

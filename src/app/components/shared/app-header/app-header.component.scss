@@ -51,13 +51,92 @@ $white: #fff;
 
 @media (min-width: 1024px) { .nav--desktop { display: flex; } }
 
-.actions { display: none; gap: 12px; align-items: center; 
+.actions { display: none; gap: 16px; align-items: center; 
   &--desktop { display: none; }
 }
 @media (min-width: 1024px) { .actions--desktop { display: flex; } }
 
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $border;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(214, 221, 230, 0.25);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.user-profile__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(167, 238, 67, 0.15);
+  border: 2px solid rgba(167, 238, 67, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    color: $accent;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.user-profile__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-profile__name {
+  color: $white;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-profile__email {
+  color: $muted;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .user-mail { color: $muted; font-size: 14px; }
-.btn { height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid $border; background: $panel; color: $text; font-weight: 600; font-size: 14px; }
+.btn { height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid $border; background: $panel; color: $text; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(214, 221, 230, 0.25);
+  }
+}
 .btn--block { width: 100%; }
 .btn-icon { padding: 8px; border-radius: 8px; color: $text; background: transparent; border: 0; cursor: pointer; }
 .icon { width: 24px; height: 24px; }
@@ -85,16 +164,18 @@ $white: #fff;
   .nav-toggle { display: none; }
 }
 
-/* Mobile menu overlay */
 .drawer-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
   z-index: 998;
   backdrop-filter: blur(4px);
+  
+  @media (min-width: 1024px) {
+    display: none;
+  }
 }
 
-/* Mobile drawer - slides from right like admin */
 .drawer {
   position: fixed;
   top: 0;
@@ -116,6 +197,10 @@ $white: #fff;
 
   &--open {
     transform: translateX(0);
+  }
+  
+  @media (min-width: 1024px) {
+    display: none;
   }
 }
 
@@ -220,6 +305,80 @@ $white: #fff;
 .drawer__footer {
   margin-top: auto;
   padding-top: 16px;
+}
+
+.drawer__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $border;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(214, 221, 230, 0.25);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.drawer__user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(167, 238, 67, 0.15);
+  border: 2px solid rgba(167, 238, 67, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: $accent;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.drawer__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.drawer__user-name {
+  color: $white;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawer__user-email {
+  color: $muted;
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .drawer__email {

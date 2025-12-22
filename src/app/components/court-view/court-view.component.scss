@@ -170,14 +170,13 @@
 
 .day { 
   min-width: 160px; 
-  flex: 1 1 160px; /* Allow days to grow and fill space on wide screens */
+  flex: 1 1 160px; 
   background: rgba(255,255,255,0.05); 
   border: 1px solid rgba(214,221,230,0.15); 
   border-radius: 12px; 
   padding: 10px; 
 }
 
-/* Mobile calendar - 2 days per row with equal height */
 @media (max-width: 767px) {
   .courts-wrap {
     padding: 0;
@@ -274,7 +273,6 @@
   .price.mobile { display: block; }
 }
 
-/* PrimeNG Confirm Dialog - Match create-court popup styling */
 ::ng-deep {
   .p-confirmdialog {
     background: rgba(255, 255, 255, 0.08) !important;
@@ -336,13 +334,13 @@
     }
   }
 
-  /* Dialog overlay backdrop */
+  
   .p-dialog-mask {
     background: rgba(0, 0, 0, 0.68) !important;
     backdrop-filter: blur(4px);
   }
 
-  /* Button styling inside confirm dialog */
+  
   .p-confirmdialog-footer {
     .p-button {
       display: inline-flex;
@@ -359,7 +357,7 @@
       transition: all 0.2s ease;
     }
 
-    /* Cancel/Reject button - neutral style */
+    
     .p-confirmdialog-reject-button {
       background: rgba(138, 160, 181, 0.15) !important;
       border: 1px solid rgba(138, 160, 181, 0.3) !important;
@@ -375,7 +373,7 @@
       }
     }
 
-    /* Delete/Accept button - danger red style */
+    
     .p-confirmdialog-accept-button {
       background: #ff4757 !important;
       color: #ffffff !important;
@@ -392,7 +390,7 @@
     }
   }
 
-  /* Close button in header (if present) */
+  
   .p-confirmdialog-header {
     .p-dialog-header-close {
       width: 32px;

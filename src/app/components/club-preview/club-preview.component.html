@@ -102,25 +102,25 @@
         </div>
       </div>
 
-      <!-- Loading state -->
+      
       <div *ngIf="isLoadingCourts()" class="courts-loading">
         <div class="u-spinner u-spinner--md text-green"></div>
         <p class="muted">Loading courts...</p>
       </div>
 
-      <!-- Error state -->
+      
       <div *ngIf="courtsLoadError() && !isLoadingCourts()" class="courts-error">
         <p class="muted">{{ courtsLoadError() }}</p>
       </div>
 
-      <!-- Courts display -->
+      
       <ng-container *ngIf="!isLoadingCourts() && !courtsLoadError()">
-        <!-- No courts message -->
+        
         <div *ngIf="realCourts().length === 0" class="no-courts">
           <p class="muted">No courts available yet. Click "Edit Courts" to add your first court.</p>
         </div>
 
-        <!-- Courts list with filters -->
+        
         <ng-container *ngIf="realCourts().length > 0">
           <div class="filters">
             <button type="button" class="chip" [class.active]="activeCourtFilter() === 'all'" (click)="setCourtFilter('all')">All</button>

@@ -147,16 +147,36 @@ $blackish: #000a14;
   color: $text;
   background: rgba(255, 255, 255, 0.08);
 
+  &--with-icon {
+    gap: 4px;
+  }
+
   &--primary {
     background: rgba(167, 238, 67, 0.12);
     border-color: rgba(167, 238, 67, 0.35);
     color: $accent;
+  }
+  &--heated {
+    background: rgba(255, 149, 0, 0.12);
+    border-color: rgba(255, 149, 0, 0.35);
+    color: #ff9500;
+  }
+  &--unheated {
+    background: rgba(90, 200, 250, 0.12);
+    border-color: rgba(90, 200, 250, 0.35);
+    color: #5ac8fa;
   }
   &--solid {
     background: $accent;
     color: $blackish;
     border-color: $accent-border;
   }
+}
+
+.badge-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .availability {

@@ -8,14 +8,26 @@
     </div>
 
     <nav class="nav nav--desktop">
-      <a class="nav__link" [routerLink]="['/user']" routerLinkActive="nav__link--active" [routerLinkActiveOptions]="{ exact: true }">Courts</a>
-      <a class="nav__link" [routerLink]="['/user/clubs']" routerLinkActive="nav__link--active">Clubs</a>
-      <a class="nav__link" [routerLink]="['/user/events']" routerLinkActive="nav__link--active">Events</a>
+      <a class="nav__link" [routerLink]="['/courts']" routerLinkActive="nav__link--active">Courts</a>
+      <a class="nav__link" [routerLink]="['/clubs']" routerLinkActive="nav__link--active">Clubs</a>
+      <a class="nav__link" [routerLink]="['/events']" routerLinkActive="nav__link--active">Events</a>
       <a class="nav__link" [routerLink]="['/calendar']" routerLinkActive="nav__link--active">Calendar</a>
     </nav>
 
     <div class="actions actions--desktop">
-      <span class="user-mail">{{ userEmail() }}</span>
+      <div class="user-profile" (click)="goToProfile()">
+        <div class="user-profile__avatar">
+          <svg *ngIf="!profileImageUrl()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <img *ngIf="profileImageUrl()" [src]="profileImageUrl()" [alt]="username()" />
+        </div>
+        <div class="user-profile__info">
+          <span class="user-profile__name">{{ username() }}</span>
+          <span class="user-profile__email">{{ userEmail() }}</span>
+        </div>
+      </div>
       <button class="btn" (click)="logout()">Logout</button>
     </div>
 
@@ -29,10 +41,10 @@
     </button>
   </div>
 
-  <!-- Mobile menu overlay -->
+  
   <div class="drawer-overlay" *ngIf="mobileOpen" (click)="toggleMobile()"></div>
 
-  <!-- Mobile drawer (slides from right like admin) -->
+  
   <div class="drawer" [class.drawer--open]="mobileOpen">
     <div class="drawer__header">
       <div class="drawer__brand">
@@ -49,13 +61,13 @@
     <div class="drawer__separator"></div>
 
     <nav class="drawer__menu">
-      <a class="drawer__menu-item" [routerLink]="['/user']" routerLinkActive="drawer__menu-item--active" [routerLinkActiveOptions]="{ exact: true }" (click)="toggleMobile()">
+      <a class="drawer__menu-item" [routerLink]="['/courts']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
         <span>Courts</span>
       </a>
-      <a class="drawer__menu-item" [routerLink]="['/user/clubs']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
+      <a class="drawer__menu-item" [routerLink]="['/clubs']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
         <span>Clubs</span>
       </a>
-      <a class="drawer__menu-item" [routerLink]="['/user/events']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
+      <a class="drawer__menu-item" [routerLink]="['/events']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
         <span>Events</span>
       </a>
       <a class="drawer__menu-item" [routerLink]="['/calendar']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
@@ -65,7 +77,19 @@
 
     <div class="drawer__footer">
       <div class="drawer__separator"></div>
-      <div class="drawer__email">{{ userEmail() }}</div>
+      <div class="drawer__user" (click)="goToProfile(); toggleMobile()">
+        <div class="drawer__user-avatar">
+          <svg *ngIf="!profileImageUrl()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <img *ngIf="profileImageUrl()" [src]="profileImageUrl()" [alt]="username()" />
+        </div>
+        <div class="drawer__user-info">
+          <div class="drawer__user-name">{{ username() }}</div>
+          <div class="drawer__user-email">{{ userEmail() }}</div>
+        </div>
+      </div>
       <button class="drawer__logout" (click)="logout()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

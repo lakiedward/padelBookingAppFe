@@ -164,7 +164,6 @@
   }
 }
 
-/* Mobile optimizations */
 @media (max-width: 640px) {
   .login-container {
     .login-title {
@@ -328,18 +327,18 @@
     .p-button-label { font-weight: 700; color: inherit; }
   }
 
-  /* Mobile optimizations for inputs */
+  
   @media (max-width: 640px) {
     .p-inputtext {
       padding: 13px;
-      font-size: 16px; /* Prevents auto-zoom on iOS */
+      font-size: 16px; 
     }
 
     .p-password {
       .p-password-input {
         padding: 13px;
         padding-right: 44px;
-        font-size: 16px; /* Prevents auto-zoom on iOS */
+        font-size: 16px; 
       }
     }
 

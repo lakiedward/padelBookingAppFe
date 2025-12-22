@@ -26,8 +26,7 @@ export class AdminBookingDetailsComponent implements OnInit {
   error: string | null = null;
   isCancelling = false;
 
-  // Reschedule state (mirrors ManageBooking modal behaviour)
-  rescheduleDate: string | null = null; // YYYY-MM-DD
+  rescheduleDate: string | null = null;
   rescheduleOptions: RescheduleCourtOptionsResponse[] | null = null;
   rescheduleLoading = false;
   rescheduleError: string | null = null;
@@ -64,7 +63,6 @@ export class AdminBookingDetailsComponent implements OnInit {
           this.details = details;
           this.isLoading = false;
 
-          // Initialise reschedule date with booking date
           const start = new Date(details.startTime);
           if (!Number.isNaN(start.getTime())) {
             this.rescheduleDate = this.formatDateToKey(start);
@@ -120,8 +118,6 @@ export class AdminBookingDetailsComponent implements OnInit {
     });
   }
 
-  // ============ Reschedule logic (ported from ManageBooking modal) ============
-
   onRescheduleDateChange(event: Event): void {
     const input = event.target as HTMLInputElement | null;
     const value = input?.value || '';
@@ -172,7 +168,6 @@ export class AdminBookingDetailsComponent implements OnInit {
 
     this.bookingService.rescheduleBooking(this.bookingId, slot.timeSlotId).subscribe({
       next: () => {
-        // After a successful reschedule, reload full details so UI stays in sync
         this.rescheduleLoading = false;
         this.rescheduleOptions = null;
         this.rescheduleError = null;
@@ -186,8 +181,6 @@ export class AdminBookingDetailsComponent implements OnInit {
       }
     });
   }
-
-  // ============ Clipboard helpers ============
 
   copyEmail(): void {
     const email = this.details?.userEmail;

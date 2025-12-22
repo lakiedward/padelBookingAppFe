@@ -38,5 +38,5 @@ export class CheckoutSuccessComponent implements OnInit {
   }
 
   goToCalendar() { this.router.navigate(['/calendar']); }
-  goHome() { this.router.navigate(['/user']); }
+  goHome() { this.router.navigate(['/courts']); }
 }

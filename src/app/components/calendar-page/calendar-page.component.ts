@@ -13,12 +13,12 @@ type ViewMode = 'month' | 'week' | 'day';
 type Reservation = {
   id: string;
   courtId: number;
-  date: string;   // YYYY-MM-DD
-  start: string;  // HH:MM
-  end: string;    // HH:MM
+  date: string;
+  start: string;
+  end: string;
   club: string;
   court: string;
-  sport: string;  // emoji or short
+  sport: string;
   city?: string;
   timeSlotId?: number;
 };
@@ -37,15 +37,12 @@ export class CalendarPageComponent implements OnInit {
     private bookingService: BookingService
   ) {}
 
-  // Header/mobile
   mobileOpen = false;
   isLoading = true;
 
-  // State
-  anchor = signal(new Date()); // Start with today
+  anchor = signal(new Date());
   viewMode = signal<ViewMode>('month');
 
-  // Real user reservations from backend
   reservations = signal<Reservation[]>([]);
 
   ngOnInit(): void {
@@ -58,7 +55,6 @@ export class CalendarPageComponent implements OnInit {
     this.bookingService.getMyBookings().subscribe({
       next: (bookings) => {
         
-        // Transform backend BookingSummaryResponse to Reservation format
         const reservations: Reservation[] = bookings.map(booking => {
           const startDateTime = new Date(booking.startTime);
           const endDateTime = new Date(booking.endTime);
@@ -69,10 +65,10 @@ export class CalendarPageComponent implements OnInit {
             date: this.formatDateToKey(startDateTime),
             start: this.formatTimeToHHMM(startDateTime),
             end: this.formatTimeToHHMM(endDateTime),
-            club: 'Club', // Backend doesn't return club name in booking summary
+            club: 'Club',
             court: booking.courtName,
             sport: sportEmoji(booking.activityName),
-            city: 'City', // Backend doesn't return city
+            city: 'City',
             timeSlotId: booking.timeSlotId
           };
         });
@@ -97,7 +93,6 @@ export class CalendarPageComponent implements OnInit {
 
   
 
-  // Derived helpers
   readonly eventsByDay = computed<Record<string, string[]>>(() => {
     const m: Record<string, string[]> = {};
     for (const r of this.reservations()) {
@@ -106,7 +101,6 @@ export class CalendarPageComponent implements OnInit {
     return m;
   });
 
-  // UI handlers
   toggleMobile() { this.mobileOpen = !this.mobileOpen; }
   logout() { this.auth.logout(); this.router.navigate(['/auth']); }
 
@@ -143,7 +137,6 @@ export class CalendarPageComponent implements OnInit {
     this.anchor.set(new Date(t.getFullYear(), t.getMonth(), t.getDate()));
   }
 
-  // Headline
   readonly headline = computed(() => {
     const a = this.anchor();
     const mode = this.viewMode();
@@ -154,13 +147,11 @@ export class CalendarPageComponent implements OnInit {
       : this.niceDayLong(a);
   });
 
-  // Month grid
   readonly monthMatrix = computed(() => {
     const a = this.anchor();
     return this.buildCalendarMatrix(a.getFullYear(), a.getMonth());
   });
 
-  // Weeks in month
   getWeeksInMonth(): { date: Date; inCurrent: boolean }[][] {
     const matrix = this.monthMatrix();
     const weeks: { date: Date; inCurrent: boolean }[][] = [];
@@ -186,7 +177,6 @@ export class CalendarPageComponent implements OnInit {
     }
   }
 
-  // Week/day derived
   readonly weekDays = computed(() => {
     const start = this.startOfWeekMon(this.anchor());
     return Array.from({ length: 7 }, (_, i) => this.addDays(start, i));
@@ -206,7 +196,6 @@ export class CalendarPageComponent implements OnInit {
     const currentAnchor = this.anchor();
     const anchorDateKey = this.toDateKey(currentAnchor);
     
-    // Filter reservations based on current view mode
     let filteredReservations: Reservation[];
     
     if (currentViewMode === 'day') {
@@ -219,7 +208,6 @@ export class CalendarPageComponent implements OnInit {
       
       filteredReservations = this.reservations().filter(r => r.date >= weekStartKey && r.date <= weekEndKey);
     } else {
-      // Month view - show all reservations
       filteredReservations = this.reservations();
     }
     
@@ -237,7 +225,6 @@ export class CalendarPageComponent implements OnInit {
   getReservationsForCourt(courtName: string): Reservation[] {
     let filteredReservations = this.reservations().filter(r => r.court === courtName);
     
-    // In day view, only show reservations for the selected day
     if (this.viewMode() === 'day') {
       filteredReservations = filteredReservations.filter(r => r.date === this.toDateKey(this.anchor()));
     }
@@ -254,27 +241,20 @@ export class CalendarPageComponent implements OnInit {
     });
   }
 
-  // Court data methods for court cards
-  // Note: Backend BookingSummaryResponse now includes courtId
   getCourtImage(courtId: number): string {
-    // Use the new endpoint that accepts courtId and returns primary photo
-    // GET /api/public/courts/{courtId}/photo
     const baseUrl = 'https://padelbookingappbe-production.up.railway.app';
     return `${baseUrl}/api/public/courts/${courtId}/photo`;
   }
 
   getCourtLocation(courtName: string): string {
-    // Generic location since backend doesn't provide club address in booking summary
     return 'Sports Complex';
   }
 
   getCourtPrice(courtName: string): string {
-    // Price info not available in calendar view - would need to fetch court details
     return '—';
   }
 
   getCourtTags(courtName: string): string[] {
-    // Tags not available in booking summary
     return [];
   }
 
@@ -282,7 +262,6 @@ export class CalendarPageComponent implements OnInit {
     const reservations = this.getReservationsForCourt(courtName);
     if (reservations.length === 0) return '';
     
-    // Return the date of the first reservation
     const firstReservation = reservations[0];
     return firstReservation.date;
   }
@@ -291,7 +270,6 @@ export class CalendarPageComponent implements OnInit {
     const reservations = this.getReservationsForCourt(courtName);
     if (reservations.length === 0) return [];
     
-    // Return the actual booked time slots for this court
     const slots = reservations.map(r => {
       const start = new Date(`${r.date}T${r.start}`);
       const end = new Date(`${r.date}T${r.end}`);
@@ -300,7 +278,6 @@ export class CalendarPageComponent implements OnInit {
       return `${startStr} – ${endStr}`;
     });
     
-    // If more than 3 slots, show first 3 and count the rest
     if (slots.length > 3) {
       const remaining = slots.length - 3;
       return [...slots.slice(0, 3), `+${remaining} more`];
@@ -356,21 +333,17 @@ export class CalendarPageComponent implements OnInit {
       queryParams['date'] = this.toDateKey(this.anchor());
     }
 
-    this.router.navigate(['/user/court', courtId], {
+    this.router.navigate(['/court', courtId], {
       queryParams,
       fragment: 'time-slots'
     });
   }
 
-  // ===================
-  // Date helpers
-  // ===================
   readonly WD_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   weekdayShort(d: Date) { return this.WD_LABELS[d.getDay()]; }
   toDateKey(d: Date) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
-  // Check if date is today
   isToday(date: Date): boolean {
     const today = new Date();
     return date.getDate() === today.getDate() &&
@@ -402,4 +375,3 @@ export class CalendarPageComponent implements OnInit {
     return cells;
   }
 }
-

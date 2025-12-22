@@ -1,16 +1,13 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 
-// Simple currency service: detect user currency by locale, fetch EUR-based rates, convert and format.
-// Note: For now we assume backend amounts are in EUR unless specified otherwise.
-
 @Injectable({ providedIn: 'root' })
 export class CurrencyService {
   private selected: string = 'EUR';
   private ratesBase: string = 'EUR';
   private rates: Record<string, number> | null = null;
   private lastFetch = 0;
-  private ttlMs = 12 * 60 * 60 * 1000; // 12h
+  private ttlMs = 12 * 60 * 60 * 1000;
 
   constructor() {
     this.selected = this.detectUserCurrency();
@@ -40,9 +37,8 @@ export class CurrencyService {
     const t = (to || 'EUR').toUpperCase();
     if (isNaN(amount)) return 0;
     if (f === t) return amount;
-    if (!this.rates) return amount; // fallback no conversion
+    if (!this.rates) return amount;
 
-    // We have rates relative to ratesBase (EUR). Compute via EUR.
     const base = this.ratesBase.toUpperCase();
     const toRate = this.rates[t];
 
@@ -52,27 +48,22 @@ export class CurrencyService {
 
     const fromRate = this.rates[f];
     if (fromRate && toRate) {
-      // amount in base = amount / fromRate
-      // amount in to = (amount / fromRate) * toRate
       return (amount / fromRate) * toRate;
     }
-    return amount; // fallback
+    return amount;
   }
 
-  // Convenience wrappers for pipes
   convertAndFormat(amount: number, from: string, to: string): string {
     const v = this.convert(amount, from, to);
     return this.format(v, to);
   }
 
   private detectUserCurrency(): string {
-    // From localStorage if set
     try {
       const saved = localStorage.getItem('pb_user_currency');
       if (saved) return saved.toUpperCase();
     } catch {}
 
-    // Map from locale region to currency
     const locale = (navigator.language || 'en-GB').toLowerCase();
     const region = (locale.split('-')[1] || 'GB').toUpperCase();
     const map: Record<string, string> = {
@@ -115,7 +106,6 @@ export class CurrencyService {
         } catch {}
       }
     } catch {
-      // ignore, keep previous
     }
   }
 }

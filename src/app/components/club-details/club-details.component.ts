@@ -62,10 +62,8 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectedSports = new Set<SportKey>(['tennis']);
 
-
   isEditing = signal(true);
   isSaving = signal(false);
-  // Show centered spinner while loading existing club
   isLoading = signal(true);
 
   @Output() courtsRequested = new EventEmitter<void>();
@@ -83,8 +81,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       location: ['', Validators.required],
       description: ['', Validators.required],
     });
-
-    // Start in editing mode until backend data is loaded
 
     this.form.get('address')!.valueChanges.subscribe(value => {
       if (this.geocodeDebounce) clearTimeout(this.geocodeDebounce);
@@ -109,7 +105,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.isBrowser) { this.isLoading.set(false); return; }
-    // Load existing club from backend with spinner
     this.isLoading.set(true);
     this.clubService.getMyClub().pipe(
       finalize(() => { this.isLoading.set(false); setTimeout(() => this.initMapOnce()); })
@@ -200,7 +195,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   save() {
-    if (this.isSaving()) return; // Prevent multiple saves
+    if (this.isSaving()) return;
 
     this.submitted = true;
     this.form.markAllAsTouched();
@@ -258,7 +253,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
       }
     } catch {}
-    // Scrolling handled above; editing state toggled on success
   }
 
   showError() {
@@ -327,7 +321,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.savedLocations = (details.locations || []).map(l => ({ address: l.address, lat: l.lat, lng: l.lng }));
 
     this.selectedSports = new Set<SportKey>(details.sports || []);
-
 
     const prevProfile = this.profilePreviewUrl();
     const prevWallpaper = this.wallpaperPreviewUrl();
@@ -422,8 +415,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // Real upload occurs on save via ClubService (multipart)
-
   onDragOver(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
@@ -482,8 +473,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     return file.type.startsWith('image/');
   }
 
-  // Removed handleProfileFile/handleWallpaperFile helpers in favor of direct assignment
-
   onDeleteClub() {
     this.confirmationService.confirm({
       header: 'Delete Club',
@@ -492,7 +481,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       rejectLabel: 'Cancel',
       acceptLabel: 'Continue',
       accept: () => {
-        // Defer to next tick so the first dialog fully closes before opening the second
         setTimeout(() => {
           this.confirmationService.confirm({
             header: 'Confirm Deletion',
@@ -503,7 +491,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
             accept: () => {
               this.clubService.deleteClub().subscribe({
                 next: () => {
-                  // Reset local state
                   this.clubService.lastSaved.set(null);
                   this.hasExistingClub = false;
                   this.form.reset();
@@ -517,7 +504,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
                   this.selectedWallpaperFile = null;
                   this.isEditing.set(true);
                   this.messageService.add({ key: 'success', severity: 'success', summary: 'Deleted', detail: 'Club deleted successfully', life: 3000 });
-                  // Owner account will also be deleted on backend; logout locally and redirect to auth
                   try { this.authService.logout(); } catch {}
                   try { this.router.navigate(['/auth']); } catch {}
                 },
@@ -533,7 +519,6 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
-
 
   ngOnDestroy() {
     const profileUrl = this.profilePreviewUrl();

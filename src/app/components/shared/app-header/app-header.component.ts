@@ -13,15 +13,28 @@ import { AuthService } from '../../../services/auth.service';
 export class AppHeaderComponent {
   mobileOpen = false;
 
-  // Use computed signal for reactive email display
   userEmail = computed(() => {
     const user = this.auth.currentUser$();
     return user?.email || 'user@playora.com';
   });
 
+  username = computed(() => {
+    const user = this.auth.currentUser$();
+    return user?.username || 'User';
+  });
+
+  profileImageUrl = computed(() => {
+    const user = this.auth.currentUser$();
+    return user?.profileImageUrl;
+  });
+
   constructor(private auth: AuthService, private router: Router) {}
 
   toggleMobile() { this.mobileOpen = !this.mobileOpen; }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
+  }
 
   logout() {
     this.auth.logout();

@@ -63,7 +63,7 @@
   min-height: 0;
   max-height: 100%;
   
-  // Custom scrollbar styling
+  
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -201,7 +201,6 @@ textarea.form-control {
   border-radius: 10px;
 }
 
-// Courts Grid
 .courts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -276,7 +275,6 @@ textarea.form-control {
   font-weight: 700;
 }
 
-// Image Upload
 .image-upload {
   position: relative;
 }
@@ -364,7 +362,6 @@ textarea.form-control {
   margin: 0;
 }
 
-// Buttons
 .btn {
   display: inline-flex;
   align-items: center;
@@ -406,7 +403,6 @@ textarea.form-control {
   background: rgba(255, 255, 255, 0.15);
 }
 
-// PrimeNG overrides
 ::ng-deep {
   .p-select {
     width: 100%;

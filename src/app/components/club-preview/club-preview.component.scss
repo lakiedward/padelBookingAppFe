@@ -60,21 +60,17 @@
   align-items: center;
   gap: 12px;
 }
-.contact-item .icon-box {
+.icon-box {
   width: 56px;
   height: 56px;
-  min-width: 56px;
-  min-height: 56px;
   border-radius: 16px;
   background: rgba(167,238,67,0.2);
   border: 1px solid rgba(167,238,67,0.3);
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   color: #a7ee43;
-  flex-shrink: 0;
+  font-size: 22px;
 }
-.contact-item .icon-box .icon { width: 24px; height: 24px; }
+.icon-box .icon { width: 24px; height: 24px; }
 .contact-item .content .title { color: #a7ee43; font-weight: 700; font-size: 14px; }
 .contact-item .content .value { color: #fff; font-size: 16px; margin-top: 4px; }
 
@@ -111,8 +107,6 @@
 @media (min-width: 768px) { .cards { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 1024px) { .cards { grid-template-columns: 1fr 1fr 1fr; } }
 
-// CourtListingCard styles are now handled by the component itself
-
 .club-preview {
   margin-top: 0;
   border: none;
@@ -135,7 +129,7 @@
   font-size: 20px;
   font-weight: 700;
 }
-.club-preview .edit-btn { /* now using global .btn */ }
+.club-preview .edit-btn { }
 .club-preview .edit-btn .icon { width: 18px; height: 18px; }
 .club-preview .edit-btn:hover { filter: brightness(0.95); }
 
@@ -196,7 +190,6 @@
 .about h2, .contact h2, .courts h2 { font-size: 20px; margin: 8px 0 8px; }
 .about p { color: #fff; white-space: pre-line; }
 
-/* Contact items with icons */
 .contact .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
 @media (min-width: 640px) { .contact .grid { grid-template-columns: 1fr 1fr; } }
 .contact-item {
@@ -217,7 +210,6 @@
 .contact-item .content .title { color: #a7ee43; font-weight: 700; font-size: 14px; }
 .contact-item .content .value { color: #fff; font-size: 16px; margin-top: 4px; }
 
-/* Courts */
 .courts { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(214,221,230,0.15); }
 .courts-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .courts .hint { color: #8aa0b5; font-size: 13px; }
@@ -257,218 +249,4 @@
 .club-preview .contact {
   padding-top: 20px;
   padding-bottom: 20px;
-}
-
-/* Mobile-specific styles for cleaner appearance */
-@media (max-width: 767px) {
-  .club-preview {
-    .hero {
-      margin: 0;
-      height: 420px;
-      border-radius: 0;
-    }
-
-    .hero-content {
-      left: 16px;
-      right: 16px;
-      bottom: 20px;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 110px;
-      height: 110px;
-      border-radius: 18px;
-      border-width: 4px;
-    }
-
-    .titles {
-      width: 100%;
-    }
-
-    .titles h1 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .meta {
-      gap: 6px;
-      flex-wrap: wrap;
-      max-width: 100%;
-    }
-
-    .sport {
-      font-size: 11px;
-      padding: 4px 10px;
-    }
-
-    .location {
-      font-size: 13px;
-      margin-top: 4px;
-      line-height: 1.4;
-    }
-
-    .hero-actions {
-      top: 12px;
-      right: 12px;
-      gap: 6px;
-
-      .btn {
-        padding: 6px 10px;
-        font-size: 11px;
-        font-weight: 600;
-        height: 32px;
-        
-        .icon {
-          width: 14px;
-          height: 14px;
-        }
-      }
-    }
-
-    .container {
-      padding: 12px 16px 20px;
-    }
-
-    .about h2, .contact h2, .courts h2 {
-      font-size: 16px;
-      margin: 4px 0 8px;
-    }
-
-    .about p {
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .contact .grid {
-      gap: 12px;
-    }
-
-    .contact-item {
-      gap: 10px;
-    }
-
-    .contact-item .icon-box {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      min-height: 44px;
-      border-radius: 12px;
-
-      .icon {
-        width: 20px;
-        height: 20px;
-      }
-    }
-
-    .contact-item .content .title {
-      font-size: 12px;
-    }
-
-    .contact-item .content .value {
-      font-size: 14px;
-      margin-top: 2px;
-    }
-
-    .courts {
-      margin-top: 16px;
-      padding-top: 12px;
-    }
-
-    .courts-header {
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4px 8px;
-
-      h2 {
-        margin: 0;
-      }
-
-      .controls {
-        flex-direction: row-reverse;
-        align-items: center;
-        gap: 8px;
-
-        .hint {
-          display: none;
-        }
-
-        .btn {
-          padding: 5px 10px;
-          font-size: 10px;
-          height: 32px;
-
-          .icon {
-            width: 12px;
-            height: 12px;
-          }
-        }
-      }
-
-      &::after {
-        content: 'Manage courts by sport below';
-        width: 100%;
-        font-size: 11px;
-        color: #8aa0b5;
-        order: 3;
-      }
-    }
-
-    .filters {
-      margin-bottom: 12px;
-    }
-
-    .chip {
-      font-size: 11px;
-      padding: 5px 10px;
-    }
-
-    .cards {
-      gap: 12px;
-    }
-
-    .section-sub {
-      font-size: 14px;
-      margin: 12px 0 8px;
-    }
-  }
-
-  .top-divider {
-    margin: 0 16px;
-  }
-}
-
-/* Tablet-specific styles */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .club-preview {
-    .logo {
-      width: 110px;
-      height: 110px;
-    }
-
-    .hero-actions {
-      .btn {
-        padding: 10px 18px;
-        font-size: 14px;
-        height: 42px;
-      }
-    }
-
-    .titles h1 {
-      font-size: 24px;
-    }
-
-    .sport {
-      font-size: 12px;
-      padding: 3px 10px;
-    }
-
-    .location {
-      font-size: 14px;
-    }
-  }
 }

@@ -1,14 +1,14 @@
 export interface AllTimeSlotItem {
   id: number;
-  startTime: string; // ISO DateTime string
-  endTime: string;   // ISO DateTime string
+  startTime: string;
+  endTime: string;
   price: number;
   available: boolean;
   currency?: string;
 }
 
 export interface SlotsForDateResponse {
-  date: string; // ISO Date string (YYYY-MM-DD)
+  date: string;
   courtId: number;
   courtName: string;
   items: AllTimeSlotItem[];
@@ -20,10 +20,10 @@ export interface BookingSummaryResponse {
   courtId: number;
   courtName: string;
   activityName: string;
-  startTime: string; // ISO DateTime string
-  endTime: string;   // ISO DateTime string
+  startTime: string;
+  endTime: string;
   price: number;
-  createdAt: string; // ISO DateTime string
+  createdAt: string;
   currency?: string;
 }
 
@@ -33,16 +33,16 @@ export interface AdminBookingResponse {
   courtId: number;
   courtName: string;
   activityName: string;
-  startTime: string; // ISO DateTime string
-  endTime: string;   // ISO DateTime string
+  startTime: string;
+  endTime: string;
   price: number;
-  createdAt: string; // ISO DateTime string
+  createdAt: string;
   currency?: string;
   userId: number;
   username: string;
   userEmail?: string | null;
   userPhone?: string | null;
-  paymentType?: string | null; // e.g., 'Card', 'Cash', 'Online'
+  paymentType?: string | null;
 }
 
 export interface CreateBookingRequest {
@@ -96,11 +96,11 @@ export interface AdminBookingDetailsResponse {
   sportKey: string;
   clubId: number;
   clubName: string;
-  startTime: string; // ISO DateTime string
-  endTime: string;   // ISO DateTime string
+  startTime: string;
+  endTime: string;
   price: number;
   currency?: string | null;
-  createdAt: string; // ISO DateTime string
+  createdAt: string;
   durationMinutes: number;
   userId: number;
   username: string;

@@ -2,13 +2,6 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-/**
- * Guard pentru protecția rutelor care necesită rol de ADMIN.
- * Verifică autentificare + rol ROLE_ADMIN.
- * Redirecționează:
- * - utilizatorii neautentificați → /auth
- * - utilizatorii autentificați fără rol admin → /user
- */
 export const adminGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
@@ -19,8 +12,8 @@ export const adminGuard: CanActivateFn = () => {
   }
 
   if (!auth.isAdmin()) {
-    console.warn('[adminGuard] User is not admin, redirecting to /user');
-    return router.createUrlTree(['/user']);
+    console.warn('[adminGuard] User is not admin, redirecting to /courts');
+    return router.createUrlTree(['/courts']);
   }
 
   return true;

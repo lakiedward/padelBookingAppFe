@@ -1,12 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-/**
- * Pipe to ensure time is displayed in 24-hour format (HH:mm)
- * Handles various input formats:
- * - Date objects
- * - Time strings (HH:mm, H:mm, HH:MM AM/PM, etc.)
- * - ISO datetime strings
- */
 @Pipe({
   name: 'time24',
   standalone: true
@@ -16,25 +9,20 @@ export class Time24Pipe implements PipeTransform {
   transform(value: Date | string | null | undefined): string {
     if (!value) return '00:00';
     
-    // If it's a Date object
     if (value instanceof Date) {
       return this.formatDateToTime24(value);
     }
     
-    // If it's a string
     if (typeof value === 'string') {
-      // Already in HH:mm format (24-hour)
       if (/^\d{1,2}:\d{2}$/.test(value)) {
         return this.normalizeTime24(value);
       }
       
-      // Try to parse as ISO datetime or other date string
       const parsed = new Date(value);
       if (!isNaN(parsed.getTime())) {
         return this.formatDateToTime24(parsed);
       }
       
-      // Try to handle AM/PM format
       if (/am|pm/i.test(value)) {
         return this.convertAmPmTo24(value);
       }
@@ -62,10 +50,8 @@ export class Time24Pipe implements PipeTransform {
   }
   
   private convertAmPmTo24(time: string): string {
-    // Remove spaces and convert to lowercase
     const normalized = time.trim().toLowerCase();
     
-    // Extract time and AM/PM
     const match = normalized.match(/(\d{1,2}):(\d{2})\s*(am|pm)/);
     if (!match) return '00:00';
     
@@ -73,7 +59,6 @@ export class Time24Pipe implements PipeTransform {
     const minutes = parseInt(match[2], 10);
     const period = match[3];
     
-    // Convert to 24-hour format
     if (period === 'pm' && hours !== 12) {
       hours += 12;
     } else if (period === 'am' && hours === 12) {

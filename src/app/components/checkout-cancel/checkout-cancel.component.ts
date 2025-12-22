@@ -12,6 +12,6 @@ import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 })
 export class CheckoutCancelComponent {
   constructor(private router: Router) {}
-  goHome() { this.router.navigate(['/user']); }
-  goToCourts() { this.router.navigate(['/user']); }
+  goHome() { this.router.navigate(['/courts']); }
+  goToCourts() { this.router.navigate(['/courts']); }
 }

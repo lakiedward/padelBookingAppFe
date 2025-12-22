@@ -68,7 +68,6 @@ export class BookingPageComponent implements OnInit {
     const courtId = Number(courtIdParam);
     const priceNum = Number(price);
 
-    // Load court details to get full information
     this.publicService.getPublicCourtById(courtId).subscribe({
       next: (court: CourtResponse) => {
         this.slotDetails = {
@@ -121,7 +120,6 @@ export class BookingPageComponent implements OnInit {
     this.bookingService.createBooking(this.slotDetails.timeSlotId).subscribe({
       next: () => {
         this.isSubmitting = false;
-        // Navigate to calendar with success message
         this.router.navigate(['/calendar'], {
           queryParams: { bookingSuccess: 'true' }
         });
@@ -135,9 +133,9 @@ export class BookingPageComponent implements OnInit {
 
   onCancel(): void {
     if (this.slotDetails) {
-      this.router.navigate(['/user/court', this.slotDetails.courtId]);
+      this.router.navigate(['/court', this.slotDetails.courtId]);
     } else {
-      this.router.navigate(['/user']);
+      this.router.navigate(['/courts']);
     }
   }
 
@@ -152,7 +150,6 @@ export class BookingPageComponent implements OnInit {
   }
 
   formatTime(time: string): string {
-    // Time is in HH:mm format (24h)
     return time;
   }
 }

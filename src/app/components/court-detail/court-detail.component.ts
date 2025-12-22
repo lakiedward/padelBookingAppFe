@@ -1,12 +1,13 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
 import { PublicService } from '../../services/public.service';
 import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse, CourtPhotoResponse, CourtResponse } from '../../models/court.models';
 import { AuthService } from '../../services/auth.service';
+import { ClubDetails } from '../../models/club.models';
 import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { MapService } from '../../services/map.service';
 import { Subject, combineLatest } from 'rxjs';
@@ -16,7 +17,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-court-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePickerModule, AppHeaderComponent, ConvertMoneyPipe],
+  imports: [CommonModule, FormsModule, DatePickerModule, AppHeaderComponent, ConvertMoneyPipe, RouterLink],
   templateUrl: './court-detail.component.html',
   styleUrl: './court-detail.component.scss'
 })
@@ -24,16 +25,16 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
   isLoading = true;
   courtId!: number;
   court?: CourtResponse;
+  club?: ClubDetails;
   heroImage = '';
   mobileOpen = false;
 
-  // date/state
   selectedDate: Date = new Date();
   days: Date[] = [];
   slotsForDay: { id: number; start: string; end: string; available: boolean; price: number; currency?: string }[] = [];
   selectedSlot?: { id: number; start: string; end: string; price: number; currency?: string };
+  loadingSlots = false;
 
-  // location/map state
   clubLocation?: { address: string; lat: number; lng: number };
   private mapInitialized = false;
 
@@ -65,7 +66,7 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
       .subscribe(([params, query]) => {
         const id = Number(params.get('id'));
         if (!id) {
-          this.router.navigate(['/user']);
+          this.router.navigate(['/courts']);
           return;
         }
 
@@ -113,9 +114,12 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
         this.loadSlotsForSelectedDate();
         setTimeout(() => this.scrollToSelectedDay(), 200);
 
-        // Initialize map if location exists
         if (this.clubLocation && this.isBrowser) {
           setTimeout(() => this.initializeMap(), 150);
+        }
+
+        if (court.clubId) {
+          this.loadClubDetails(court.clubId);
         }
 
         this.isLoading = false;
@@ -123,7 +127,19 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isLoading = false;
-        this.router.navigate(['/user']);
+        this.router.navigate(['/courts']);
+      }
+    });
+  }
+
+  private loadClubDetails(clubId: number) {
+    this.publicService.getPublicClubById(clubId).subscribe({
+      next: (club) => {
+        this.club = club;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load club details:', err);
       }
     });
   }
@@ -135,47 +151,42 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
   }
 
   onBack() {
-    this.router.navigate(['/user']);
+    this.router.navigate(['/courts']);
   }
 
   onSelectDay(d: Date) {
     this.selectedDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     
-    // Ensure selected date is in days array
     this.ensureDateInDaysArray(this.selectedDate);
     
-    this.selectedSlot = undefined; // Clear selected slot when changing date
+    this.selectedSlot = undefined;
     this.loadSlotsForSelectedDate();
     
-    // Scroll selected day into view
     setTimeout(() => this.scrollToSelectedDay(), 150);
   }
 
   private ensureDateInDaysArray(date: Date) {
-    const dateKey = this.dateKey(date);
-    const exists = this.days.some(d => this.dateKey(d) === dateKey);
+    const selectedDay = new Date(date);
+    const dayOfWeek = selectedDay.getDay();
     
-    if (!exists) {
-      // Add the date and regenerate a 7-day window around it
-      const today = new Date();
-      const selectedDay = new Date(date);
-      const diffDays = Math.floor((selectedDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      
-      // Generate days array starting from the selected date or today (whichever is earlier)
-      const startDay = diffDays < 0 ? diffDays : 0;
-      const endDay = Math.max(6, diffDays + 3); // Show at least 7 days, or selected date + 3 days
-      
-      this.days = Array.from({ length: endDay - startDay + 1 }, (_, i) => this.addDays(today, startDay + i));
-      
-      // Force Angular to detect changes and re-render
-      this.cdr.detectChanges();
-    }
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    
+    const monday = new Date(selectedDay);
+    monday.setDate(selectedDay.getDate() - daysToMonday);
+    monday.setHours(0, 0, 0, 0);
+    
+    this.days = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      return day;
+    });
+    
+    this.cdr.detectChanges();
   }
 
   onDateInputChange(evt: Event) {
     const input = evt.target as HTMLInputElement;
     let next: Date | null = null;
-    // valueAsDate is supported in modern browsers, fallback to parsing value
     if ((input as any).valueAsDate) {
       next = (input as any).valueAsDate as Date;
     } else if (input.value) {
@@ -209,8 +220,9 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadSlotsForSelectedDate() {
+    this.loadingSlots = true;
     this.slotsForDay = [];
-    this.selectedSlot = undefined; // Clear selected slot when reloading
+    this.selectedSlot = undefined;
     const dateKey = this.dateKey(this.selectedDate);
     
     this.publicService.getAllTimeSlotsByCourtAndDate(this.courtId, dateKey).subscribe({
@@ -224,11 +236,13 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
           price: s.price || 0,
           currency: (s as any).currency || 'EUR'
         }));
+        this.loadingSlots = false;
         this.cdr.detectChanges();
         this.handleInitialSlotSelection();
       },
       error: () => {
         this.slotsForDay = [];
+        this.loadingSlots = false;
         this.cdr.detectChanges();
         this.handleInitialSlotSelection();
       }
@@ -243,8 +257,7 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
   onBookNow() {
     if (!this.selectedSlot || !this.court) return;
 
-    // Navigate to booking page with time slot ID and additional info as query params
-    this.router.navigate(['/user/booking', this.selectedSlot.id], {
+    this.router.navigate(['/booking', this.selectedSlot.id], {
       queryParams: {
         courtId: this.courtId,
         date: this.dateKey(this.selectedDate),
@@ -332,7 +345,6 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
     this.mobileOpen = !this.mobileOpen;
   }
 
-  // Map methods
   private async initializeMap() {
     if (!this.isBrowser || !this.clubLocation) return;
 
@@ -345,7 +357,6 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
       const L = (window as any).L;
       if (!L) return;
 
-      // Create read-only map (no interaction)
       const map = L.map(mapContainer, {
         dragging: false,
         zoomControl: false,
@@ -358,7 +369,6 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
-      // Add marker at club location
       L.marker([this.clubLocation.lat, this.clubLocation.lng]).addTo(map);
 
       this.mapInitialized = true;
@@ -373,7 +383,6 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
     window.open(url, '_blank');
   }
 
-  // utils
   addDays(base: Date, n: number) { const d = new Date(base); d.setDate(d.getDate() + n); return d; }
   dateKey(d: Date) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
   formatDay(d: Date) { return d.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' }); }
@@ -413,5 +422,59 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
       seen.add(k);
       return true;
     });
+  }
+
+  copyToClipboard(text: string): void {
+    if (!text) return;
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.showCopyToast(text);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        this.fallbackCopyToClipboard(text);
+      });
+    } else {
+      this.fallbackCopyToClipboard(text);
+    }
+  }
+
+  private fallbackCopyToClipboard(text: string): void {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      document.execCommand('copy');
+      this.showCopyToast(text);
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+    }
+    
+    document.body.removeChild(textArea);
+  }
+
+  private showCopyToast(text: string): void {
+    const toast = document.createElement('div');
+    toast.className = 'copy-toast';
+    toast.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span>Copied to clipboard!</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => document.body.removeChild(toast), 300);
+    }, 2000);
   }
 }

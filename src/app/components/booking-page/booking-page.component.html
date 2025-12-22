@@ -9,13 +9,13 @@
     <div class="container hero__inner">
       <main class="booking-main">
 
-        <!-- Loading State -->
+        
         <div *ngIf="isLoading" class="booking-loading">
           <div class="u-spinner u-spinner--lg"></div>
           <p class="loading-text">Loading booking details...</p>
         </div>
 
-        <!-- Error State (No Booking Details) -->
+        
         <div *ngIf="!isLoading && !slotDetails" class="booking-error-card">
           <div class="error-icon">⚠️</div>
           <h2 class="error-title">Booking Information Missing</h2>
@@ -23,17 +23,17 @@
           <button class="btn btn--primary" (click)="onCancel()">Go Back to Courts</button>
         </div>
 
-        <!-- Booking Form -->
+        
         <div *ngIf="!isLoading && slotDetails" class="booking-container">
 
           <div class="booking-card">
-            <!-- Header -->
+            
             <div class="booking-header">
               <h1 class="booking-title">Confirm Your Booking</h1>
               <p class="booking-subtitle">Review your selection and complete your booking</p>
             </div>
 
-            <!-- Booking Summary Section -->
+            
             <div class="booking-section">
               <h3 class="section-title">📅 Booking Details</h3>
 
@@ -69,19 +69,19 @@
                 </div>
               </div>
 
-              <!-- Price Highlight -->
+              
               <div class="price-card">
                 <span class="price-label">Total Price</span>
                 <span class="price-value">{{ slotDetails.price | convertMoney:(slotDetails.currency || 'EUR') }}</span>
               </div>
             </div>
 
-            <!-- Payment Method Section -->
+            
             <div class="booking-section">
               <h3 class="section-title">💳 Payment Method</h3>
 
               <div class="payment-methods">
-                <!-- Cash Payment -->
+                
                 <div
                   class="payment-method"
                   [class.payment-method--active]="selectedPaymentMethod === 'cash'"
@@ -108,7 +108,7 @@
                   </div>
                 </div>
 
-                <!-- Card Payment -->
+                
                 <div
                   class="payment-method"
                   [class.payment-method--active]="selectedPaymentMethod === 'card'"
@@ -135,13 +135,13 @@
               </div>
             </div>
 
-            <!-- Error Message -->
+            
             <div *ngIf="bookingError" class="booking-error">
               <span class="error-icon-small">⚠️</span>
               <span class="error-text">{{ bookingError }}</span>
             </div>
 
-            <!-- Action Buttons -->
+            
             <div class="booking-actions">
               <button
                 class="btn btn--secondary btn--large"

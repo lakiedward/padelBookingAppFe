@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <!-- Content -->
+  
   <main class="container content">
     
 
@@ -35,9 +35,9 @@
 
       <div class="headline">{{ headline() }}</div>
 
-      <!-- Month view -->
+      
       <ng-container *ngIf="viewMode() === 'month'; else nonMonth">
-        <!-- Desktop: Classic calendar grid -->
+        
         <div class="desktop-calendar">
           <div class="weekdays">
             <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
@@ -66,7 +66,7 @@
           </div>
         </div>
 
-        <!-- Mobile: Weeks layout -->
+        
         <div class="mobile-calendar">
           <div class="weeks-container">
             <div class="week-section" *ngFor="let week of getWeeksInMonth(); let weekIndex = index">
@@ -101,7 +101,7 @@
         </div>
       </ng-container>
 
-      <!-- Week/Day views -->
+      
       <ng-template #nonMonth>
         <div *ngIf="viewMode() === 'week'; else dayView">
           <div class="week-head">
@@ -110,7 +110,7 @@
           <div class="week-cols">
             <div class="week-col" *ngFor="let d of weekDays()" [class.week-col--today]="isToday(d)">
               <div class="week-col__label">{{ weekdayShort(d) }} {{ d.getDate() }}</div>
-              <!-- Desktop: month-like day box inside week view -->
+              
               <div class="cal-day cal--week" [class.cal-day--today]="isToday(d)">
                 <div class="cal-day__header">
                   <div class="cal-day__title">{{ weekdayShort(d) }}</div>
@@ -174,22 +174,22 @@
         </ng-template>
       </ng-template>
 
-      <!-- Courts section for Week and Day views -->
+      
       <div *ngIf="viewMode() === 'week' || viewMode() === 'day'" class="courts-section">
         <h3 class="courts-section__title">Your Courts</h3>
         
-        <!-- Loading state -->
+        
         <div *ngIf="isLoading" style="text-align: center; padding: 40px; color: #8aa0b5;">
           Loading your bookings...
         </div>
         
-        <!-- Empty state -->
+        
         <div *ngIf="!isLoading && getUniqueCourts().length === 0" style="text-align: center; padding: 40px; color: #8aa0b5;">
           <p>No bookings found for this period.</p>
           <p style="font-size: 14px; margin-top: 8px;">Book a court to see it here!</p>
         </div>
         
-        <!-- Courts grid -->
+        
         <div *ngIf="!isLoading && getUniqueCourts().length > 0" class="grid">
           <app-court-listing-card
             *ngFor="let court of getUniqueCourts()"

@@ -50,7 +50,7 @@
   min-height: 0;
   height: 0;
   
-  // Custom scrollbar styling
+  
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -139,7 +139,6 @@
 .field input::placeholder, .field textarea::placeholder { color: #ffffff; opacity: 0.7; }
 .field .error { color: #ff6b6b; font-size: 12px; margin-top: 4px; margin-bottom: 0; }
 
-/* PrimeNG Select Styling - matching create-event */
 ::ng-deep {
   .p-select {
     width: 100%;
@@ -217,13 +216,13 @@
       }
     }
 
-    // Ensure the input wrapper doesn't add extra size
+    
     .p-datepicker-input-wrapper {
       width: 100%;
     }
   }
 
-  // Calendar popup styling
+  
   .p-datepicker-overlay {
     .p-datepicker {
       background: rgba(15, 27, 38, 0.98) !important;
@@ -299,7 +298,7 @@
     }
   }
 
-  // Time picker styling
+  
   .p-timepicker {
     background: rgba(15, 27, 38, 0.98) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -323,7 +322,6 @@
   }
 }
 
-/* Court Characteristics */
 .characteristics-section { margin: 0; }
 .characteristics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 12px; }
 .characteristic-group { display: grid; gap: 8px; }
@@ -349,7 +347,6 @@
   box-shadow: 0 2px 8px rgba(167,238,67,0.2);
 }
 
-/* Surface Type Section */
 .surface-group { grid-column: 1 / -1; }
 .surface-buttons { 
   display: grid; 
@@ -391,7 +388,6 @@
 
 @media (max-width: 767.98px) {}
 
-/* Availability & Pricing */
 .section { margin-top: 0; margin-bottom: 16px; }
 .section:last-of-type { margin-bottom: 0; }
 .section-title { color: #d6dde6; font-weight: 800; font-size: 16px; margin-bottom: 12px; margin-top: 0; }
@@ -497,7 +493,6 @@
   flex-grow: 0;
 }
 
-/* Media upload - matching create-event style */
 .divider { height: 1px; border: none; background: rgba(214,221,230,0.15); margin: 16px 0; }
 
 .media-layout {
@@ -647,7 +642,6 @@
   }
 }
 
-/* Equipment */
 .equip-form { display: grid; gap: 10px; }
 .equip-row { display: grid; grid-template-columns: 1fr 140px auto; gap: 12px; align-items: end; }
 .price-field input { width: 100%; min-width: 0; }

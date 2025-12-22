@@ -3,7 +3,7 @@
 <div class="admin-booking-page page-gradient-bg">
   <div class="admin-booking-page__inner">
 
-    <!-- Main booking details card -->
+    
     <section
       class="admin-booking-page__card admin-booking-details"
       *ngIf="!isLoading && !error && details as d"
@@ -191,7 +191,7 @@
       </div>
     </section>
 
-    <!-- Loading state -->
+    
     <section
       class="admin-booking-page__card admin-booking-details admin-booking-details--loading"
       *ngIf="isLoading"
@@ -202,7 +202,7 @@
       </div>
     </section>
 
-    <!-- Error state -->
+    
     <section
       class="admin-booking-page__card admin-booking-details admin-booking-details--error"
       *ngIf="!isLoading && error"

@@ -291,7 +291,7 @@ html {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(80% 80% at 50% 30%, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+  background: transparent;
   z-index: 1;
   pointer-events: none; /* never block interactions */
 }

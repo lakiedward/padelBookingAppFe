@@ -1,4 +1,3 @@
-/// <reference types="google.accounts" />
 import { Component, EventEmitter, Output, ChangeDetectorRef, AfterViewInit, inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,9 +12,39 @@ import { MessageService } from 'primeng/api';
 import { environment } from '../../../environments/environment';
 import { PaymentsService } from '../../services/payments.service';
 
-type GoogleIdentity = {
-  accounts: typeof google.accounts;
-};
+interface CredentialResponse {
+  credential: string;
+  select_by?: string;
+  clientId?: string;
+}
+
+interface GoogleAccountsId {
+  initialize(config: {
+    client_id: string;
+    callback: (response: CredentialResponse) => void;
+    context?: string;
+    ux_mode?: string;
+  }): void;
+  prompt(): void;
+  renderButton(
+    parent: HTMLElement,
+    options: {
+      type?: string;
+      theme?: string;
+      size?: string;
+      text?: string;
+      shape?: string;
+      width?: number;
+      logo_alignment?: string;
+    }
+  ): void;
+}
+
+interface GoogleIdentity {
+  accounts: {
+    id: GoogleAccountsId;
+  };
+}
 
 @Component({
   selector: 'app-register',
@@ -197,11 +226,9 @@ export class RegisterComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Wait for Google SDK to load
     this.waitForGoogleSDK().then(() => {
       this.getGoogleIdentity();
     }).catch(() => {
-      // SDK failed to load, fallback to custom button
       setTimeout(() => {
         this.useGoogleButton = false;
         this.cdr.detectChanges();
@@ -304,7 +331,6 @@ export class RegisterComponent implements AfterViewInit {
   private renderGoogleButton(googleGlobal: GoogleIdentity) {
     const buttonContainer = this.document?.getElementById('googleButtonContainerRegister');
     if (!buttonContainer) return;
-    // Clear previous content to allow re-rendering on resize
     buttonContainer.innerHTML = '';
     const containerWidth = Math.max(200, Math.min(buttonContainer.clientWidth || 0, 480));
     googleGlobal.accounts.id.renderButton(buttonContainer, {
@@ -328,7 +354,7 @@ export class RegisterComponent implements AfterViewInit {
     this.removeResizeListener?.();
   }
 
-  private readonly handleGoogleCredential = (response: google.accounts.id.CredentialResponse) => {
+  private readonly handleGoogleCredential = (response: CredentialResponse) => {
     if (!response.credential) {
       return;
     }
@@ -341,7 +367,7 @@ export class RegisterComponent implements AfterViewInit {
         if (this.authService.isAdmin()) {
           this.router.navigate(['/admin']);
         } else if (this.authService.isUser()) {
-          this.router.navigate(['/user']);
+          this.router.navigate(['/courts']);
         } else {
           this.router.navigate(['/']);
         }
@@ -363,5 +389,3 @@ export class RegisterComponent implements AfterViewInit {
     this.switchToLogin.emit();
   }
 }
-
-

@@ -37,13 +37,13 @@ interface CourtItem {
   title: string;
   club: string;
   location: string;
-  price: string; // e.g. "$40"
+  price: string;
   unit?: string;
-  tags: string[]; // e.g. ["Indoor","Synthetic"]
-  availableDate?: string; // e.g. "2025-09-01"
-  slots: string[]; // e.g. ["6:00 AM","7:00 AM","9:00 AM","+6 more"]
+  tags: string[];
+  availableDate?: string;
+  slots: string[];
   sport: SportFilter;
-  fullSlots: SlotInterval[]; // full start/end slots used for filtering
+  fullSlots: SlotInterval[];
 }
 
 @Component({
@@ -55,6 +55,7 @@ interface CourtItem {
 })
 export class BrowseCourtsPageComponent implements OnInit {
   mobileOpen = false;
+  filtersExpanded = false;
   sportFilter: SportFilter = 'all';
   venueFilter: VenueFilter = 'all';
   heatedFilter: HeatedFilter = 'all';
@@ -65,35 +66,30 @@ export class BrowseCourtsPageComponent implements OnInit {
     { label: 'Price: High to Low', value: 'price-desc' }
   ];
   
-  // City filter
-  selectedCity: string = 'all';
-  cityOptions: { label: string; value: string }[] = [
-    { label: 'All cities', value: 'all' }
+  selectedLocation: string = 'all';
+  locationOptions: { label: string; value: string }[] = [
+    { label: 'All locations', value: 'all' }
   ];
   
-  // Club filter
   selectedClub: string = 'all';
   clubOptions: { label: string; value: string }[] = [
     { label: 'All clubs', value: 'all' }
   ];
   
+  private clubToLocationMap = new Map<string, string>();
+  private allClubOptions: { label: string; value: string }[] = [];
+  
   moreSportsOpen = false;
   selectedDate: Date | null = null;
   selectedDateStr = '';
-  // Simple time strings (HH:MM format) used for filtering
   timeFromStr: string = '';
   timeToStr: string = '';
-  // Date models bound to PrimeNG time-only pickers
   timeFrom: Date | null = null;
   timeTo: Date | null = null;
   overlayAppendTarget: string | null = null;
 
-  // Time options (24h format with 15-minute intervals)
   timeOptions: { label: string; value: string }[] = [];
 
-  // Prefer PrimeNG DatePicker "touch" modal experience on phones and keep
-  // the overlay alive until user confirms selection (iOS/Safari quirks).
-  // SSR-safe detection (window may be undefined during server render).
   get isTouch(): boolean {
     if (typeof window === 'undefined') return false;
     try {
@@ -170,17 +166,14 @@ export class BrowseCourtsPageComponent implements OnInit {
   ngOnInit(): void {
     if (!this.isBrowser) return;
     
-    // Set today as default if no date selected
     if (!this.selectedDate) {
       const now = new Date();
       this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       this.selectedDateStr = this.formatDateForInput(this.selectedDate);
     }
-    // Sanitize any pre-filled time strings to strict quarter steps
     this.timeFromStr = this.timeFromStr;
     this.timeToStr = this.timeToStr;
     
-    // Load clubs first to populate dropdowns
     this.loadClubs();
     
     setTimeout(() => {
@@ -192,32 +185,27 @@ export class BrowseCourtsPageComponent implements OnInit {
     this.publicService.getPublicClubs().subscribe({
       next: (clubs) => {
         
-        // Extract unique club names for the club dropdown
         const clubNames = new Set<string>();
-        const cities = new Set<string>();
+        const locations = new Map<string, string>();
         
         clubs.forEach(club => {
           if (club.name) {
             clubNames.add(club.name);
           }
-          // Extract cities from club locations
           if (club.locations && club.locations.length > 0) {
             club.locations.forEach(loc => {
-              // Extract city from address (assuming format like "Street, City, Country")
-              // Adjust this logic based on your actual address format
-              const parts = loc.address.split(',');
-              if (parts.length > 1) {
-                const city = parts[parts.length - 2].trim(); // Usually city is second to last
-                if (city) {
-                  cities.add(city);
+              const formatted = this.formatLocation(loc.address);
+              if (formatted) {
+                locations.set(formatted, loc.address);
+                if (club.name) {
+                  this.clubToLocationMap.set(club.name, formatted);
                 }
               }
             });
           }
         });
         
-        // Populate club dropdown
-        this.clubOptions = [
+        this.allClubOptions = [
           { label: 'All clubs', value: 'all' },
           ...Array.from(clubNames).sort().map(name => ({
             label: name,
@@ -225,12 +213,13 @@ export class BrowseCourtsPageComponent implements OnInit {
           }))
         ];
         
-        // Populate city dropdown
-        this.cityOptions = [
-          { label: 'All cities', value: 'all' },
-          ...Array.from(cities).sort().map(city => ({
-            label: city,
-            value: city
+        this.clubOptions = [...this.allClubOptions];
+        
+        this.locationOptions = [
+          { label: 'All locations', value: 'all' },
+          ...Array.from(locations.keys()).sort().map(formatted => ({
+            label: formatted,
+            value: formatted
           }))
         ];
         
@@ -239,6 +228,58 @@ export class BrowseCourtsPageComponent implements OnInit {
       error: () => {
       }
     });
+  }
+  
+  onLocationChange(): void {
+    if (this.selectedLocation === 'all') {
+      this.clubOptions = [...this.allClubOptions];
+    } else {
+      this.clubOptions = [
+        { label: 'All clubs', value: 'all' },
+        ...this.allClubOptions
+          .filter(opt => opt.value !== 'all')
+          .filter(opt => this.clubToLocationMap.get(opt.value) === this.selectedLocation)
+      ];
+    }
+    
+    if (this.selectedClub !== 'all') {
+      const clubLocation = this.clubToLocationMap.get(this.selectedClub);
+      if (clubLocation !== this.selectedLocation && this.selectedLocation !== 'all') {
+        this.selectedClub = 'all';
+      }
+    }
+    
+    this.cdr.detectChanges();
+  }
+
+  private formatLocation(address: string): string {
+    const parts = address.split(',').map(p => p.trim());
+    
+    if (parts.length >= 6) {
+      const city = parts[2];
+      const country = parts[5];
+      return `${city}, ${country}`;
+    } else if (parts.length === 5) {
+      const city = parts[1];
+      const country = parts[4];
+      return `${city}, ${country}`;
+    } else if (parts.length === 4) {
+      const city = parts[0];
+      const country = parts[3];
+      return `${city}, ${country}`;
+    } else if (parts.length >= 2) {
+      const lastPart = parts[parts.length - 1];
+      const secondToLast = parts[parts.length - 2];
+      
+      if (/^\d+$/.test(secondToLast) && parts.length >= 3) {
+        const city = parts[parts.length - 3];
+        return `${city}, ${lastPart}`;
+      } else {
+        return `${secondToLast}, ${lastPart}`;
+      }
+    }
+    
+    return address;
   }
 
   private loadCourts(): void {
@@ -260,7 +301,6 @@ export class BrowseCourtsPageComponent implements OnInit {
           fullSlots: []
         }));
         this.items.forEach((it, idx) => {
-          // Only use loadAvailabilityFor - it will use fallback if needed
           this.loadAvailabilityFor(idx, it.courtId);
           if (!courts[idx].primaryPhotoUrl) {
             this.ensurePhotoFromDetails(idx, it.courtId);
@@ -346,77 +386,68 @@ export class BrowseCourtsPageComponent implements OnInit {
   private minutesToHHMM(totalMinutes: number): string {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    const clampedHours = (hours + 24) % 24;
-    return `${String(clampedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   }
 
   goToDetail(courtId: number) {
-    this.router.navigate(['/user/court', courtId]);
+    this.router.navigate(['/court', courtId]);
   }
 
   private loadAvailabilityFor(index: number, courtId: number) {
-    // Use today's date or selected date for availability check
-    const targetDate = this.selectedDate || new Date();
-    const dateStr = this.formatDateForInput(targetDate);
+    const dateStr = this.selectedDateStr;
     
     this.publicService.getAllTimeSlotsByCourtAndDate(courtId, dateStr).subscribe({
       next: (response) => {
         const slots = response?.items || [];
         
         if (!Array.isArray(slots) || slots.length === 0) {
-          this.publicService.getPublicCourtById(courtId).subscribe({
-            next: (court) => {
-              const fallback = this.computeFromRules(court.availabilityRules);
-              if (fallback) {
-                this.items[index] = {
-                  ...this.items[index],
-                  availableDate: fallback.dateStr,
-                  fullSlots: fallback.intervals,
-                  slots: fallback.displayTimes
-                };
-                this.items = [...this.items];
-                this.cdr.detectChanges();
-              } else {
-                
-              }
-            },
-            error: (err) => {
-              
-            }
-          });
+          this.items[index] = {
+            ...this.items[index],
+            availableDate: dateStr,
+            fullSlots: [],
+            slots: ['No slots available']
+          };
+          this.items = [...this.items];
+          this.cdr.detectChanges();
           return;
         }
         
-        // Sort slots by time
         const sorted = slots.slice().sort((a, b) => a.startTime.localeCompare(b.startTime));
         
-        // Build arrays of HH:mm times for filtering and chips (with availability status)
         const intervals: SlotInterval[] = sorted.map(s => ({
           start: s.startTime.substring(11, 16),
           end: s.endTime.substring(11, 16),
           available: s.available
         }));
         
-        // Only show available slots in chips
         const availableIntervals = intervals.filter(i => i.available !== false);
-        const chips: string[] = this.toChipLabels(availableIntervals.map(i => i.start));
+        
+        const chips: string[] = availableIntervals.length > 0 
+          ? this.toChipLabels(availableIntervals.map(i => i.start))
+          : ['No slots available'];
         
         
-        // Create new object to force change detection
         this.items[index] = {
           ...this.items[index],
           availableDate: dateStr,
-          fullSlots: intervals, // All slots with availability status
-          slots: chips // Only available slots for display
+          fullSlots: intervals,
+          slots: chips
         };
-        this.items = [...this.items]; // Force array reference change
+        this.items = [...this.items];
         this.cdr.detectChanges();
       },
       error: () => {
+        this.items[index] = {
+          ...this.items[index],
+          availableDate: dateStr,
+          fullSlots: [],
+          slots: ['No slots available']
+        };
+        this.items = [...this.items];
+        this.cdr.detectChanges();
       }
     });
   }
-
 
   
 
@@ -437,11 +468,10 @@ export class BrowseCourtsPageComponent implements OnInit {
   }
 
   onTimeInputChange(which: 'from' | 'to', event: any) {
-    // Support both native input events and PrimeNG Date objects
     const raw = (event && event.target && typeof event.target.value === 'string')
       ? event.target.value
-      : (event && event.value) // PrimeNG often sends { value: Date }
-        ?? event; // fallback
+      : (event && event.value)
+        ?? event;
 
     const mins = this.coerceToMinutes(raw);
     if (mins != null) {
@@ -459,10 +489,8 @@ export class BrowseCourtsPageComponent implements OnInit {
       }
     }
 
-    // Validate time range
     if (this.timeFromStr && this.timeToStr) {
       if (this.timeFromStr >= this.timeToStr) {
-        // Reset the invalid time
         if (which === 'to') {
           this.timeToStr = '';
           this.timeTo = null;
@@ -481,7 +509,6 @@ export class BrowseCourtsPageComponent implements OnInit {
     if (typeof raw === 'string') {
       return this.parseTimeString(raw);
     }
-    // Try toString() if available
     if (raw && typeof raw.toString === 'function') {
       const str = raw.toString();
       return this.parseTimeString(str);
@@ -494,14 +521,13 @@ export class BrowseCourtsPageComponent implements OnInit {
     const add = rem === 0 ? 15 : (15 - rem);
     const next = totalMinutes + add;
     const DAY = 24 * 60;
-    return next % DAY; // wrap around midnight
+    return next % DAY;
   }
 
   private sanitizeToQuarter(raw: string): string {
     if (!raw) return '';
     const mins = this.parseTimeString(raw);
     if (mins == null) return '';
-    // Snap to NEXT 15-minute increment to avoid illegal minutes like :46
     const rem = mins % 15;
     const snapped = rem === 0 ? mins : mins + (15 - rem);
     const DAY = 24 * 60;
@@ -518,8 +544,16 @@ export class BrowseCourtsPageComponent implements OnInit {
       (this.venueFilter === 'indoor' && it.tags.includes('Indoor')) ||
       (this.venueFilter === 'outdoor' && it.tags.includes('Outdoor'));
 
+    const clubMatch = (it: CourtItem) =>
+      this.selectedClub === 'all' || it.club === this.selectedClub;
+
+    const locationMatch = (it: CourtItem) => {
+      if (this.selectedLocation === 'all') return true;
+      const clubLocation = this.clubToLocationMap.get(it.club);
+      return clubLocation === this.selectedLocation;
+    };
+
     const timeInRange = (item: CourtItem): boolean => {
-      // Derive minutes from Date models first; fall back to strings for safety
       const fromMin = this.timeFrom
         ? this.timeFrom.getHours() * 60 + this.timeFrom.getMinutes()
         : (this.timeFromStr ? this.parseTimeString(this.timeFromStr) : null);
@@ -536,7 +570,6 @@ export class BrowseCourtsPageComponent implements OnInit {
             .map((start) => ({ start, end: start }));
 
       for (const interval of intervals) {
-        // Skip unavailable/booked slots
         if (interval.available === false) continue;
 
         const startMin = this.parseTimeString(interval.start);
@@ -545,35 +578,32 @@ export class BrowseCourtsPageComponent implements OnInit {
 
         if (fromMin != null && toMin != null) {
           if (fromMin <= toMin) {
-            // Check for overlap: slot overlaps with filter window if:
-            // slot starts before filter ends AND slot ends after filter starts
             if (startMin < toMin && endMin > fromMin) return true;
           } else {
-            // Over-midnight case (e.g., From 22:00, To 02:00)
-            // Slot overlaps if it's either late (>= fromMin) or early (<= toMin)
             if (startMin >= fromMin || endMin <= toMin) return true;
           }
         } else if (fromMin != null) {
-          // Only "From" specified - any slot starting at or after fromMin
           if (startMin >= fromMin) return true;
         } else if (toMin != null) {
-          // Only "To" specified - any slot ending at or before toMin
           if (endMin <= toMin) return true;
         }
       }
       return false;
     };
 
-    const parsed = this.items.filter((it) => sportMatch(it) && venueMatch(it) && timeInRange(it));
+    const parsed = this.items.filter((it) => sportMatch(it) && venueMatch(it) && clubMatch(it) && locationMatch(it) && timeInRange(it));
 
     const toPrice = (p: string) => Number((p || '').replace(/[^0-9.]/g, '')) || 0;
     if (this.sortBy === 'price-asc') parsed.sort((a, b) => toPrice(a.price) - toPrice(b.price));
     if (this.sortBy === 'price-desc') parsed.sort((a, b) => toPrice(b.price) - toPrice(a.price));
-    // 'earliest' is demo only; left as-is
     return parsed;
   }
 
   toggleMobile() { this.mobileOpen = !this.mobileOpen; }
+
+  toggleFilters() {
+    this.filtersExpanded = !this.filtersExpanded;
+  }
 
   toggleMoreSports(event: Event) {
     event.stopPropagation();
@@ -582,17 +612,24 @@ export class BrowseCourtsPageComponent implements OnInit {
 
   selectSport(key: SportFilter) {
     this.sportFilter = key;
-    // Close the extra sports panel after selecting, including 'Show all'
     this.moreSportsOpen = false;
+  }
+
+  getActiveFilterCount(): number {
+    let count = 0;
+    if (this.sportFilter !== 'all') count++;
+    if (this.venueFilter !== 'all') count++;
+    if (this.heatedFilter !== 'all') count++;
+    if (this.selectedLocation !== 'all') count++;
+    if (this.selectedClub !== 'all') count++;
+    return count;
   }
 
   setToday() {
     const now = new Date();
-    // zero out time for clearer comparisons
     this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     this.selectedDateStr = this.formatDateForInput(this.selectedDate);
     
-    // Reload availability for all courts with today's date
     this.items.forEach((item, idx) => {
       this.loadAvailabilityFor(idx, item.courtId);
     });
@@ -619,7 +656,6 @@ export class BrowseCourtsPageComponent implements OnInit {
       this.selectedDateStr = '';
     }
     
-    // Reload availability for all courts with new date
     this.items.forEach((item, idx) => {
       this.loadAvailabilityFor(idx, item.courtId);
     });
@@ -630,7 +666,6 @@ export class BrowseCourtsPageComponent implements OnInit {
       this.selectedDate = date;
       this.selectedDateStr = this.formatDateForInput(date);
       
-      // Reload availability for all courts with new date
       this.items.forEach((item, idx) => {
         this.loadAvailabilityFor(idx, item.courtId);
       });
@@ -646,10 +681,38 @@ export class BrowseCourtsPageComponent implements OnInit {
   }
 
   clearTime() {
-    this.timeFromStr = '';
-    this.timeToStr = '';
     this.timeFrom = null;
     this.timeTo = null;
+    this.timeFromStr = '';
+    this.timeToStr = '';
+    this.cdr.detectChanges();
+  }
+  
+  clearAllFilters() {
+    this.sportFilter = 'all';
+    
+    this.venueFilter = 'all';
+    
+    this.heatedFilter = 'all';
+    
+    this.selectedLocation = 'all';
+    
+    this.selectedClub = 'all';
+    this.clubOptions = [...this.allClubOptions];
+    
+    this.sortBy = 'earliest';
+    
+    this.selectedDate = null;
+    this.selectedDateStr = '';
+    
+    this.timeFrom = null;
+    this.timeTo = null;
+    this.timeFromStr = '';
+    this.timeToStr = '';
+    
+    this.moreSportsOpen = false;
+    
+    this.cdr.detectChanges();
   }
 
   private parseTimeString(raw: unknown): number | null {
@@ -669,7 +732,6 @@ export class BrowseCourtsPageComponent implements OnInit {
 
     if (typeof candidate !== 'string') return null;
 
-    // Parse HH:MM format
     const trimmed = candidate.trim();
     const h24 = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
     if (h24) {
@@ -679,8 +741,6 @@ export class BrowseCourtsPageComponent implements OnInit {
     }
     return null;
   }
-
-  // No global click listener needed for inline expansion
 
   logout() {
     this.auth.logout();

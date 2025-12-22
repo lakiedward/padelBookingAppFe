@@ -1,8 +1,6 @@
 import { SportKey } from './club.models';
 import { CourtSummaryResponse } from './court.models';
 
-// ========== ENUMS ==========
-
 export enum EventType {
   TOURNAMENT = 'TOURNAMENT',
   LEAGUE = 'LEAGUE',
@@ -19,7 +17,6 @@ export enum EventStatus {
 }
 
 export enum EventFormat {
-  // Padel formats
   AMERICANO = 'AMERICANO',
   MEXICANO = 'MEXICANO',
   MIXED_AMERICANO = 'MIXED_AMERICANO',
@@ -28,14 +25,11 @@ export enum EventFormat {
   PADEL_KNOCKOUT = 'PADEL_KNOCKOUT',
   KING_OF_COURT = 'KING_OF_COURT',
 
-  // Tennis formats
   ROUND_ROBIN = 'ROUND_ROBIN',
   SINGLE_ELIMINATION = 'SINGLE_ELIMINATION',
   DOUBLE_ELIMINATION = 'DOUBLE_ELIMINATION',
   GROUPS_KNOCKOUT = 'GROUPS_KNOCKOUT'
 }
-
-// ========== FORMAT DEFINITIONS BY SPORT ==========
 
 export const PADEL_FORMATS: EventFormat[] = [
   EventFormat.AMERICANO,
@@ -54,7 +48,6 @@ export const TENNIS_FORMATS: EventFormat[] = [
   EventFormat.GROUPS_KNOCKOUT
 ];
 
-// Helper function to get formats by sport
 export function getFormatsForSport(sportKey: SportKey): EventFormat[] {
   const normalizedSport = sportKey.toLowerCase();
   switch (normalizedSport) {
@@ -67,7 +60,6 @@ export function getFormatsForSport(sportKey: SportKey): EventFormat[] {
   }
 }
 
-// Helper function to get display name for format
 export function getFormatDisplayName(format: EventFormat): string {
   const displayNames: Record<EventFormat, string> = {
     [EventFormat.AMERICANO]: 'Americano',
@@ -85,7 +77,6 @@ export function getFormatDisplayName(format: EventFormat): string {
   return displayNames[format] || format;
 }
 
-// Helper function to get display name for event type
 export function getEventTypeDisplayName(type: EventType): string {
   const displayNames: Record<EventType, string> = {
     [EventType.TOURNAMENT]: 'Tournament',
@@ -96,7 +87,6 @@ export function getEventTypeDisplayName(type: EventType): string {
   return displayNames[type] || type;
 }
 
-// Helper function to get display name for status
 export function getStatusDisplayName(status: EventStatus): string {
   const displayNames: Record<EventStatus, string> = {
     [EventStatus.DRAFT]: 'Draft',
@@ -108,27 +98,23 @@ export function getStatusDisplayName(status: EventStatus): string {
   return displayNames[status] || status;
 }
 
-// ========== REQUEST DTOs ==========
-
 export interface CreateEventRequest {
   name: string;
   description?: string | null;
-  eventType: string; // EventType as string
-  sportKey: string;  // SportKey as string
-  format: string;    // EventFormat as string
-  startDate: string; // yyyy-MM-dd
-  endDate: string;   // yyyy-MM-dd
-  registrationDeadline?: string | null; // yyyy-MM-dd
+  eventType: string;
+  sportKey: string;
+  format: string;
+  startDate: string;
+  endDate: string;
+  registrationDeadline?: string | null;
   maxParticipants?: number | null;
   price?: number | null;
   courtIds: number[];
 }
 
 export interface UpdateEventRequest extends CreateEventRequest {
-  status: string; // EventStatus as string
+  status: string;
 }
-
-// ========== RESPONSE DTOs ==========
 
 export interface EventResponse {
   id: number;
@@ -137,8 +123,8 @@ export interface EventResponse {
   eventType: string;
   sportKey: string;
   format: string;
-  startDate: string; // yyyy-MM-dd
-  endDate: string;   // yyyy-MM-dd
+  startDate: string;
+  endDate: string;
   registrationDeadline: string | null;
   maxParticipants: number | null;
   currentParticipants: number;
@@ -149,8 +135,8 @@ export interface EventResponse {
   courts: CourtSummaryResponse[];
   clubId: number;
   clubName: string;
-  createdAt: string; // ISO LocalDateTime
-  updatedAt: string; // ISO LocalDateTime
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface EventSummaryResponse {
@@ -160,8 +146,8 @@ export interface EventSummaryResponse {
   eventType: string;
   sportKey: string;
   format: string;
-  startDate: string; // yyyy-MM-dd
-  endDate: string;   // yyyy-MM-dd
+  startDate: string;
+  endDate: string;
   maxParticipants: number | null;
   currentParticipants: number;
   price: number | null;
@@ -173,9 +159,6 @@ export interface EventSummaryResponse {
   clubName: string;
 }
 
-// ========== UI MODELS ==========
-
-// For displaying events in panels/cards
 export interface EventPanelData {
   id: number;
   name: string;
@@ -196,7 +179,6 @@ export interface EventPanelData {
   clubName: string;
 }
 
-// Convert backend response to UI model
 export function eventSummaryToPanelData(summary: EventSummaryResponse): EventPanelData {
   return {
     id: summary.id,
@@ -207,7 +189,7 @@ export function eventSummaryToPanelData(summary: EventSummaryResponse): EventPan
     format: summary.format as EventFormat,
     startDate: new Date(summary.startDate),
     endDate: new Date(summary.endDate),
-    registrationDeadline: null, // Not in summary
+    registrationDeadline: null,
     maxParticipants: summary.maxParticipants,
     currentParticipants: summary.currentParticipants,
     price: summary.price,
@@ -219,7 +201,6 @@ export function eventSummaryToPanelData(summary: EventSummaryResponse): EventPan
   };
 }
 
-// For event details
 export interface EventDetailsData extends EventPanelData {
   courts: CourtSummaryResponse[];
   registrationDeadline: Date | null;
@@ -227,7 +208,6 @@ export interface EventDetailsData extends EventPanelData {
   updatedAt: Date;
 }
 
-// Convert backend response to UI details model
 export function eventResponseToDetailsData(response: EventResponse): EventDetailsData {
   return {
     id: response.id,

@@ -1,5 +1,5 @@
 <div class="manage-booking-container">
-  <!-- Sport Selection Dropdown -->
+  
   <div class="selector-group">
     <div class="sport-selector">
       <label class="selector__label">Select Sport</label>
@@ -15,7 +15,7 @@
       />
     </div>
 
-    <!-- Court Selection Dropdown -->
+    
     <div class="court-selector">
       <label class="selector__label">Select Court</label>
       <p-select
@@ -32,13 +32,13 @@
     </div>
   </div>
 
-  <!-- Loading State -->
+  
   <div *ngIf="isLoading()" class="loading-state">
     <div class="spinner"></div>
     <p>Loading bookings...</p>
   </div>
 
-  <!-- Calendar Panel -->
+  
   <section *ngIf="!isLoading() && selectedCourtId()" class="calendar-panel">
     <div class="toolbar">
       <div class="toolbar__left">
@@ -74,9 +74,9 @@
 
     <div class="headline">{{ headline() }}</div>
 
-    <!-- Month view -->
+    
     <ng-container *ngIf="viewMode() === 'month'; else nonMonth">
-      <!-- Desktop: Classic calendar grid -->
+      
       <div class="desktop-calendar">
         <div class="weekdays">
           <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
@@ -109,7 +109,7 @@
         </div>
       </div>
 
-      <!-- Mobile: Weeks layout -->
+      
       <div class="mobile-calendar">
         <div class="weeks-container">
           <div class="week-section" *ngFor="let week of getWeeksInMonth(); let weekIndex = index">
@@ -148,7 +148,7 @@
       </div>
     </ng-container>
 
-    <!-- Week/Day views -->
+    
     <ng-template #nonMonth>
       <div *ngIf="viewMode() === 'week'; else dayView">
         <div class="week-head">
@@ -157,7 +157,7 @@
         <div class="week-cols">
           <div class="week-col" *ngFor="let d of weekDays()" [class.week-col--today]="isToday(d)">
             <div class="week-col__label">{{ weekdayShort(d) }} {{ d.getDate() }}</div>
-            <!-- Desktop: month-like day box inside week view -->
+            
             <div class="cal-day cal--week" [class.cal-day--today]="isToday(d)">
               <div class="cal-day__header">
                 <div class="cal-day__title">{{ weekdayShort(d) }}</div>
@@ -169,7 +169,7 @@
               <div class="cal-day__content">
                 <div class="cal-day__num">{{ d.getDate() }}</div>
                 <div class="cal-day__body">
-                  <!-- Detailed booking cards inside calendar cells -->
+                  
                   <div
                     class="booking-card booking-card--compact"
                     *ngFor="let b of bookingsByDay(d)"
@@ -243,12 +243,12 @@
     </ng-template>
   </section>
 
-  <!-- Empty state when no court selected -->
+  
   <div *ngIf="!isLoading() && !selectedCourtId()" class="empty-state">
     <p>Please select a court to view bookings</p>
   </div>
 
-  <!-- Booking details modal -->
+  
   <div class="modal-container" *ngIf="showBookingModal()">
     <div class="modal-overlay" (click)="closeBooking()"></div>
     <div class="modal-content" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Booking Details">
@@ -277,7 +277,7 @@
             </div>
 
             <div class="booking-modal__column booking-modal__column--reschedule">
-              <!-- Reschedule section -->
+              
               <div class="booking-modal__section">
                 <div class="booking-modal__section-header">
                   <div class="booking-modal__section-title">Reschedule booking</div>
@@ -344,7 +344,7 @@
                 </ng-container>
               </div>
 
-              <!-- Payment quick actions -->
+              
               <div class="booking-modal__section" *ngIf="sb.paymentType !== 'CASH'">
                 <div class="booking-modal__section-header">
                   <div class="booking-modal__section-title">Payment actions</div>

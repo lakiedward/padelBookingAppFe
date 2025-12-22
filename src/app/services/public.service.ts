@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { CourtSummaryResponse, PublicAvailableTimeSlot, CourtResponse } from '../models/court.models';
 import { SlotsForDateResponse } from '../models/booking.models';
@@ -18,7 +19,23 @@ export class PublicService {
   }
   
   getPublicClubs(): Observable<ClubDetails[]> {
-    return this.http.get<ClubDetails[]>(`${this.apiBase}/api/public/clubs`);
+    return this.http.get<ClubDetails[]>(`${this.apiBase}/api/public/clubs`).pipe(
+      map(clubs => clubs.map(club => ({
+        ...club,
+        profileImageUrl: this.toAbsoluteUrl(club.profileImageUrl),
+        wallpaperImageUrl: this.toAbsoluteUrl(club.wallpaperImageUrl)
+      })))
+    );
+  }
+
+  getPublicClubById(clubId: number): Observable<ClubDetails> {
+    return this.http.get<ClubDetails>(`${this.apiBase}/api/public/clubs/${clubId}`).pipe(
+      map(club => ({
+        ...club,
+        profileImageUrl: this.toAbsoluteUrl(club.profileImageUrl),
+        wallpaperImageUrl: this.toAbsoluteUrl(club.wallpaperImageUrl)
+      }))
+    );
   }
 
   getAvailableTimeSlotsByCourt(courtId: number): Observable<PublicAvailableTimeSlot[]> {
@@ -29,10 +46,6 @@ export class PublicService {
     return this.http.get<CourtResponse>(`${this.apiBase}/api/public/courts/${courtId}`);
   }
 
-  /**
-   * Get ALL time slots (available + unavailable) for a court on a specific date
-   * Used to show which slots are free and which are occupied
-   */
   getAllTimeSlotsByCourtAndDate(courtId: number, date: string): Observable<SlotsForDateResponse> {
     const params = new HttpParams().set('date', date);
     return this.http.get<SlotsForDateResponse>(`${this.apiBase}/api/public/courts/${courtId}/slots`, { params });
@@ -40,6 +53,22 @@ export class PublicService {
 
   getPublicEvents(): Observable<EventSummaryResponse[]> {
     return this.http.get<EventSummaryResponse[]>(`${this.apiBase}/api/public/events`);
+  }
+
+  getPublicCourtsByClubId(clubId: string | number): Observable<CourtSummaryResponse[]> {
+    return this.http.get<CourtSummaryResponse[]>(`${this.apiBase}/api/public/clubs/${clubId}/courts`);
+  }
+
+  getClubProfileImageUrl(clubId: string | number): string {
+    return `${this.apiBase}/api/public/clubs/${clubId}/profile-image`;
+  }
+
+  getClubWallpaperImageUrl(clubId: string | number): string {
+    return `${this.apiBase}/api/public/clubs/${clubId}/wallpaper-image`;
+  }
+
+  getCourtPhotoUrl(courtId: number): string {
+    return `${this.apiBase}/api/public/courts/photos/${courtId}`;
   }
 
   toAbsoluteUrl(path: string | null | undefined): string | null {

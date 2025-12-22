@@ -8,7 +8,6 @@ $muted: #9aa7b5;
 $white: #fff;
 $error: #ef4444;
 
-// Page wrapper
 .page {
   position: relative;
   min-height: 100vh;
@@ -26,7 +25,6 @@ $error: #ef4444;
   padding: 0 16px;
 }
 
-// Hero section
 .hero {
   position: relative;
   overflow: hidden;
@@ -82,7 +80,6 @@ $error: #ef4444;
   }
 }
 
-// Booking Main Container
 .booking-main {
   width: 100%;
   max-width: 600px;
@@ -91,7 +88,6 @@ $error: #ef4444;
   z-index: 1;
 }
 
-// Loading State
 .booking-loading {
   display: flex;
   flex-direction: column;
@@ -107,7 +103,6 @@ $error: #ef4444;
   margin: 0;
 }
 
-// Error State Card
 .booking-error-card {
   border-radius: 16px;
   border: 1px solid rgba(239, 68, 68, 0.3);
@@ -137,12 +132,10 @@ $error: #ef4444;
   margin: 0;
 }
 
-// Booking Container
 .booking-container {
   width: 100%;
 }
 
-// Booking Card
 .booking-card {
   border-radius: 16px;
   border: 1px solid $border;
@@ -158,7 +151,6 @@ $error: #ef4444;
   }
 }
 
-// Header
 .booking-header {
   display: flex;
   flex-direction: column;
@@ -184,7 +176,6 @@ $error: #ef4444;
   margin: 0;
 }
 
-// Section
 .booking-section {
   display: flex;
   flex-direction: column;
@@ -201,7 +192,6 @@ $error: #ef4444;
   gap: 8px;
 }
 
-// Summary Grid
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -241,7 +231,6 @@ $error: #ef4444;
   font-weight: 600;
 }
 
-// Price Card
 .price-card {
   display: flex;
   align-items: center;
@@ -269,7 +258,6 @@ $error: #ef4444;
   }
 }
 
-// Payment Methods
 .payment-methods {
   display: flex;
   flex-direction: column;
@@ -370,7 +358,6 @@ $error: #ef4444;
   letter-spacing: 0.05em;
 }
 
-// Error Message
 .booking-error {
   display: flex;
   align-items: center;
@@ -391,7 +378,6 @@ $error: #ef4444;
   flex: 1;
 }
 
-// Action Buttons
 .booking-actions {
   display: flex;
   gap: 12px;
@@ -472,7 +458,6 @@ $error: #ef4444;
   gap: 10px;
 }
 
-// Spinner utility (ensure it exists in global styles)
 .u-spinner {
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-top-color: $accent;

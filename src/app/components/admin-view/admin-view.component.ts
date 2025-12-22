@@ -39,7 +39,6 @@ export class AdminViewComponent implements AfterViewInit {
     public clubService: ClubService,
     private cdr: ChangeDetectorRef
   ) {
-    // Load club data on initialization to populate sports dropdown
     this.clubService.getMyClub().subscribe({
       next: () => {},
       error: () => {}
@@ -47,15 +46,12 @@ export class AdminViewComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // ViewChild is now available
     this.cdr.detectChanges();
   }
 
   select(menu: AdminMenuKey) {
     this.selectedMenu = menu;
-    this.mobileMenuOpen = false; // Close mobile menu after selection
-    
-    // No need to manually trigger loadCourts; CourtView loads itself on insertion
+    this.mobileMenuOpen = false;
   }
 
   toggleMobileMenu() {
@@ -73,7 +69,7 @@ export class AdminViewComponent implements AfterViewInit {
   }
 
   onAddCourtFromView() {
-    this.editingCourtId = undefined; // Reset edit mode
+    this.editingCourtId = undefined;
     this.showCreateCourtModal = true;
   }
 
@@ -91,13 +87,11 @@ export class AdminViewComponent implements AfterViewInit {
     this.showCreateCourtModal = false;
     this.editingCourtId = undefined;
 
-    // Refresh courts list
     if (this.courtViewComponent) {
       this.courtViewComponent.loadCourts();
     }
   }
 
-  // Event management methods
   onAddEventFromView() {
     this.editingEventId = undefined;
     this.showCreateEventModal = true;
@@ -117,7 +111,6 @@ export class AdminViewComponent implements AfterViewInit {
     this.showCreateEventModal = false;
     this.editingEventId = undefined;
 
-    // Refresh events list
     if (this.eventViewComponent) {
       this.eventViewComponent.loadEvents();
     }
@@ -126,20 +119,17 @@ export class AdminViewComponent implements AfterViewInit {
   onManageBookingFromClub(courtId: number) {
     this.preselectCourtId = courtId;
     this.select('manage-booking');
-    // Optionally scroll to the section
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
   }
 
   onManageBookingFromCourt(courtId: number) {
     this.preselectCourtId = courtId;
     this.select('manage-booking');
-    // Optionally scroll to the section
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
   }
 
   getAvailableSports(): SportKey[] {
     const clubSports = this.clubService.lastSaved()?.sports || [];
-    // Always include padel and tennis, plus any other club sports
     const sports = new Set<SportKey>(['padel', 'tennis', ...clubSports]);
     return Array.from(sports);
   }

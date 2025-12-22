@@ -1,4 +1,3 @@
-/// <reference types="google.accounts" />
 import { Component, EventEmitter, Output, AfterViewInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,9 +10,39 @@ import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 
-type GoogleIdentity = {
-  accounts: typeof google.accounts;
-};
+interface CredentialResponse {
+  credential: string;
+  select_by?: string;
+  clientId?: string;
+}
+
+interface GoogleAccountsId {
+  initialize(config: {
+    client_id: string;
+    callback: (response: CredentialResponse) => void;
+    context?: string;
+    ux_mode?: string;
+  }): void;
+  prompt(): void;
+  renderButton(
+    parent: HTMLElement,
+    options: {
+      type?: string;
+      theme?: string;
+      size?: string;
+      text?: string;
+      shape?: string;
+      width?: number;
+      logo_alignment?: string;
+    }
+  ): void;
+}
+
+interface GoogleIdentity {
+  accounts: {
+    id: GoogleAccountsId;
+  };
+}
 
 @Component({
   selector: 'app-login',
@@ -55,21 +84,17 @@ export class LoginComponent implements AfterViewInit {
       rememberMe: [false]
     });
 
-    // Reset auth error on any field change
     this.loginForm.valueChanges.subscribe(() => {
       if (this.authError) this.authError = false;
     });
   }
 
   ngAfterViewInit(): void {
-    // Handle browser autofill not triggering Angular change detection (SSR-safe)
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Wait for Google SDK to load
     this.waitForGoogleSDK().then(() => {
       this.getGoogleIdentity();
     }).catch(() => {
-      // SDK failed to load, fallback to custom button
       setTimeout(() => {
         this.useGoogleButton = false;
         this.cdr.detectChanges();
@@ -124,15 +149,13 @@ export class LoginComponent implements AfterViewInit {
         if (this.authService.isAdmin()) {
           this.router.navigate(['/admin']);
         } else if (this.authService.isUser()) {
-          this.router.navigate(['/user']);
+          this.router.navigate(['/courts']);
         } else {
-          // Fallback: no recognized role
         }
       },
       error: () => {
         this.loading = false;
         this.authError = true;
-        // Mark fields as having auth error (non-validation) to show red state
         const emailCtrl = this.loginForm.get('email');
         const passCtrl = this.loginForm.get('password');
         emailCtrl?.markAsTouched();
@@ -156,7 +179,6 @@ export class LoginComponent implements AfterViewInit {
   }
 
   onForgotPassword() {
-    // Navigate to forgot password
   }
 
   onGoogleSignIn() {
@@ -237,7 +259,6 @@ export class LoginComponent implements AfterViewInit {
   private renderGoogleButton(googleGlobal: GoogleIdentity) {
     const buttonContainer = this.document?.getElementById('googleButtonContainer');
     if (!buttonContainer) return;
-    // Clear previous content to allow re-rendering on resize
     buttonContainer.innerHTML = '';
     const containerWidth = Math.max(200, Math.min(buttonContainer.clientWidth || 0, 480));
     googleGlobal.accounts.id.renderButton(buttonContainer, {
@@ -261,7 +282,7 @@ export class LoginComponent implements AfterViewInit {
     this.removeResizeListener?.();
   }
 
-  private readonly handleGoogleCredential = (response: google.accounts.id.CredentialResponse) => {
+  private readonly handleGoogleCredential = (response: CredentialResponse) => {
     if (!response.credential) {
       return;
     }
@@ -275,7 +296,7 @@ export class LoginComponent implements AfterViewInit {
         if (this.authService.isAdmin()) {
           this.router.navigate(['/admin']);
         } else if (this.authService.isUser()) {
-          this.router.navigate(['/user']);
+          this.router.navigate(['/courts']);
         } else {
           this.router.navigate(['/']);
         }

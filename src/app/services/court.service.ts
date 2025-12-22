@@ -21,41 +21,32 @@ export class CourtService {
 
   constructor(private http: HttpClient) {}
 
-  // GET /api/admin/courts - Get all courts for current admin
   getCourts(): Observable<CourtSummaryResponse[]> {
     return this.http.get<CourtSummaryResponse[]>(this.courtsUrl);
   }
 
-  // GET /api/admin/courts/{id} - Get specific court details
   getCourtById(id: number): Observable<CourtResponse> {
     return this.http.get<CourtResponse>(`${this.courtsUrl}/${id}`);
   }
 
-  // POST /api/admin/courts - Create new court
   createCourt(details: CourtCreateRequest, images?: File[]): Observable<CourtResponse> {
     const formData = this.buildCourtFormData(details, images);
     return this.http.post<CourtResponse>(this.courtsUrl, formData);
   }
 
-  // PUT /api/admin/courts/{id} - Update existing court
   updateCourt(id: number, details: CourtCreateRequest, images?: File[]): Observable<CourtResponse> {
     const formData = this.buildCourtFormData(details, images);
     return this.http.put<CourtResponse>(`${this.courtsUrl}/${id}`, formData);
   }
 
-  // DELETE /api/admin/courts/{id} - Delete court
   deleteCourt(id: number): Observable<any> {
     return this.http.delete(`${this.courtsUrl}/${id}`);
   }
 
-  // DELETE /api/admin/courts/photos/{photoId} - Delete court photo
   deleteCourtPhoto(photoId: number): Observable<any> {
     return this.http.delete(`${this.courtsUrl}/photos/${photoId}`);
   }
 
-  // ========== HELPER METHODS ==========
-
-  // Fetch backend time slots for a court within a date-time range
   getTimeSlotsByRange(
     courtId: number,
     startTimeISO: string,
@@ -70,11 +61,9 @@ export class CourtService {
     return this.http.get<import('../models/court.models').BackendTimeSlot[]>(url, { params });
   }
 
-  // Build FormData for multipart request
   private buildCourtFormData(details: CourtCreateRequest, images?: File[]): FormData {
     const formData = new FormData();
     
-    // Convert frontend model to backend DTO
     const backendDetails = {
       name: details.name,
       sport: details.sport,
@@ -86,7 +75,6 @@ export class CourtService {
 
     formData.append('details', JSON.stringify(backendDetails));
 
-    // Add images if provided
     if (images && images.length > 0) {
       images.forEach(image => {
         formData.append('images', image);
@@ -96,7 +84,6 @@ export class CourtService {
     return formData;
   }
 
-  // Map frontend rule to backend rule
   private mapRuleToBackend(rule: AvailabilityRule): any {
     const baseRule = {
       type: rule.type === 'weekly' ? BackendAvailabilityRuleType.WEEKLY : BackendAvailabilityRuleType.DATE,
@@ -119,7 +106,6 @@ export class CourtService {
     }
   }
 
-  // Map frontend equipment to backend equipment
   private mapEquipmentToBackend(equipment: EquipmentItem): CourtEquipmentResponse {
     return {
       name: equipment.name,
@@ -127,7 +113,6 @@ export class CourtService {
     };
   }
 
-  // Map backend rule to frontend rule
   mapRuleToFrontend(rule: CourtAvailabilityRuleResponse): AvailabilityRule {
     const baseRule = {
       id: rule.id ? String(rule.id) : this.generateRuleId(),
@@ -151,7 +136,6 @@ export class CourtService {
       };
     }
 
-    // Fallback to weekly with empty weekdays
     return {
       ...baseRule,
       type: 'weekly',
@@ -159,7 +143,6 @@ export class CourtService {
     };
   }
 
-  // Map backend equipment to frontend equipment
   mapEquipmentToFrontend(equipment: CourtEquipmentResponse): EquipmentItem {
     return {
       name: equipment.name,
@@ -167,12 +150,10 @@ export class CourtService {
     };
   }
 
-  // Generate unique rule ID for frontend
   private generateRuleId(): string {
     return 'rule_' + Math.random().toString(36).slice(2, 10);
   }
 
-  // Helper to convert relative URLs to absolute
   toAbsoluteUrl(path: string | null | undefined): string | null {
     if (!path) return null;
     if (/^https?:\/\//i.test(path)) return path;
@@ -180,4 +161,3 @@ export class CourtService {
     return `${this.apiBase}${normalized}`;
   }
 }
-

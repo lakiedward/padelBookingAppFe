@@ -160,7 +160,6 @@
   padding: 8px 0 0 0;
 }
 
-/* Mobile responsive styles */
 @media (max-width: 480px) {
   .login-container {
     .login-title {
@@ -212,7 +211,6 @@
   }
 }
 
-/* Toast positioning - outside container on the right */
 ::ng-deep .p-toast.p-toast-top-right {
   top: 20px !important;
   right: 20px !important;
@@ -336,7 +334,7 @@
     .p-button-label { font-weight: 700; color: inherit; }
   }
 
-  /* Mobile responsive for inputs */
+  
   @media (max-width: 480px) {
     .p-inputtext {
       padding: 12px;

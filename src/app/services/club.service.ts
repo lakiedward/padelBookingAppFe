@@ -29,27 +29,24 @@ export interface ClubDetailsResponse {
   sports: string[];
   profileImageUrl?: string | null;
   wallpaperImageUrl?: string | null;
-  updatedAt: string; // ISO string from backend LocalDateTime
+  updatedAt: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ClubService {
   lastSaved = signal<ClubDetails | null>(null);
 
-  // Base API (align with AuthService target)
   private apiBase = 'https://padelbookingappbe-production.up.railway.app';
   private adminClubUrl = `${this.apiBase}/api/admin/club`;
 
   constructor(private http: HttpClient) {}
 
-  // GET /api/admin/club
   getMyClub(): Observable<ClubDetails> {
     return this.http
       .get<ClubDetailsResponse>(this.adminClubUrl)
       .pipe(map((res) => this.toClubDetails(res)));
   }
 
-  // POST /api/admin/club/create (multipart)
   createClub(details: ClubDetailsRequest, profileImage?: File | null, wallpaperImage?: File | null): Observable<ClubDetails> {
     const fd = this.buildFormData(details, profileImage, wallpaperImage);
     return this.http
@@ -57,7 +54,6 @@ export class ClubService {
       .pipe(map((res) => this.toClubDetails(res)));
   }
 
-  // PUT /api/admin/club (multipart)
   updateClub(details: ClubDetailsRequest, profileImage?: File | null, wallpaperImage?: File | null): Observable<ClubDetails> {
     const fd = this.buildFormData(details, profileImage, wallpaperImage);
     return this.http
@@ -65,12 +61,10 @@ export class ClubService {
       .pipe(map((res) => this.toClubDetails(res)));
   }
 
-  // DELETE /api/admin/club
   deleteClub(): Observable<void> {
     return this.http.delete<void>(this.adminClubUrl);
   }
 
-  // Helpers
   private buildFormData(details: ClubDetailsRequest, profileImage?: File | null, wallpaperImage?: File | null): FormData {
     const fd = new FormData();
     fd.append('details', JSON.stringify(details));
@@ -95,7 +89,6 @@ export class ClubService {
     this.lastSaved.set(mapped);
     return mapped;
   }
-
 
   private toAbsoluteUrl(path: string | null | undefined): string | null {
     if (!path) return null;

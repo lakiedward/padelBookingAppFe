@@ -22,14 +22,12 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly stateService = inject(StateService);
 
-  // Expose state service signals (use with $ suffix to avoid naming conflicts)
   public readonly currentUser$ = this.stateService.currentUser;
   public readonly isAuthenticated$ = this.stateService.isAuthenticated;
   public readonly isAdmin$ = this.stateService.isAdmin;
   public readonly isUser$ = this.stateService.isUser;
 
   constructor() {
-    // Restore user from localStorage on init (SSR-safe)
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       const stored = localStorage.getItem('user');
       if (stored) {
@@ -44,7 +42,6 @@ export class AuthService {
             localStorage.setItem('user', JSON.stringify(normalized));
           }
         } catch {
-          // ignore parse errors
         }
       }
     }
@@ -118,18 +115,10 @@ export class AuthService {
     return this.stateService.hasRole(role);
   }
 
-  /**
-   * Helper method to check admin role (reads from signal)
-   * For reactive UI, use isAdmin$ signal instead
-   */
   isAdmin(): boolean {
     return this.stateService.isAdmin();
   }
 
-  /**
-   * Helper method to check user role (reads from signal)
-   * For reactive UI, use isUser$ signal instead
-   */
   isUser(): boolean {
     return this.stateService.isUser();
   }

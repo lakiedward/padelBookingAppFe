@@ -18,12 +18,12 @@ type ViewMode = 'month' | 'week' | 'day';
 type AdminBooking = {
   id: string;
   courtId: number;
-  date: string;   // YYYY-MM-DD
-  start: string;  // HH:MM
-  end: string;    // HH:MM
+  date: string;
+  start: string;
+  end: string;
   club: string;
   court: string;
-  sport: string;  // emoji or short
+  sport: string;
   city?: string;
   username: string;
   userId: number;
@@ -61,7 +61,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     private confirmationService: ConfirmationService
   ) {}
 
-  // State
   isLoading = signal(true);
   allCourts = signal<CourtOption[]>([]);
   sports = signal<SportOption[]>([]);
@@ -81,17 +80,14 @@ export class ManageBookingComponent implements OnInit, OnChanges {
   selectedBooking = signal<AdminBooking | null>(null);
   showBookingModal = signal(false);
 
-  // Reschedule state
-  rescheduleDate = signal<string | null>(null); // YYYY-MM-DD
+  rescheduleDate = signal<string | null>(null);
   rescheduleOptions = signal<RescheduleCourtOptionsResponse[] | null>(null);
   rescheduleLoading = signal(false);
   rescheduleError = signal<string | null>(null);
 
-  // Payment operations
   isMarkingPaidCash = signal(false);
 
   ngOnInit(): void {
-    // Force week view on mobile/tablet
     if (window.innerWidth <= 1023) {
       this.viewMode.set('week');
     }
@@ -102,7 +98,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     if (changes['preselectCourtId']) {
       const val: number | null = changes['preselectCourtId'].currentValue ?? null;
       if (val != null) {
-        // If courts are already loaded, apply immediately; else store pending
         const exists = this.allCourts().some(c => c.value === val);
         if (exists) {
           const court = this.allCourts().find(c => c.value === val);
@@ -130,7 +125,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
         }));
         this.allCourts.set(courtOptions);
 
-        // Extract unique sports
         const uniqueSports = Array.from(new Set(courtOptions.map(c => c.sport)));
         const sportOptions: SportOption[] = uniqueSports.map(sport => ({
           label: sport,
@@ -138,7 +132,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
         }));
         this.sports.set(sportOptions);
 
-        // Apply preselection if provided and present in options
         const pre = this.preselectCourtId ?? this.pendingPreselectId;
         if (pre != null) {
           const match = courtOptions.find(c => c.value === pre);
@@ -149,7 +142,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
             this.pendingPreselectId = null;
           }
         } else if (sportOptions.length > 0) {
-          // Auto-select first sport
           this.selectedSport.set(sportOptions[0].value);
         }
         
@@ -167,7 +159,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     this.selectedCourtId.set(null);
     this.bookings.set([]);
     
-    // Auto-select first court of this sport
     const courtsForSport = this.courts();
     if (courtsForSport.length > 0) {
       this.selectedCourtId.set(courtsForSport[0].value);
@@ -189,7 +180,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     this.bookingService.getBookingsByCourtId(courtId).subscribe({
       next: (bookings: AdminBookingResponse[]) => {
 
-        // Transform backend AdminBookingResponse to AdminBooking format
         const adminBookings: AdminBooking[] = bookings.map((booking) => {
           const startDateTime = new Date(booking.startTime);
           const endDateTime = new Date(booking.endTime);
@@ -245,7 +235,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     return emojiMap[normalized] || '🎯';
   }
 
-  // Derived helpers
   readonly eventsByDay = computed<Record<string, string[]>>(() => {
     const m: Record<string, string[]> = {};
     for (const b of this.bookings()) {
@@ -254,7 +243,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     return m;
   });
 
-  // View mode handlers
   setView(mode: ViewMode) {
     this.viewMode.set(mode);
   }
@@ -264,12 +252,10 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     this.viewMode.set('day');
   }
 
-  // Booking details modal
   openBooking(booking: AdminBooking) {
     this.selectedBooking.set(booking);
     this.showBookingModal.set(true);
 
-    // Initialize reschedule state
     this.rescheduleDate.set(booking.date);
     this.rescheduleOptions.set(null);
     this.rescheduleError.set(null);
@@ -374,7 +360,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
         if (currentCourtId != null && updatedBooking.courtId === currentCourtId) {
           this.selectedBooking.set(updatedBooking);
         } else {
-          // Booking moved to another court; close modal in current view
           this.closeBooking();
         }
 
@@ -469,7 +454,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     return this.anchor();
   }
 
-  // Headline
   readonly headline = computed(() => {
     const a = this.anchor();
     const mode = this.viewMode();
@@ -480,13 +464,11 @@ export class ManageBookingComponent implements OnInit, OnChanges {
       : this.niceDayLong(a);
   });
 
-  // Month grid
   readonly monthMatrix = computed(() => {
     const a = this.anchor();
     return this.buildCalendarMatrix(a.getFullYear(), a.getMonth());
   });
 
-  // Weeks in month
   getWeeksInMonth(): { date: Date; inCurrent: boolean }[][] {
     const matrix = this.monthMatrix();
     const weeks: { date: Date; inCurrent: boolean }[][] = [];
@@ -512,7 +494,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     }
   }
 
-  // Week/day derived
   readonly weekDays = computed(() => {
     const start = this.startOfWeekMon(this.anchor());
     return Array.from({ length: 7 }, (_, i) => this.addDays(start, i));
@@ -545,9 +526,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     });
   }
 
-  // ===================
-  // Date helpers
-  // ===================
   readonly WD_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   weekdayShort(d: Date) { return this.WD_LABELS[d.getDay()]; }
   toDateKey(d: Date) {
@@ -579,17 +557,14 @@ export class ManageBookingComponent implements OnInit, OnChanges {
     const mondayIndex = (first.getDay() + 6) % 7;
     const cells: { date: Date; inCurrent: boolean }[] = [];
     
-    // Add days from previous month
     for (let i = mondayIndex - 1; i >= 0; i--) {
       cells.push({ date: new Date(year, month0 - 1, daysInPrev - i), inCurrent: false });
     }
     
-    // Add days from current month
     for (let d = 1; d <= daysInMonth; d++) {
       cells.push({ date: new Date(year, month0, d), inCurrent: true });
     }
     
-    // Only add next month days to complete the last week (not a full extra week)
     const remainder = cells.length % 7;
     if (remainder > 0) {
       const daysToAdd = 7 - remainder;

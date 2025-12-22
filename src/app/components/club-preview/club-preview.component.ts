@@ -62,12 +62,10 @@ export class ClubPreviewComponent implements OnInit {
           return;
         }
         
-        // Load full details for each court to get availability rules
         const detailRequests = courts.map(court => 
           this.courtService.getCourtById(court.id)
         );
         
-        // Use forkJoin to load all court details in parallel
         import('rxjs').then(rxjs => {
           rxjs.forkJoin(detailRequests).subscribe({
             next: (detailedCourts) => {
@@ -76,7 +74,6 @@ export class ClubPreviewComponent implements OnInit {
               this.isLoadingCourts.set(false);
             },
             error: () => {
-              // Fallback to summary data without prices/slots
               const mappedCourts = courts.map(c => this.mapCourtSummaryToCourt(c));
               this.realCourts.set(mappedCourts);
               this.isLoadingCourts.set(false);
@@ -95,7 +92,6 @@ export class ClubPreviewComponent implements OnInit {
   private mapCourtSummaryToCourt(summary: CourtSummaryResponse): CourtListingData {
     const location = this.details?.locations?.[0]?.address || this.details?.name || 'Club Location';
     
-    // Ensure imageUrl is always a string (never null)
     let imageUrl = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=1200&auto=format&fit=crop';
     if (summary.primaryPhotoUrl) {
       const absoluteUrl = this.courtService.toAbsoluteUrl(summary.primaryPhotoUrl);
@@ -106,7 +102,6 @@ export class ClubPreviewComponent implements OnInit {
     
     const emoji = sportEmoji(summary.sport as any);
     
-    // Fallback data when full details are not available
     const price = 'N/A';
     const availableDate = 'N/A';
     const slots: string[] = [];
@@ -130,7 +125,6 @@ export class ClubPreviewComponent implements OnInit {
   private mapCourtDetailsToListing(court: CourtResponse): CourtListingData {
     const location = this.details?.locations?.[0]?.address || this.details?.name || 'Club Location';
     
-    // Get image URL
     let imageUrl = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=1200&auto=format&fit=crop';
     if (court.photos && court.photos.length > 0) {
       const primaryPhoto = court.photos.find(p => p.isPrimary) || court.photos[0];
@@ -144,7 +138,6 @@ export class ClubPreviewComponent implements OnInit {
     
     const emoji = sportEmoji(court.sport as any);
     
-    // Extract pricing and availability from rules
     const { price, availableDate, slots } = this.extractAvailabilityInfo(court);
 
     return {
@@ -174,17 +167,14 @@ export class ClubPreviewComponent implements OnInit {
       };
     }
 
-    // Get minimum price from all rules
     const prices = rules.map(r => r.price);
     const minPrice = Math.min(...prices);
     const price = `€${minPrice}`;
 
-    // Get today's availability
     const today = new Date();
-    const todayDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const todayDayOfWeek = today.getDay();
     const todayDateStr = this.formatDate(today);
 
-    // Find rules applicable for today
     const todayRules = rules.filter(rule => {
       if (rule.type === BackendAvailabilityRuleType.DATE && rule.date === todayDateStr) {
         return true;
@@ -198,7 +188,6 @@ export class ClubPreviewComponent implements OnInit {
     });
 
     if (todayRules.length > 0) {
-      // Generate sample slots from today's rules (show first 3-4 slots)
       const sampleSlots: string[] = [];
       let totalSlots = 0;
 
@@ -206,14 +195,12 @@ export class ClubPreviewComponent implements OnInit {
         const slots = this.generateSlotsFromRule(rule);
         totalSlots += slots.length;
         
-        // Add first few slots to samples
         if (sampleSlots.length < 3) {
           const remaining = 3 - sampleSlots.length;
           sampleSlots.push(...slots.slice(0, remaining));
         }
       }
 
-      // Add "+X more" if there are more slots
       if (totalSlots > 3) {
         sampleSlots.push(`+${totalSlots - 3} more`);
       }
@@ -225,7 +212,6 @@ export class ClubPreviewComponent implements OnInit {
       };
     }
 
-    // Check for tomorrow or next available day
     for (let i = 1; i <= 7; i++) {
       const futureDate = new Date(today);
       futureDate.setDate(today.getDate() + i);
@@ -245,8 +231,6 @@ export class ClubPreviewComponent implements OnInit {
       });
 
       if (futureRules.length > 0) {
-        
-        // Generate sample slots
         const sampleSlots: string[] = [];
         let totalSlots = 0;
 
@@ -272,7 +256,6 @@ export class ClubPreviewComponent implements OnInit {
       }
     }
 
-    // No availability in the next 7 days
     return {
       price,
       availableDate: '',
@@ -331,7 +314,6 @@ export class ClubPreviewComponent implements OnInit {
     return all.filter(c => c.sport === s);
   }
 
-  // Get unique sports from actual courts
   getUniqueSportsFromCourts(): SportKey[] {
     const courts = this.realCourts();
     const sportsSet = new Set<SportKey>();

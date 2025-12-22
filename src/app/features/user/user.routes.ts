@@ -1,9 +1,5 @@
 import { Routes } from '@angular/router';
 
-/**
- * User feature routes - lazy loaded module
- * Protected by authGuard (checked at parent level)
- */
 export const USER_ROUTES: Routes = [
   {
     path: '',
@@ -15,6 +11,14 @@ export const USER_ROUTES: Routes = [
     path: 'court/:id',
     loadComponent: () => import('../../components/court-detail/court-detail.component')
       .then(m => m.CourtDetailComponent)
+  },
+  {
+    path: 'clubs',
+    loadComponent: () => import('../../components/clubs-page/clubs-page').then(m => m.ClubsPage)
+  },
+  {
+    path: 'clubs/:id',
+    loadComponent: () => import('../../components/club-detail-page/club-detail-page').then(m => m.ClubDetailPageComponent)
   },
   {
     path: 'events',
@@ -35,5 +39,10 @@ export const USER_ROUTES: Routes = [
     path: 'checkout/cancel',
     loadComponent: () => import('../../components/checkout-cancel/checkout-cancel.component')
       .then(m => m.CheckoutCancelComponent)
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('../../components/user-profile/user-profile.component')
+      .then(m => m.UserProfileComponent)
   }
 ];

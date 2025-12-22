@@ -11,7 +11,7 @@ export const authRedirectGuard: CanActivateFn = () => {
       return router.createUrlTree(['/admin']);
     }
     if (auth.isUser()) {
-      return router.createUrlTree(['/user']);
+      return router.createUrlTree(['/courts']);
     }
   }
   return true;

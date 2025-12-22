@@ -61,11 +61,9 @@ export class CreateEventComponent implements OnInit, OnChanges {
   isLoading = false;
   saveError: string | null = null;
 
-  // Cover image
   coverImageFile: File | null = null;
   coverImagePreview: string | null = null;
 
-  // Dropdown options
   sportOptions: SportOption[] = [
     { label: 'Tennis', value: 'tennis' },
     { label: 'Padel', value: 'padel' }
@@ -146,23 +144,19 @@ export class CreateEventComponent implements OnInit, OnChanges {
   setupSportWatcher() {
     this.form.get('sport')?.valueChanges.subscribe((sport: SportKey | '') => {
       if (sport) {
-        // Update format options based on sport
         const formats = getFormatsForSport(sport);
         this.formatOptions = formats.map(f => ({
           label: getFormatDisplayName(f),
           value: f
         }));
 
-        // Clear format selection if current format is not valid for new sport
         const currentFormat = this.form.get('format')?.value;
         if (currentFormat && !formats.includes(currentFormat)) {
           this.form.get('format')?.setValue('');
         }
 
-        // Update filtered courts
         this.updateFilteredCourts();
 
-        // Clear court selection if any selected court doesn't match new sport
         this.selectedCourtIds = this.selectedCourtIds.filter(courtId => {
           const court = this.allCourts.find(c => c.id === courtId);
           return court && court.sport.toLowerCase() === sport.toLowerCase();
@@ -232,7 +226,6 @@ export class CreateEventComponent implements OnInit, OnChanges {
     if (file) {
       this.coverImageFile = file;
 
-      // Create preview
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.coverImagePreview = e.target.result;
