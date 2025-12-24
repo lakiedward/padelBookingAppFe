@@ -3,6 +3,15 @@
   <div class="mobile-menu-overlay" *ngIf="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
 
   <aside class="sidebar" [class.mobile-open]="mobileMenuOpen">
+    <div class="brand">
+      <div>
+        <div class="logo">PLAYORA</div>
+        <div class="name">Sports Club Management Platform</div>
+      </div>
+    </div>
+
+    <div class="menu-separator"></div>
+
     <nav class="menu">
       <button (click)="select('club-management')" [class.active]="selectedMenu === 'club-management'">
         <span>Club Management</span>

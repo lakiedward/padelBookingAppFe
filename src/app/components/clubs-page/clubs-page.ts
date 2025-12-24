@@ -253,4 +253,13 @@ export class ClubsPage implements OnInit {
     if (this.selectedClubType() !== 'all') count++;
     return count;
   }
+
+  clearAllFilters(): void {
+    this.selectedSport.set('all');
+    this.selectedLocation = 'all';
+    this.selectedClubName = 'all';
+    this.selectedClubType.set('all');
+    this.clubNameOptions = [...this.allClubNameOptions];
+    this.applyFilters();
+  }
 }

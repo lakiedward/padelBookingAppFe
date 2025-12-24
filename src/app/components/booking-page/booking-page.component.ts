@@ -80,7 +80,7 @@ export class BookingPageComponent implements OnInit {
           startTime: start,
           endTime: end,
           price: priceNum,
-          currency: currency || 'EUR'
+          currency: 'EUR'
         };
         this.isLoading = false;
         this.cdr.detectChanges();

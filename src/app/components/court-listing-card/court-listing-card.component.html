@@ -8,9 +8,6 @@
   <div class="media">
     <img [src]="imageError ? fallbackImage : image" [alt]="title" class="media-img" (error)="onImageError()" />
     <div class="media-overlay"></div>
-    <div class="media-badge">
-      <span class="badge badge--solid">Active</span>
-    </div>
     <div class="media-bottom">
       <div class="media-info">
         <div class="emoji">{{ emoji }}</div>
@@ -79,8 +76,8 @@
       </ng-container>
     </div>
 
-    <div class="availability" *ngIf="mode === 'booking'">Available on {{ availableDate || '—' }}:</div>
-    <div class="availability" *ngIf="mode === 'reservation' && availableDate">Your booking is on {{ availableDate }} from:</div>
+    <div class="availability" *ngIf="mode === 'booking'">Available on {{ availableDate ? ((availableDate + 'T00:00:00') | date:'EEE, MMM d') : '—' }}:</div>
+    <div class="availability" *ngIf="mode === 'reservation' && availableDate">Your booking is on {{ (availableDate + 'T00:00:00') | date:'EEE, MMM d' }} from:</div>
     <div class="slots" *ngIf="slots && slots.length > 0">
       <span class="chip" *ngFor="let s of slots">{{ s }}</span>
     </div>

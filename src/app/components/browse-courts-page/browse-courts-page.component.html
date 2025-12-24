@@ -48,15 +48,15 @@
               <div class="filters__label">Sports</div>
               <div class="pills">
                 <button class="pill" [class.pill--active]="sportFilter==='all'" (click)="selectSport('all')">All Sports</button>
-                <button class="pill" [class.pill--active]="sportFilter==='tennis'" (click)="selectSport('tennis')">🎾 Tennis</button>
-                <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="selectSport('football')">⚽ Football</button>
-                <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="selectSport('basketball')">🏀 Basketball</button>
-                <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="selectSport('padel')">🏓 Padel</button>
-                <button class="pill" [class.pill--active]="sportFilter==='volleyball'" (click)="selectSport('volleyball')">🏐 Volleyball</button>
-                <button class="pill" [class.pill--active]="sportFilter==='badminton'" (click)="selectSport('badminton')">🏸 Badminton</button>
-                <button class="pill" [class.pill--active]="sportFilter==='squash'" (click)="selectSport('squash')">🎾 Squash</button>
-                <button class="pill" [class.pill--active]="sportFilter==='handball'" (click)="selectSport('handball')">🤾 Handball</button>
-                <button class="pill" [class.pill--active]="sportFilter==='pingpong'" (click)="selectSport('pingpong')">🏓 Ping Pong</button>
+                <button class="pill" [class.pill--active]="sportFilter==='tennis'" (click)="selectSport('tennis')">Tennis</button>
+                <button class="pill" [class.pill--active]="sportFilter==='football'" (click)="selectSport('football')">Football</button>
+                <button class="pill" [class.pill--active]="sportFilter==='basketball'" (click)="selectSport('basketball')">Basketball</button>
+                <button class="pill" [class.pill--active]="sportFilter==='padel'" (click)="selectSport('padel')">Padel</button>
+                <button class="pill" [class.pill--active]="sportFilter==='volleyball'" (click)="selectSport('volleyball')">Volleyball</button>
+                <button class="pill" [class.pill--active]="sportFilter==='badminton'" (click)="selectSport('badminton')">Badminton</button>
+                <button class="pill" [class.pill--active]="sportFilter==='squash'" (click)="selectSport('squash')">Squash</button>
+                <button class="pill" [class.pill--active]="sportFilter==='handball'" (click)="selectSport('handball')">Handball</button>
+                <button class="pill" [class.pill--active]="sportFilter==='pingpong'" (click)="selectSport('pingpong')">Ping Pong</button>
               </div>
             </div>
           </div>
@@ -235,7 +235,7 @@
           
           
           <div class="filter-row filter-row--actions">
-            <button class="clear-filters-btn" (click)="clearAllFilters()">
+            <button class="clear-filters-btn" [class.active]="getActiveFilterCount() > 0" (click)="clearAllFilters()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 6h18"></path>
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -259,13 +259,13 @@
         <p>Loading courts...</p>
       </div>
 
-      <div class="empty" *ngIf="!isLoading && items.length === 0" style="text-align: center; padding: 40px; color: #8aa0b5;">
+      <div class="empty" *ngIf="!isLoading && filtered.length === 0" style="text-align: center; padding: 40px; color: #8aa0b5;">
         No courts available yet. Check back soon!
       </div>
 
-      <div class="grid" *ngIf="!isLoading && items.length > 0">
+      <div class="grid" *ngIf="!isLoading && filtered.length > 0">
         <app-court-listing-card
-          *ngFor="let c of filtered; index as i"
+          *ngFor="let c of filtered; trackBy: trackByCourtId"
           [image]="c.image"
           [emoji]="c.emoji"
           [title]="c.title"

@@ -10,25 +10,25 @@ export class CurrencyService {
   private ttlMs = 12 * 60 * 60 * 1000;
 
   constructor() {
-    this.selected = this.detectUserCurrency();
+    this.selected = 'EUR';
     this.loadCachedRates();
     this.ensureRates();
   }
 
   getSelectedCurrency(): string {
-    return this.selected;
+    return 'EUR';
   }
 
   setSelectedCurrency(code: string) {
-    this.selected = (code || 'EUR').toUpperCase();
-    try { localStorage.setItem('pb_user_currency', this.selected); } catch {}
+    this.selected = 'EUR';
+    try { localStorage.setItem('pb_user_currency', 'EUR'); } catch {}
   }
 
   format(amount: number, currency: string): string {
     try {
-      return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency.toUpperCase(), maximumFractionDigits: 2 }).format(amount);
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(amount);
     } catch {
-      return `${amount.toFixed(2)} ${currency.toUpperCase()}`;
+      return `${amount.toFixed(2)} EUR`;
     }
   }
 
@@ -54,8 +54,7 @@ export class CurrencyService {
   }
 
   convertAndFormat(amount: number, from: string, to: string): string {
-    const v = this.convert(amount, from, to);
-    return this.format(v, to);
+    return this.format(amount, 'EUR');
   }
 
   private detectUserCurrency(): string {

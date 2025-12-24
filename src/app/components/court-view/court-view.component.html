@@ -56,12 +56,12 @@
               <div class="equipment-row" *ngIf="c.equipment && c.equipment.length > 0">
                 <span class="eq-label">Equipment:</span>
                 <span class="eq-item" *ngFor="let eq of c.equipment">
-                  {{ eq.name }} · {{ eq.pricePerHour | convertMoney:(eq.currency || c.currency || 'EUR') }}/hr
+                  {{ eq.name }} · {{ eq.pricePerHour | convertMoney:'EUR' }}/hr
                 </span>
               </div>
             </div>
             <div class="court-price">
-              <span class="price-val" *ngIf="c.priceValue !== undefined; else naPrice">{{ c.priceValue | convertMoney:(c.currency || 'EUR') }}</span>
+              <span class="price-val" *ngIf="c.priceValue !== undefined; else naPrice">{{ c.priceValue | convertMoney:'EUR' }}</span>
               <ng-template #naPrice><span class="price-val">N/A</span></ng-template>
               <span class="price-note">/slot</span>
             </div>
@@ -98,7 +98,7 @@
               <div class="slot" *ngFor="let s of d.slots; trackBy: trackByIndex" [class.green]="s.tone === 'green'" [class.blue]="s.tone === 'blue'" [class.gray]="!s.tone || s.tone === 'gray'">
                 <div class="label">{{ s.label }}</div>
                 <div class="note" *ngIf="s.note">{{ s.note }}</div>
-                <div class="price" *ngIf="s.priceValue !== undefined">{{ s.priceValue | convertMoney:(s.currency || c.currency || 'EUR') }}</div>
+                <div class="price" *ngIf="s.priceValue !== undefined">{{ s.priceValue | convertMoney:'EUR' }}</div>
               </div>
             </div>
             <ng-template #emptyDay>

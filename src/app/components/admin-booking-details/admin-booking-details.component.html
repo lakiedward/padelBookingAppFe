@@ -61,7 +61,7 @@
           </div>
           <div class="admin-card__row">
             <span class="label">Price</span>
-            <span class="value price">{{ d.price | convertMoney:(d.currency || 'EUR') }}</span>
+            <span class="value price">{{ d.price | convertMoney:'EUR' }}</span>
           </div>
         </section>
 
@@ -155,7 +155,7 @@
                       {{ s.startTime | date: 'shortTime' }} – {{ s.endTime | date: 'shortTime' }}
                     </span>
                     <span class="slot-chip__price">
-                      {{ s.price | convertMoney:(s.currency || 'EUR') }}
+                      {{ s.price | convertMoney:'EUR' }}
                     </span>
                     <span *ngIf="s.isCurrentSlot" class="slot-chip__badge">current</span>
                   </button>

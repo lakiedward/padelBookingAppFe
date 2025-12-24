@@ -11,6 +11,7 @@ import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { DatePickerModule } from 'primeng/datepicker';
 import { Select } from 'primeng/select';
 import { sportEmoji } from '../../utils/sport-emoji.util';
+import { catchError, forkJoin, map, of } from 'rxjs';
 
 type SportFilter =
   | 'all'
@@ -144,7 +145,7 @@ export class BrowseCourtsPageComponent implements OnInit {
   ];
 
   items: CourtItem[] = [];
-  isLoading = false;
+  isLoading = true;
 
   private isBrowser: boolean;
 
@@ -177,6 +178,7 @@ export class BrowseCourtsPageComponent implements OnInit {
     this.loadClubs();
     
     setTimeout(() => {
+      this.isLoading = true;
       this.loadCourts();
     }, 0);
   }
@@ -287,7 +289,7 @@ export class BrowseCourtsPageComponent implements OnInit {
     this.publicService.getPublicCourts().subscribe({
       next: (courts) => {
         
-        this.items = courts.map(c => ({
+        const baseItems = courts.map(c => ({
           courtId: c.id,
           image: this.courtService.toAbsoluteUrl(c.primaryPhotoUrl) || 'https://placehold.co/1200x800?text=Court',
           emoji: sportEmoji(c.sport),
@@ -300,12 +302,74 @@ export class BrowseCourtsPageComponent implements OnInit {
           sport: (c.sport as any),
           fullSlots: []
         }));
-        this.items.forEach((it, idx) => {
-          this.loadAvailabilityFor(idx, it.courtId);
-          if (!courts[idx].primaryPhotoUrl) {
-            this.ensurePhotoFromDetails(idx, it.courtId);
-          }
+
+        const dateStr = this.selectedDateStr;
+
+        this.items = baseItems;
+        this.refreshAvailabilityBatch(dateStr, () => {
+          this.items.forEach((it, idx) => {
+            if (!courts[idx].primaryPhotoUrl) {
+              this.ensurePhotoFromDetails(idx, it.courtId);
+            }
+          });
         });
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private refreshAvailabilityBatch(dateStr: string, afterUpdate?: () => void): void {
+    const availabilityRequests = this.items.map((it) =>
+      this.publicService.getAllTimeSlotsByCourtAndDate(it.courtId, dateStr).pipe(
+        map((response) => {
+          const slots = response?.items || [];
+          if (!Array.isArray(slots) || slots.length === 0) {
+            return {
+              availableDate: dateStr,
+              fullSlots: [] as SlotInterval[],
+              slots: ['No slots available'] as string[]
+            };
+          }
+
+          const sorted = slots.slice().sort((a, b) => a.startTime.localeCompare(b.startTime));
+          const intervals: SlotInterval[] = sorted.map((s) => ({
+            start: s.startTime.substring(11, 16),
+            end: s.endTime.substring(11, 16),
+            available: s.available
+          }));
+
+          const availableIntervals = intervals.filter((i) => i.available !== false);
+          const chips: string[] =
+            availableIntervals.length > 0
+              ? this.toChipLabels(availableIntervals.map((i) => i.start))
+              : ['No slots available'];
+
+          return {
+            availableDate: dateStr,
+            fullSlots: intervals,
+            slots: chips
+          };
+        }),
+        catchError(() =>
+          of({
+            availableDate: dateStr,
+            fullSlots: [] as SlotInterval[],
+            slots: ['No slots available'] as string[]
+          })
+        )
+      )
+    );
+
+    forkJoin(availabilityRequests).subscribe({
+      next: (availability) => {
+        this.items = this.items.map((it, idx) => ({
+          ...it,
+          ...availability[idx]
+        }));
+        afterUpdate?.();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -314,6 +378,10 @@ export class BrowseCourtsPageComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  trackByCourtId(_: number, item: CourtItem): number {
+    return item.courtId;
   }
 
   private computeFromRules(rules: CourtAvailabilityRuleResponse[]): { dateStr: string; displayTimes: string[]; intervals: SlotInterval[] } | null {
@@ -407,7 +475,6 @@ export class BrowseCourtsPageComponent implements OnInit {
             fullSlots: [],
             slots: ['No slots available']
           };
-          this.items = [...this.items];
           this.cdr.detectChanges();
           return;
         }
@@ -433,7 +500,6 @@ export class BrowseCourtsPageComponent implements OnInit {
           fullSlots: intervals,
           slots: chips
         };
-        this.items = [...this.items];
         this.cdr.detectChanges();
       },
       error: () => {
@@ -443,7 +509,6 @@ export class BrowseCourtsPageComponent implements OnInit {
           fullSlots: [],
           slots: ['No slots available']
         };
-        this.items = [...this.items];
         this.cdr.detectChanges();
       }
     });
@@ -629,11 +694,9 @@ export class BrowseCourtsPageComponent implements OnInit {
     const now = new Date();
     this.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     this.selectedDateStr = this.formatDateForInput(this.selectedDate);
-    
-    this.items.forEach((item, idx) => {
-      this.loadAvailabilityFor(idx, item.courtId);
-    });
-    this.cdr.detectChanges();
+
+    this.isLoading = true;
+    this.refreshAvailabilityBatch(this.selectedDateStr);
   }
 
   isToday(): boolean {
@@ -655,21 +718,18 @@ export class BrowseCourtsPageComponent implements OnInit {
       this.selectedDate = null;
       this.selectedDateStr = '';
     }
-    
-    this.items.forEach((item, idx) => {
-      this.loadAvailabilityFor(idx, item.courtId);
-    });
+
+    this.isLoading = true;
+    this.refreshAvailabilityBatch(this.selectedDateStr);
   }
   
   onDateSelect(date: Date) {
     if (date) {
       this.selectedDate = date;
       this.selectedDateStr = this.formatDateForInput(date);
-      
-      this.items.forEach((item, idx) => {
-        this.loadAvailabilityFor(idx, item.courtId);
-      });
-      this.cdr.detectChanges();
+
+      this.isLoading = true;
+      this.refreshAvailabilityBatch(this.selectedDateStr);
     }
   }
 

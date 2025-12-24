@@ -199,7 +199,7 @@ export class ManageBookingComponent implements OnInit, OnChanges {
             userPhone: booking.userPhone ?? undefined,
             paymentType: booking.paymentType ?? 'Card',
             price: booking.price,
-            currency: booking.currency ?? 'EUR',
+            currency: 'EUR',
           };
         });
 
@@ -344,7 +344,7 @@ export class ManageBookingComponent implements OnInit, OnChanges {
           userPhone: updated.userPhone ?? undefined,
           paymentType: updated.paymentType ?? 'Card',
           price: updated.price,
-          currency: updated.currency ?? 'EUR',
+          currency: 'EUR',
         };
 
         const currentCourtId = this.selectedCourtId();

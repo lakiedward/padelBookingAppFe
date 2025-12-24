@@ -255,7 +255,7 @@
           </div>
           <div class="detail-summary-row" *ngIf="selectedSlot && selectedSlot.price > 0">
             <span class="detail-summary-label">Price</span>
-            <span class="detail-summary-value">{{ selectedSlot.price | convertMoney:(selectedSlot.currency || 'EUR') }}</span>
+            <span class="detail-summary-value">{{ selectedSlot.price | convertMoney:'EUR' }}</span>
           </div>
         </div>
         <button class="book-now-btn" [disabled]="!selectedSlot" (click)="onBookNow()">

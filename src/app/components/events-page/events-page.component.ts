@@ -37,6 +37,8 @@ export class EventsPageComponent implements OnInit {
   protected readonly events = signal<EventPanelData[]>([]);
   protected readonly selectedSport = signal<SportKey | 'all'>(this.allTag);
   protected readonly selectedStatus = signal<'all' | EventStatus>('all');
+  protected readonly filtersExpanded = signal(false);
+  protected readonly searchQuery = signal('');
 
   protected readonly statusFilters: StatusFilterOption[] = [
     { label: 'All Statuses', value: 'all' },
@@ -75,12 +77,40 @@ export class EventsPageComponent implements OnInit {
   protected readonly filteredEvents = computed(() => {
     const sportFilter = this.selectedSport();
     const statusFilter = this.selectedStatus();
+    const query = this.searchQuery().trim().toLowerCase();
 
-    return this.events().filter((event) => {
+    let filtered = this.events().filter((event) => {
       const sportMatches = sportFilter === 'all' || event.sportKey === sportFilter;
       const statusMatches = statusFilter === 'all' || event.status === statusFilter;
-      return sportMatches && statusMatches;
+      const searchMatches =
+        !query ||
+        event.name.toLowerCase().includes(query) ||
+        event.clubName.toLowerCase().includes(query);
+      return sportMatches && statusMatches && searchMatches;
     });
+
+    // Apply location filter (would need location data in EventPanelData)
+    // if (this.selectedLocation !== 'all') {
+    //   filtered = filtered.filter(event => event.location === this.selectedLocation);
+    // }
+
+    // Apply club filter
+    if (this.selectedClub !== 'all') {
+      filtered = filtered.filter(event => event.clubName === this.selectedClub);
+    }
+
+    // Apply sorting
+    if (this.sortBy === 'date-asc') {
+      filtered = [...filtered].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+    } else if (this.sortBy === 'date-desc') {
+      filtered = [...filtered].sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
+    } else if (this.sortBy === 'price-asc') {
+      filtered = [...filtered].sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (this.sortBy === 'price-desc') {
+      filtered = [...filtered].sort((a, b) => (b.price || 0) - (a.price || 0));
+    }
+
+    return filtered;
   });
 
   protected readonly hasResults = computed(() => this.filteredEvents().length > 0);
@@ -156,8 +186,7 @@ export class EventsPageComponent implements OnInit {
       return 'All Sports';
     }
     const normalized = sport.charAt(0).toUpperCase() + sport.slice(1);
-    const emoji = this.sportIcon(sport);
-    return `${emoji} ${normalized}`;
+    return normalized;
   }
 
   protected sportIcon(sportKey: SportKey): string {
@@ -207,6 +236,29 @@ export class EventsPageComponent implements OnInit {
   protected toggleMoreSports(event: Event): void {
     event.stopPropagation();
     this.moreSportsOpen.update((v) => !v);
+  }
+
+  toggleFilters(): void {
+    this.filtersExpanded.set(!this.filtersExpanded());
+  }
+
+  onSearchChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery.set(input.value);
+  }
+
+  getActiveFilterCount(): number {
+    let count = 0;
+    if (this.searchQuery().trim() !== '') count++;
+    if (this.selectedSport() !== 'all') count++;
+    if (this.selectedStatus() !== 'all') count++;
+    if (this.selectedLocation !== 'all') count++;
+    if (this.selectedClub !== 'all') count++;
+    if (this.sortBy !== 'date-asc') count++;
+    if (this.selectedDate !== null) count++;
+    if (this.timeFrom !== null) count++;
+    if (this.timeTo !== null) count++;
+    return count;
   }
 
   onLocationChange(): void {
@@ -261,7 +313,22 @@ export class EventsPageComponent implements OnInit {
     this.clubOptions = [...this.allClubOptions];
     this.sortBy = 'date-asc';
     this.moreSportsOpen.set(false);
+    this.searchQuery.set('');
     this.cdr.detectChanges();
+  }
+
+  hasActiveFilters(): boolean {
+    return (
+      this.searchQuery().trim() !== '' ||
+      this.selectedSport() !== 'all' ||
+      this.selectedStatus() !== 'all' ||
+      this.selectedLocation !== 'all' ||
+      this.selectedClub !== 'all' ||
+      this.sortBy !== 'date-asc' ||
+      this.selectedDate !== null ||
+      this.timeFrom !== null ||
+      this.timeTo !== null
+    );
   }
 
   private fetchEvents(): void {

@@ -9,6 +9,6 @@ export class MoneyPipe implements PipeTransform {
   constructor(private currency: CurrencyService) {}
   transform(value: number | null | undefined, currencyCode: string = 'EUR'): string {
     const amount = typeof value === 'number' ? value : 0;
-    return this.currency.format(amount, currencyCode);
+    return this.currency.format(amount, 'EUR');
   }
 }

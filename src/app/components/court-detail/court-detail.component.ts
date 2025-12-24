@@ -234,7 +234,7 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
           end: (s.endTime || '').substring(11, 16),
           available: !!s.available,
           price: s.price || 0,
-          currency: (s as any).currency || 'EUR'
+          currency: 'EUR'
         }));
         this.loadingSlots = false;
         this.cdr.detectChanges();
@@ -251,7 +251,7 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
 
   onPickSlot(slot: { id: number; start: string; end: string; available?: boolean; price?: number; currency?: string }) {
     if (slot.available === false) return;
-    this.selectedSlot = { id: slot.id, start: slot.start, end: slot.end, price: slot.price || 0, currency: slot.currency };
+    this.selectedSlot = { id: slot.id, start: slot.start, end: slot.end, price: slot.price || 0, currency: 'EUR' };
   }
 
   onBookNow() {
@@ -264,7 +264,7 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
         start: this.selectedSlot.start,
         end: this.selectedSlot.end,
         price: this.selectedSlot.price,
-        currency: this.selectedSlot.currency || 'EUR'
+        currency: 'EUR'
       }
     });
   }

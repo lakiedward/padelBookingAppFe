@@ -186,7 +186,7 @@
                       </div>
                       <div class="booking-card__compact-row">
                         <span class="booking-card__label">Price:</span>
-                        <span class="booking-card__value booking-card__price--small">{{ b.price | convertMoney:(b.currency || 'EUR') }}</span>
+                        <span class="booking-card__value booking-card__price--small">{{ b.price | convertMoney:'EUR' }}</span>
                       </div>
                     </div>
                   </div>
@@ -233,7 +233,7 @@
                 </div>
                 <div class="booking-card__row">
                   <span class="booking-card__label">Price:</span>
-                  <span class="booking-card__value booking-card__price">{{ b.price | convertMoney:(b.currency || 'EUR') }}</span>
+                  <span class="booking-card__value booking-card__price">{{ b.price | convertMoney:'EUR' }}</span>
                 </div>
               </div>
             </div>
@@ -273,7 +273,7 @@
                 <span class="label">Payment</span>
                 <span class="value tag">{{ sb.paymentType || 'Unknown' }}</span>
               </div>
-              <div class="booking-modal__row"><span class="label">Price</span><span class="value price">{{ sb.price | convertMoney:(sb.currency || 'EUR') }}</span></div>
+              <div class="booking-modal__row"><span class="label">Price</span><span class="value price">{{ sb.price | convertMoney:'EUR' }}</span></div>
             </div>
 
             <div class="booking-modal__column booking-modal__column--reschedule">
@@ -335,7 +335,7 @@
                           (click)="rescheduleToSlot(s)"
                         >
                           <span class="slot-chip__time">{{ s.startTime | time24 }} – {{ s.endTime | time24 }}</span>
-                          <span class="slot-chip__price">{{ s.price | convertMoney:(s.currency || 'EUR') }}</span>
+                          <span class="slot-chip__price">{{ s.price | convertMoney:'EUR' }}</span>
                           <span *ngIf="s.isCurrentSlot" class="slot-chip__badge">current</span>
                         </button>
                       </div>

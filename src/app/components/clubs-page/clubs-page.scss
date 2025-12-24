@@ -12,6 +12,11 @@ $white: #fff;
   min-height: 100vh;
   color: $white;
   isolation: isolate;
+
+  &.page-gradient-bg::before,
+  &.page-gradient-bg::after {
+    z-index: 0;
+  }
 }
 
 .container {
@@ -23,7 +28,6 @@ $white: #fff;
 .hero {
   position: relative;
   overflow: hidden;
-  padding-bottom: 48px;
 }
 
 .glow--hero-a {
@@ -59,43 +63,46 @@ $white: #fff;
   filter: blur(16px);
 }
 
+ .bg-admin-like .glow--hero-a,
+ .bg-admin-like .glow--hero-b,
+ .bg-admin-like .glow--hero-c {
+   display: none;
+ }
+
 .hero__inner {
-  padding: 0;
-  display: grid;
-  gap: 16px;
+  padding: 48px 16px 40px;
 }
 
-.page-header {
+.hero__head {
   text-align: center;
-  margin-bottom: 0;
-  padding: 48px 0 24px 0;
+  margin-bottom: 20px;
 }
 
-.page-title {
+.hero__title {
   font-size: 40px;
   font-weight: 800;
   color: $white;
   margin: 0 0 8px 0;
   letter-spacing: 0.02em;
   line-height: 1.1;
-
-  .accent {
-    color: $accent;
-  }
 }
 
-.page-subtitle {
+.hero__subtitle {
   font-size: 16px;
   color: $muted;
   margin: 0;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .search-filter-bar {
   display: flex;
   gap: 12px;
   align-items: center;
+  margin-top: 24px;
 }
+
+ .muted { color: #d6dde6; }
+ .accent { color: $accent; }
 
 .search-bar {
   position: relative;
@@ -116,7 +123,9 @@ $white: #fff;
 .search-input {
   width: 100%;
   height: 52px;
+  min-height: 52px;
   padding: 0 16px 0 48px;
+  box-sizing: border-box;
   background: $panel;
   border: 1px solid $border;
   border-radius: 12px;
@@ -141,7 +150,9 @@ $white: #fff;
   align-items: center;
   gap: 8px;
   height: 52px;
+  min-height: 52px;
   padding: 0 20px;
+  box-sizing: border-box;
   background: $panel;
   border: 1px solid $border;
   border-radius: 12px;
@@ -193,91 +204,169 @@ $white: #fff;
   font-weight: 700;
 }
 
-.filters-section {
+.filters {
   display: none;
-  margin-top: 0;
-  margin-bottom: 0;
+  border: 1px solid $border;
+  background: $panel;
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
+  margin-top: 16px;
 
-  &.filters-section--expanded {
+  &.filters--expanded {
     display: block;
   }
 }
 
 .filters-content {
-  background: $panel;
-  border: 1px solid $border;
-  border-radius: 16px;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
-.filter-group {
+.filters__row {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-bottom: 20px;
 }
 
-.filter-group--dropdowns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+.filters__row--inputs {
+  margin-bottom: 0;
 }
 
-.filter-item {
+.filters__group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.filter-label {
-  font-size: 13px;
+.filters__label {
+  color: $muted;
+  font-size: 12px;
   font-weight: 600;
-  color: $white;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: 4px;
 }
 
-.filter-group-label {
-  font-size: 14px;
-  font-weight: 700;
-  color: $white;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.sport-filters {
+.pills {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.sport-filter-btn {
-  padding: 8px 16px;
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid $border;
-  border-radius: 20px;
+  border: 1px solid rgba(214, 221, 230, 0.2);
   color: $text;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-transform: capitalize;
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: $accent-border;
   }
+}
+
+.pill--active {
+  background: rgba(167, 238, 67, 0.15);
+  border-color: $accent-border;
+  color: $accent;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  color: $muted;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.filter-row--second {
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filter-row--actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+}
+
+.clear-filters-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid rgba(214, 221, 230, 0.2);
+  border-radius: 8px;
+  color: rgba(154, 167, 181, 0.9);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+
+  span {
+    white-space: nowrap;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(214, 221, 230, 0.3);
+    color: rgba(214, 221, 230, 1);
+
+    svg {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.08);
+  }
 
   &.active {
-    background: rgba(167, 238, 67, 0.2);
-    border-color: $accent-border;
-    color: $accent;
+    background: rgba(255, 59, 48, 0.10);
+    border-color: rgba(255, 59, 48, 0.45);
+    color: rgba(255, 59, 48, 1);
+
+    svg {
+      opacity: 1;
+    }
   }
 }
 
 .count {
+  margin-top: 16px;
   color: $muted;
   font-size: 14px;
 }
@@ -339,7 +428,7 @@ $white: #fff;
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
-  margin-top: 0;
+  margin-top: 16px;
 
   @media (min-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
@@ -355,6 +444,7 @@ $white: #fff;
   border: 1px solid $border;
   border-radius: 16px;
   overflow: hidden;
+  width: 100%;
   cursor: pointer;
   transition: all 0.3s ease;
 
@@ -625,31 +715,38 @@ $white: #fff;
 
 @media (max-width: 767px) {
   .hero__inner {
-    padding: 0;
+    padding: 28px 16px 28px;
   }
 
-  .page-header {
-    padding: 0 16px;
-    margin-bottom: 0;
+  .hero__head {
+    margin-bottom: 16px;
   }
 
-  .page-title {
+  .hero__title {
     font-size: 28px;
     line-height: 1.15;
   }
 
-  .page-subtitle {
+  .hero__subtitle {
     font-size: 14px;
+    margin-top: 12px;
+    padding: 0 8px;
   }
 
   .search-filter-bar {
-    flex-direction: column;
-    gap: 8px;
-    padding: 0 16px;
+    flex-direction: row;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .search-input {
+    height: 52px !important;
+    min-height: 52px !important;
   }
 
   .filter-toggle-btn {
-    width: 100%;
+    height: 52px !important;
+    min-height: 52px !important;
     justify-content: center;
   }
 
@@ -673,7 +770,7 @@ $white: #fff;
   }
 
   .clubs-grid {
-    padding: 0 16px;
+    padding: 0;
   }
 
   .club-card-image {
