@@ -7,7 +7,7 @@
           <path d="M12 20h9"></path>
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
         </svg>
-        Edit Club
+        <span>Edit</span>
       </button>
       <button type="button" class="btn btn--danger btn--sm" (click)="deleteRequested.emit()">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -17,7 +17,7 @@
           <path d="M14 11v6"></path>
           <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
         </svg>
-        Delete Club
+        Delete
       </button>
     </div>
     <div class="hero-content">
@@ -92,35 +92,35 @@
         <h2>Club Courts</h2>
         <div class="controls">
           <div class="hint">Manage courts by sport below</div>
-          <button type="button" class="btn btn--primary btn--sm" (click)="onEditCourts()">
+          <button type="button" class="btn btn btn--primary btn--sm" (click)="onEditCourts()">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M12 20h9"></path>
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
             </svg>
-            Edit Courts
+            <span>Edit</span>
           </button>
         </div>
       </div>
 
-      
+
       <div *ngIf="isLoadingCourts()" class="courts-loading">
         <div class="u-spinner u-spinner--md text-green"></div>
         <p class="muted">Loading courts...</p>
       </div>
 
-      
+
       <div *ngIf="courtsLoadError() && !isLoadingCourts()" class="courts-error">
         <p class="muted">{{ courtsLoadError() }}</p>
       </div>
 
-      
+
       <ng-container *ngIf="!isLoadingCourts() && !courtsLoadError()">
-        
+
         <div *ngIf="realCourts().length === 0" class="no-courts">
           <p class="muted">No courts available yet. Click "Edit Courts" to add your first court.</p>
         </div>
 
-        
+
         <ng-container *ngIf="realCourts().length > 0">
           <div class="filters">
             <button type="button" class="chip" [class.active]="activeCourtFilter() === 'all'" (click)="setCourtFilter('all')">All</button>
@@ -129,8 +129,8 @@
           <ng-container *ngIf="activeCourtFilter() !== 'all'; else allCourts">
             <h3 class="section-sub">{{ activeCourtFilter() | titlecase }}</h3>
             <div class="cards">
-              <app-court-listing-card 
-                *ngFor="let c of courtsBySport(activeCourtFilter())" 
+              <app-court-listing-card
+                *ngFor="let c of courtsBySport(activeCourtFilter())"
                 [image]="c.image"
                 [emoji]="c.emoji"
                 [title]="c.title"
@@ -151,8 +151,8 @@
               <ng-container *ngIf="courtsBySport(s).length">
                 <h3 class="section-sub">{{ s | titlecase }}</h3>
                 <div class="cards">
-                  <app-court-listing-card 
-                    *ngFor="let c of courtsBySport(s)" 
+                  <app-court-listing-card
+                    *ngFor="let c of courtsBySport(s)"
                     [image]="c.image"
                     [emoji]="c.emoji"
                     [title]="c.title"

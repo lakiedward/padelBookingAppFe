@@ -1,16 +1,8 @@
 <div class="admin-container page-gradient-bg">
-  
+
+  <div class="mobile-menu-overlay" *ngIf="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
+
   <aside class="sidebar" [class.mobile-open]="mobileMenuOpen">
-    <div class="brand">
-      <div class="brand-text">
-        <div class="logo">PLAYORA</div>
-        <div class="name">Sports Club Management</div>
-        <div class="desc">Professional club and court management platform</div>
-      </div>
-    </div>
-
-    <div class="menu-separator"></div>
-
     <nav class="menu">
       <button (click)="select('club-management')" [class.active]="selectedMenu === 'club-management'">
         <span>Club Management</span>
@@ -25,13 +17,49 @@
         <span>Events</span>
       </button>
     </nav>
+
+    <div class="sidebar-footer">
+      <div class="menu-separator"></div>
+      <button class="logout-btn" (click)="onLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Logout</span>
+      </button>
+    </div>
   </aside>
 
-  
-  <div class="mobile-menu-overlay" *ngIf="mobileMenuOpen" (click)="toggleMobileMenu()"></div>
-
   <header class="topbar">
-    
+    <div class="brand">
+      <div class="brand-text">
+        <div class="brand-title">PLAYORA</div>
+      </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="page-title">
+      {{
+        selectedMenu === 'club-management' ? 'Club Management' :
+        selectedMenu === 'courts' ? 'Manage Courts' :
+        selectedMenu === 'manage-booking' ? 'Manage Booking' :
+        'Events'
+      }}
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="logout-btn-header" (click)="onLogout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+      <span>Logout</span>
+    </button>
+
     <button class="hamburger-btn" (click)="toggleMobileMenu()" aria-label="Toggle menu">
       <svg *ngIf="!mobileMenuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <path d="M4 6H20M4 12H20M4 18H20" />
@@ -39,32 +67,6 @@
       <svg *ngIf="mobileMenuOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <path d="M6 6L18 18M6 18L18 6" />
       </svg>
-    </button>
-    
-    <div class="page">
-      <div class="name">
-        {{
-          selectedMenu === 'club-management' ? 'Club Management' :
-          selectedMenu === 'courts' ? 'Manage Courts' :
-          selectedMenu === 'manage-booking' ? 'Manage Booking' :
-          'Events'
-        }}
-      </div>
-      <div class="desc">
-        {{
-          selectedMenu === 'club-management' ? 'Manage club profile and branding' :
-          selectedMenu === 'courts' ? 'Configure courts and booking schedule' :
-          selectedMenu === 'manage-booking' ? 'View and manage all court bookings' :
-          'Create and manage club events'
-        }}
-      </div>
-    </div>
-    <div class="spacer"></div>
-    <button class="admin-chip">
-      <span>Admin Panel</span>
-    </button>
-    <button class="logout-btn" (click)="onLogout()">
-      <span>Logout</span>
     </button>
   </header>
 
@@ -89,7 +91,7 @@
     </section>
   </main>
 
-  
+
   <div class="modal-container" *ngIf="showCreateCourtModal">
     <div class="modal-overlay" (click)="onCreateCourtCancel()" aria-hidden="true"></div>
     <div
@@ -108,7 +110,7 @@
     </div>
   </div>
 
-  
+
   <div class="modal-container" *ngIf="showCreateEventModal">
     <div class="modal-overlay" (click)="onCreateEventCancel()" aria-hidden="true"></div>
     <div

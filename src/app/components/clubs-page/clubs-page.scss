@@ -78,7 +78,7 @@ $white: #fff;
   margin: 0 0 8px 0;
   letter-spacing: 0.02em;
   line-height: 1.1;
-  
+
   .accent {
     color: $accent;
   }
@@ -123,11 +123,11 @@ $white: #fff;
   color: $white;
   font-size: 15px;
   transition: all 0.2s ease;
-  
+
   &::placeholder {
     color: $muted;
   }
-  
+
   &:focus {
     outline: none;
     border-color: $accent;
@@ -151,28 +151,28 @@ $white: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  
+
   svg {
     width: 20px;
     height: 20px;
     color: $muted;
     transition: all 0.2s ease;
   }
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: $accent-border;
-    
+
     svg {
       color: $accent;
     }
   }
-  
+
   &.active {
     background: rgba(167, 238, 67, 0.15);
     border-color: $accent-border;
     color: $accent;
-    
+
     svg {
       color: $accent;
     }
@@ -197,7 +197,7 @@ $white: #fff;
   display: none;
   margin-top: 0;
   margin-bottom: 0;
-  
+
   &.filters-section--expanded {
     display: block;
   }
@@ -264,12 +264,12 @@ $white: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: capitalize;
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: $accent-border;
   }
-  
+
   &.active {
     background: rgba(167, 238, 67, 0.2);
     border-color: $accent-border;
@@ -298,21 +298,21 @@ $white: #fff;
   padding: 40px 20px;
   margin-top: 0;
   text-align: center;
-  
+
   svg {
     width: 64px;
     height: 64px;
     color: $muted;
     margin-bottom: 16px;
   }
-  
+
   p {
     font-size: 18px;
     font-weight: 600;
     color: $text;
     margin: 0 0 8px 0;
   }
-  
+
   span {
     font-size: 14px;
     color: $muted;
@@ -340,11 +340,11 @@ $white: #fff;
   grid-template-columns: 1fr;
   gap: 16px;
   margin-top: 0;
-  
+
   @media (min-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -357,12 +357,12 @@ $white: #fff;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-4px);
     border-color: $accent-border;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-    
+
     .club-card-image {
       transform: scale(1.05);
     }
@@ -374,25 +374,28 @@ $white: #fff;
   height: 200px;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   background-color: rgba(255, 255, 255, 0.05);
   transition: transform 0.3s ease;
-  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 .club-card-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(15, 27, 38, 0.8), transparent 50%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.35) 50%, transparent);
 }
 
 .club-card-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 6px 12px;
-  background: rgba(167, 238, 67, 0.9);
+  padding: 4px 10px;
+  background: $accent;
   color: #000a14;
-  border-radius: 20px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
   z-index: 2;
@@ -406,29 +409,30 @@ $white: #fff;
 }
 
 .club-card-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: $white;
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.2;
 }
 
 .club-card-location {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: $muted;
-  font-size: 13px;
-  
+  gap: 6px;
+  color: $text;
+  font-size: 14px;
+
   svg {
     width: 16px;
     height: 16px;
     flex-shrink: 0;
     color: $accent;
   }
-  
+
   span {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -444,18 +448,18 @@ $white: #fff;
 }
 
 .sport-tag {
-  padding: 4px 10px;
-  background: rgba(167, 238, 67, 0.15);
-  border: 1px solid $accent-border;
-  border-radius: 12px;
-  color: $accent;
-  font-size: 11px;
-  font-weight: 600;
+  padding: 2px 8px;
+  background: $accent;
+  border: none;
+  border-radius: 999px;
+  color: #000a14;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: capitalize;
-  
+
   &.more {
     background: rgba(255, 255, 255, 0.08);
-    border-color: $border;
+    border: 1px solid $border;
     color: $muted;
   }
 }
@@ -475,14 +479,14 @@ $white: #fff;
   gap: 8px;
   font-size: 12px;
   color: $muted;
-  
+
   svg {
     width: 14px;
     height: 14px;
     flex-shrink: 0;
     color: $accent;
   }
-  
+
   span {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -513,18 +517,18 @@ $white: #fff;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s ease;
-  
+
   svg {
     width: 16px;
     height: 16px;
     transition: transform 0.2s ease;
   }
-  
+
   &:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: $accent-border;
     color: $accent;
-    
+
     svg {
       transform: translateX(4px);
     }
@@ -540,7 +544,7 @@ $white: #fff;
     border-radius: 10px !important;
     color: #ffffff !important;
     height: 44px;
-    
+
     &:not(.p-disabled):hover {
       border-color: rgba(167, 238, 67, 0.4) !important;
       background: rgba(255, 255, 255, 0.08) !important;
@@ -628,22 +632,22 @@ $white: #fff;
     padding: 0 16px;
     margin-bottom: 0;
   }
-  
+
   .page-title {
     font-size: 28px;
     line-height: 1.15;
   }
-  
+
   .page-subtitle {
     font-size: 14px;
   }
-  
+
   .search-filter-bar {
     flex-direction: column;
     gap: 8px;
     padding: 0 16px;
   }
-  
+
   .filter-toggle-btn {
     width: 100%;
     justify-content: center;
@@ -652,7 +656,7 @@ $white: #fff;
   .filters-section {
     padding: 0 16px;
   }
-  
+
   .filters-content {
     padding: 16px;
   }
@@ -671,11 +675,13 @@ $white: #fff;
   .clubs-grid {
     padding: 0 16px;
   }
-  
+
   .club-card-image {
     height: 160px;
+    margin: 0;
+    padding: 0;
   }
-  
+
   .club-card-content {
     padding: 16px;
   }

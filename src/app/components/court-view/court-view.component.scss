@@ -1,8 +1,29 @@
 :host { display: block; }
 
-.courts-wrap { display: grid; gap: 16px; }
+.courts-wrap {
+  display: grid;
+  gap: 16px;
+}
 
-.courts-header { display: flex; align-items: center; gap: 12px; }
+.courts-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+}
+
+@media (min-width: 768px) {
+  .courts-header {
+    padding: 0 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .courts-header {
+    padding: 0 20px;
+  }
+}
+
 .courts-header .titles .title { color: #d6dde6; font-weight: 800; font-size: 22px; line-height: 1.2; }
 .courts-header .titles .sub { color: #6b7a8b; font-size: 12px; margin-top: 2px; }
 .courts-header .actions { margin-left: auto; }
@@ -18,16 +39,50 @@
 .btn.wide { width: 100%; }
 .btn.green-outline { border-color: rgba(167,238,67,0.4); background: rgba(167,238,67,0.2); color: #a7ee43; }
 
-.loading, .error, .empty-state { padding: 40px 20px; text-align: center; color: #8aa0b5; font-size: 14px; }
+.loading, .error, .empty-state {
+  padding: 40px 8px;
+  text-align: center;
+  color: #8aa0b5;
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  .loading, .error, .empty-state {
+    padding: 40px 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .loading, .error, .empty-state {
+    padding: 40px 20px;
+  }
+}
+
 .error { color: #ff9b9b; }
 .empty-state { color: #6b7a8b; }
 
-.panels { display: grid; gap: 16px; }
+.panels {
+  display: grid;
+  gap: 16px;
+  padding: 0 8px;
+}
 
-.court-panel { 
-  border: 1px solid rgba(255,255,255,0.25); 
-  border-radius: 16px; 
-  overflow: hidden; 
+@media (min-width: 768px) {
+  .panels {
+    padding: 0 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .panels {
+    padding: 0 20px;
+  }
+}
+
+.court-panel {
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 16px;
+  overflow: hidden;
   background: rgba(255,255,255,0.08);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -52,52 +107,52 @@
 .hero-actions.mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
 .hero-actions .icon { width: 16px; height: 16px; }
 
-.icon-box { 
+.icon-box {
   position: absolute;
   top: 12px;
   left: 12px;
   z-index: 2;
-  width: 36px; 
-  height: 36px; 
-  border-radius: 8px; 
-  background: rgba(167,238,67,0.2); 
-  border: 1px solid rgba(167,238,67,0.3); 
-  display: inline-flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 18px; 
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(167,238,67,0.2);
+  border: 1px solid rgba(167,238,67,0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
-.hero-bottom { 
-  position: absolute; 
-  left: 12px; 
-  right: 12px; 
-  bottom: 12px; 
-  z-index: 2; 
+.hero-bottom {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
 }
 
-.court-info { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 6px; 
+.court-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.court-title { 
-  margin: 0; 
-  color: #fff; 
-  font-size: 18px; 
-  font-weight: 800; 
+.court-title {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
 }
 
-.court-meta { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 4px; 
+.court-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.court-price { 
-  display: inline-flex; 
-  align-items: baseline; 
+.court-price {
+  display: inline-flex;
+  align-items: baseline;
   gap: 2px;
   background: rgba(0, 0, 0, 0.5);
   padding: 6px 12px;
@@ -106,75 +161,75 @@
   width: fit-content;
 }
 
-.court-price .price-val { 
-  color: #a7ee43; 
-  font-weight: 800; 
-  font-size: 16px; 
+.court-price .price-val {
+  color: #a7ee43;
+  font-weight: 800;
+  font-size: 16px;
 }
 
-.court-price .price-note { 
-  color: #8aa0b5; 
-  font-size: 12px; 
+.court-price .price-note {
+  color: #8aa0b5;
+  font-size: 12px;
 }
 
-.tags-row { 
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 6px; 
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.tag { 
-  padding: 2px 8px; 
-  border-radius: 4px; 
-  font-size: 11px; 
-  font-weight: 600; 
-  color: #d6dde6; 
-  background: rgba(255,255,255,0.12); 
+.tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #d6dde6;
+  background: rgba(255,255,255,0.12);
 }
 
-.tag.more { 
-  color: #8aa0b5; 
-  background: rgba(255,255,255,0.08); 
+.tag.more {
+  color: #8aa0b5;
+  background: rgba(255,255,255,0.08);
 }
 
-.equipment-row { 
-  display: flex; 
-  flex-wrap: wrap; 
-  align-items: center; 
-  gap: 6px; 
-  font-size: 11px; 
+.equipment-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
 }
 
-.equipment-row .eq-label { 
-  color: #8aa0b5; 
-  font-weight: 600; 
+.equipment-row .eq-label {
+  color: #8aa0b5;
+  font-weight: 600;
 }
 
-.equipment-row .eq-item { 
-  color: #a7ee43; 
-  font-weight: 600; 
+.equipment-row .eq-item {
+  color: #a7ee43;
+  font-weight: 600;
 }
 
 .calendar { padding: 12px; }
 .calendar .label { color: #d6dde6; font-size: 12px; font-weight: 800; margin-bottom: 8px; }
-.calendar .scroll { 
-  display: flex; 
-  gap: 12px; 
-  overflow-x: auto; 
-  overflow-y: hidden; 
-  padding-bottom: 8px; 
-  scrollbar-width: none; 
-  -ms-overflow-style: none; 
+.calendar .scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .calendar .scroll::-webkit-scrollbar { display: none; }
 
-.day { 
-  min-width: 160px; 
-  flex: 1 1 160px; 
-  background: rgba(255,255,255,0.05); 
-  border: 1px solid rgba(214,221,230,0.15); 
-  border-radius: 12px; 
-  padding: 10px; 
+.day {
+  min-width: 160px;
+  flex: 1 1 160px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(214,221,230,0.15);
+  border-radius: 12px;
+  padding: 10px;
 }
 
 @media (max-width: 767px) {
@@ -185,22 +240,22 @@
   .courts-header {
     padding: 0 16px;
   }
-  
+
   .panels {
     padding: 0 16px;
   }
-  
+
   .court-panel {
     overflow: hidden !important;
     max-width: 100% !important;
   }
-  
+
   .calendar {
     padding: 12px;
     overflow: hidden;
     max-width: 100%;
   }
-  
+
   .calendar .label {
     padding: 0 4px;
   }
@@ -334,13 +389,13 @@
     }
   }
 
-  
+
   .p-dialog-mask {
     background: rgba(0, 0, 0, 0.68) !important;
     backdrop-filter: blur(4px);
   }
 
-  
+
   .p-confirmdialog-footer {
     .p-button {
       display: inline-flex;
@@ -357,7 +412,7 @@
       transition: all 0.2s ease;
     }
 
-    
+
     .p-confirmdialog-reject-button {
       background: rgba(138, 160, 181, 0.15) !important;
       border: 1px solid rgba(138, 160, 181, 0.3) !important;
@@ -373,7 +428,7 @@
       }
     }
 
-    
+
     .p-confirmdialog-accept-button {
       background: #ff4757 !important;
       color: #ffffff !important;
@@ -390,7 +445,7 @@
     }
   }
 
-  
+
   .p-confirmdialog-header {
     .p-dialog-header-close {
       width: 32px;

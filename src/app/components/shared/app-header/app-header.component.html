@@ -40,64 +40,50 @@
       </svg>
     </button>
   </div>
-
-  
-  <div class="drawer-overlay" *ngIf="mobileOpen" (click)="toggleMobile()"></div>
-
-  
-  <div class="drawer" [class.drawer--open]="mobileOpen">
-    <div class="drawer__header">
-      <div class="drawer__brand">
-        <div class="drawer__logo">PLAYORA</div>
-        <div class="drawer__tagline">Sports Club Management</div>
-      </div>
-      <button class="drawer__close" (click)="toggleMobile()" aria-label="Close menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M6 6L18 18M6 18L18 6" />
-        </svg>
-      </button>
-    </div>
-
-    <div class="drawer__separator"></div>
-
-    <nav class="drawer__menu">
-      <a class="drawer__menu-item" [routerLink]="['/courts']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
-        <span>Courts</span>
-      </a>
-      <a class="drawer__menu-item" [routerLink]="['/clubs']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
-        <span>Clubs</span>
-      </a>
-      <a class="drawer__menu-item" [routerLink]="['/events']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
-        <span>Events</span>
-      </a>
-      <a class="drawer__menu-item" [routerLink]="['/calendar']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
-        <span>Calendar</span>
-      </a>
-    </nav>
-
-    <div class="drawer__footer">
-      <div class="drawer__separator"></div>
-      <div class="drawer__user" (click)="goToProfile(); toggleMobile()">
-        <div class="drawer__user-avatar">
-          <svg *ngIf="!profileImageUrl()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <img *ngIf="profileImageUrl()" [src]="profileImageUrl()" [alt]="username()" />
-        </div>
-        <div class="drawer__user-info">
-          <div class="drawer__user-name">{{ username() }}</div>
-          <div class="drawer__user-email">{{ userEmail() }}</div>
-        </div>
-      </div>
-      <button class="drawer__logout" (click)="logout()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-        <span>Logout</span>
-      </button>
-    </div>
-  </div>
 </header>
+
+
+<div class="drawer-overlay" *ngIf="mobileOpen" (click)="toggleMobile()"></div>
+
+
+<div class="drawer" [class.drawer--open]="mobileOpen">
+  <nav class="drawer__menu">
+    <a class="drawer__menu-item" [routerLink]="['/courts']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
+      <span>Courts</span>
+    </a>
+    <a class="drawer__menu-item" [routerLink]="['/clubs']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
+      <span>Clubs</span>
+    </a>
+    <a class="drawer__menu-item" [routerLink]="['/events']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
+      <span>Events</span>
+    </a>
+    <a class="drawer__menu-item" [routerLink]="['/calendar']" routerLinkActive="drawer__menu-item--active" (click)="toggleMobile()">
+      <span>Calendar</span>
+    </a>
+  </nav>
+
+  <div class="drawer__footer">
+    <div class="drawer__separator"></div>
+    <div class="drawer__user" (click)="goToProfile(); toggleMobile()">
+      <div class="drawer__user-avatar">
+        <svg *ngIf="!profileImageUrl()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <img *ngIf="profileImageUrl()" [src]="profileImageUrl()" [alt]="username()" />
+      </div>
+      <div class="drawer__user-info">
+        <div class="drawer__user-name">{{ username() }}</div>
+        <div class="drawer__user-email">{{ userEmail() }}</div>
+      </div>
+    </div>
+    <button class="drawer__logout" (click)="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+      <span>Logout</span>
+    </button>
+  </div>
+</div>

@@ -27,11 +27,13 @@
   grid-area: sidebar;
   position: relative;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.08);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  border-right: 1px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(214, 221, 230, 0.15);
   padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
 
   .brand {
     display: flex;
@@ -60,6 +62,7 @@
   .menu {
     display: grid;
     gap: 10px;
+    padding-top: 8px;
 
     button {
       display: flex;
@@ -68,7 +71,7 @@
       width: 100%;
       padding: 14px 16px;
       background: transparent;
-      border: 1px solid rgba(214, 221, 230, 0.15);
+      border: 1px solid transparent;
       color: #d6dde6;
       border-radius: 12px;
       cursor: pointer;
@@ -80,9 +83,42 @@
       &.active {
         background: #a7ee43;
         color: #000a14;
-        border-color: #a7ee43;
+        border-color: transparent;
         font-weight: 700;
       }
+    }
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    display: none;
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff6b6b;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background: rgba(255, 59, 48, 0.2);
+      border-color: rgba(255, 59, 48, 0.5);
     }
   }
 }
@@ -96,7 +132,7 @@
   gap: 16px;
   padding: 18px 24px;
   background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(214, 221, 230, 0.15);
+  border-bottom: 1px solid rgba(214, 221, 230, 0.2);
 
   .hamburger-btn {
     display: none;
@@ -121,50 +157,70 @@
     }
   }
 
-  .page .name { color: #d6dde6; font-weight: 700; font-size: 20px; }
-  .page .desc { color: #6b7a8b; font-size: 12px; }
-  .spacer { flex: 1; }
-  .admin-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(167, 238, 67, 0.2);
-    border: none;
-    color: #d6dde6;
-    padding: 8px 12px;
-    border-radius: 12px;
-    cursor: default;
+  .brand {
+    display: none;
   }
-  .logout-btn {
+
+  .brand-text {
+    line-height: 1.2;
+  }
+
+  .brand-title {
+    color: #a7ee43;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+  }
+
+  .separator {
+    display: none;
+    width: 1px;
+    height: 24px;
+    background: rgba(214, 221, 230, 0.25);
+    border-radius: 1px;
+    margin: 0 12px;
+  }
+
+  .page-title {
+    color: #d6dde6;
+    font-weight: 600;
+    font-size: 20px;
+    display: block;
+  }
+
+  .logout-btn-header {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #a7ee43;
-    color: #000a14;
-    border: 1px solid #8ae22a;
-    padding: 8px 14px;
-    border-radius: 12px;
+    padding: 10px 16px;
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff6b6b;
+    border-radius: 10px;
     cursor: pointer;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     transition: all 0.2s ease;
 
-    &:hover {
-      background: #8ae22a;
-      border-color: #7acf1f;
-      transform: translateY(-1px);
+    svg {
+      width: 18px;
+      height: 18px;
     }
 
-    &:active {
-      transform: translateY(0);
+    &:hover {
+      background: rgba(255, 59, 48, 0.2);
+      border-color: rgba(255, 59, 48, 0.5);
     }
   }
+
+  .spacer { flex: 1; }
 }
 
 .content {
   grid-area: content;
   position: relative;
   z-index: 2;
-  padding: 32px;
+  padding: 32px 32px 32px;
   overflow-y: auto;
 }
 
@@ -175,7 +231,17 @@
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 24px;
-  padding: 24px;
+  padding: 32px 24px 24px 24px;
+  overflow-x: hidden;
+  overflow-y: visible;
+
+  // Remove top padding only for edit mode forms
+  form {
+    margin-top: -32px;
+    margin-left: -24px;
+    margin-right: -24px;
+    padding: 0 24px 24px 24px;
+  }
 }
 
 .content-card.empty { color: #9fb0c0; text-align: center; padding: 80px; }
@@ -197,20 +263,21 @@
   transform: translate(-50%, -50%);
   width: min(1100px, 96vw);
   max-height: 92vh;
-  overflow: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: rgba(255, 255, 255, 0.08);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   border: 2px solid #a7ee43;
   border-radius: 20px;
-  padding: 24px;
   box-shadow: 0 0 0 2px rgba(167, 238, 67, 0.3);
 }
 
 .mobile-menu-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   z-index: 998;
   backdrop-filter: blur(4px);
 }
@@ -228,15 +295,16 @@
     grid-area: unset !important;
     position: fixed !important;
     top: 0;
-    left: 0;
-    width: min(75vw, 300px);
+    right: 0;
+    width: min(80vw, 300px);
     height: 100vh;
     z-index: 1000 !important;
-    transition: transform 0.3s ease;
-    transform: translateX(-100%);
-    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(100%);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
     overflow-y: auto;
-    padding: 16px 12px;
+    padding: 20px 16px;
+    border-left: 1px solid rgba(167, 238, 67, 0.15);
 
     &.mobile-open {
       transform: translateX(0);
@@ -262,6 +330,10 @@
       padding: 12px 14px;
       font-size: 14px;
     }
+
+    .sidebar-footer {
+      display: block;
+    }
   }
 
   .topbar {
@@ -271,58 +343,93 @@
       display: flex;
     }
 
-    .page .name {
-      font-size: 16px;
+    .brand {
+      display: flex;
     }
 
-    .page .desc {
+    .brand-title {
+      font-size: 18px;
+    }
+
+    .separator {
+      display: block;
+      width: 1px;
+      height: 20px;
+      background: rgba(214, 221, 230, 0.25);
+      border-radius: 1px;
+      margin: 0 12px;
+    }
+
+    .page-title {
+      display: block;
+      font-size: 14px;
+    }
+
+    .logout-btn-header {
       display: none;
-    }
-
-    .admin-chip {
-      padding: 6px 10px;
-      font-size: 13px;
-    }
-
-    .logout-btn {
-      padding: 6px 10px;
-      font-size: 13px;
     }
   }
 
   .content {
-    padding: 16px;
+    padding: 24px 16px 16px;
   }
 
   .content-card {
-    padding: 16px;
-    border-radius: 16px;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    padding: 0;
+    border-radius: 0;
   }
 
   .modal-content {
     width: 94vw;
-    padding: 16px;
+    max-height: 94vh;
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .admin-container {
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 1fr;
+    grid-template-rows: 64px 1fr;
+    grid-template-areas:
+      'topbar'
+      'content';
   }
 
   .sidebar {
-    padding: 16px 12px;
+    grid-area: unset !important;
+    position: fixed !important;
+    top: 0;
+    right: 0;
+    width: min(60vw, 320px);
+    height: 100vh;
+    z-index: 1000 !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(100%);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+    overflow-y: auto;
+    padding: 20px 16px;
+    border-left: 1px solid rgba(167, 238, 67, 0.15);
+
+    &.mobile-open {
+      transform: translateX(0);
+    }
 
     .brand {
-      padding: 4px 4px 12px 4px;
-
-      .brand-icon {
-        width: 36px;
-        height: 36px;
-      }
+      padding: 4px;
 
       .logo {
         font-size: 24px;
+      }
+
+      .name {
+        font-size: 13px;
+      }
+
+      .desc {
+        font-size: 11px;
       }
     }
 
@@ -330,9 +437,56 @@
       padding: 12px 14px;
       font-size: 14px;
     }
+
+    .sidebar-footer {
+      display: block;
+    }
+  }
+
+  .topbar {
+    padding: 12px 16px;
+
+    .hamburger-btn {
+      display: flex;
+    }
+
+    .brand {
+      display: flex;
+    }
+
+    .brand-title {
+      font-size: 20px;
+    }
+
+    .separator {
+      display: block;
+      width: 1px;
+      height: 22px;
+      background: rgba(214, 221, 230, 0.25);
+      border-radius: 1px;
+      margin: 0 12px;
+    }
+
+    .page-title {
+      display: block;
+      font-size: 15px;
+    }
+
+    .logout-btn-header {
+      display: none;
+    }
   }
 
   .content {
-    padding: 24px;
+    padding: 24px 24px 24px;
+  }
+
+  .content-card {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    padding: 0;
+    border-radius: 0;
   }
 }

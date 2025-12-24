@@ -1,5 +1,5 @@
 <div class="court-card">
-  <div class="image" [style.background-image]="court.imageUrl ? 'url(' + court.imageUrl + ')' : ''"></div>
+  <div class="image" [style.--bg-image]="court.imageUrl ? 'url(' + court.imageUrl + ')' : ''"></div>
   <div class="body">
     <div class="badge primary">{{ court.sport | titlecase }}</div>
     <h4>{{ court.name }}</h4>

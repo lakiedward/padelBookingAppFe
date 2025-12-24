@@ -1,8 +1,29 @@
 :host { display: block; }
 
-.events-wrap { display: grid; gap: 16px; }
+.events-wrap {
+  display: grid;
+  gap: 16px;
+}
 
-.events-header { display: flex; align-items: center; gap: 12px; }
+.events-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+}
+
+@media (min-width: 768px) {
+  .events-header {
+    padding: 0 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .events-header {
+    padding: 0 20px;
+  }
+}
+
 .events-header .titles .title { color: #d6dde6; font-weight: 800; font-size: 22px; line-height: 1.2; }
 .events-header .titles .sub { color: #6b7a8b; font-size: 12px; margin-top: 2px; }
 .events-header .actions { margin-left: auto; }
@@ -17,11 +38,45 @@
 .btn--sm { height: 40px; padding: 0 14px; font-size: 13px; border-radius: 12px; }
 .btn.wide { width: 100%; }
 
-.loading, .error, .empty-state { padding: 40px 20px; text-align: center; color: #8aa0b5; font-size: 14px; }
+.loading, .error, .empty-state {
+  padding: 40px 8px;
+  text-align: center;
+  color: #8aa0b5;
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  .loading, .error, .empty-state {
+    padding: 40px 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .loading, .error, .empty-state {
+    padding: 40px 20px;
+  }
+}
+
 .error { color: #ff9b9b; }
 .empty-state { color: #6b7a8b; }
 
-.panels { display: grid; gap: 16px; }
+.panels {
+  display: grid;
+  gap: 16px;
+  padding: 0 8px;
+}
+
+@media (min-width: 768px) {
+  .panels {
+    padding: 0 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .panels {
+    padding: 0 20px;
+  }
+}
 
 .event-panel { border: 1px solid rgba(255,255,255,0.25); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,0.08); }
 

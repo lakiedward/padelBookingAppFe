@@ -4,11 +4,37 @@
   border-radius: 16px;
   overflow: hidden;
 }
+.court-card {
+  position: relative;
+  background: #0f1b26;
+  border: 1px solid rgba(214,221,230,0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .court-card .image {
-  height: 160px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  position: relative;
+  width: 100%;
+  height: 240px; /* Increased height for the image area */
+  background: none;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.court-card .image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.2)), var(--bg-image);
   background-size: cover;
-  background-position: center;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: local;
 }
 .court-card .body { padding: 12px; }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 11px; border: 1px solid rgba(214,221,230,0.15); background: rgba(255,255,255,0.05); color: #fff; }

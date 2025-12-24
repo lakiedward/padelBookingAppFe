@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, computed, OnInit, OnDestroy } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { filter, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -10,8 +11,9 @@ import { AuthService } from '../../../services/auth.service';
   templateUrl: './app-header.component.html',
   styleUrl: './app-header.component.scss'
 })
-export class AppHeaderComponent {
+export class AppHeaderComponent implements OnInit, OnDestroy {
   mobileOpen = false;
+  private routerSubscription?: Subscription;
 
   userEmail = computed(() => {
     const user = this.auth.currentUser$();
@@ -29,6 +31,18 @@ export class AppHeaderComponent {
   });
 
   constructor(private auth: AuthService, private router: Router) {}
+
+  ngOnInit() {
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.mobileOpen = false;
+      });
+  }
+
+  ngOnDestroy() {
+    this.routerSubscription?.unsubscribe();
+  }
 
   toggleMobile() { this.mobileOpen = !this.mobileOpen; }
 

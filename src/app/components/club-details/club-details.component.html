@@ -3,7 +3,7 @@
   <p-toast key="success" position="top-right" appendTo="body" [baseZIndex]="10000"></p-toast>
   <p-confirmDialog appendTo="body"></p-confirmDialog>
 
-  
+
   <div *ngIf="isSaving()" class="saving-overlay" aria-busy="true" aria-live="polite">
     <div class="saving-overlay-content">
       <div class="u-spinner u-spinner--xl text-green"></div>
@@ -44,13 +44,12 @@
 
     <div class="section location-section">
       <h3>Club Location</h3>
-      <div class="grid" style="margin-top: 12px; grid-template-columns: 1fr auto; align-items: end;">
+      <div class="grid location-grid">
         <div class="field">
           <label>Enter address</label>
           <input pInputText placeholder="Start typing an address" formControlName="address" />
         </div>
-        <div class="field right" style="display: flex; justify-content: flex-end; align-items: center;">
-          <label class="sr-only">Add Location</label>
+        <div class="field-button">
           <button type="button" class="btn btn--primary" (click)="onAddLocation()">Add location</button>
         </div>
       </div>

@@ -183,10 +183,10 @@ $white: #fff;
   width: min(80vw, 300px);
   height: 100vh;
   z-index: 1000;
-  background: rgba(15, 27, 38, 0.95);
+  background: linear-gradient(180deg, #0b1117 0%, #0e141b 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-left: 1px solid rgba(167, 238, 67, 0.15);
+  border-left: 1px solid $border;
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
@@ -204,67 +204,10 @@ $white: #fff;
   }
 }
 
-.drawer__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.drawer__close {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid $border;
-  border-radius: 8px;
-  color: $text;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(214, 221, 230, 0.25);
-  }
-}
-
-.drawer__brand {
-  flex: 1;
-  padding: 4px 0;
-}
-
-.drawer__logo {
-  color: $accent;
-  font-weight: 800;
-  font-size: 28px;
-  letter-spacing: 0.6px;
-}
-
-.drawer__tagline {
-  color: $text;
-  font-weight: 700;
-  font-size: 14px;
-  margin-top: 2px;
-}
-
-.drawer__separator {
-  height: 1px;
-  background: $border;
-  margin: 8px 0 12px 0;
-  border-radius: 1px;
-}
-
 .drawer__menu {
   display: grid;
   gap: 8px;
+  padding-top: 8px;
 }
 
 .drawer__menu-item {
@@ -273,28 +216,26 @@ $white: #fff;
   gap: 12px;
   width: 100%;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid $border;
+  background: transparent;
+  border: 1px solid transparent;
   color: $text;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   text-align: left;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease;
 
   &:hover:not(.drawer__menu-item--active) {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(214, 221, 230, 0.25);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   &--active {
     background: $accent;
     color: #000a14;
-    border-color: $accent-border;
+    border-color: transparent;
     font-weight: 700;
-    box-shadow: 0 2px 8px rgba(167, 238, 67, 0.2);
   }
 
   &--muted {
