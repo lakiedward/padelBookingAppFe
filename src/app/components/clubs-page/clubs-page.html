@@ -146,7 +146,8 @@
           (click)="onClubClick(club.id!)"
         >
           
-          <div class="club-card-image" [style.background-image]="club.profileImageUrl ? 'url(' + club.profileImageUrl + ')' : ''">
+          <div class="club-card-image">
+            <img [src]="club.profileImageUrl || ''" [alt]="club.name" class="club-card-img" />
             <div class="club-card-overlay"></div>
             <div class="club-card-badge" *ngIf="club.sports.length > 0">
               {{ club.sports.length }} {{ club.sports.length === 1 ? 'Sport' : 'Sports' }}
