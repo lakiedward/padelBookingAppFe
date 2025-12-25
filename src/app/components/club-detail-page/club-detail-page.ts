@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PublicService } from '../../services/public.service';
 import { CourtService } from '../../services/court.service';
 import { ClubDetails, SportKey } from '../../models/club.models';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { forkJoin } from 'rxjs';
 import { Time24Pipe } from '../../pipes/time24.pipe';
@@ -29,7 +28,7 @@ interface CourtListingData {
 @Component({
   selector: 'app-club-detail-page',
   standalone: true,
-  imports: [CommonModule, AppHeaderComponent, CourtListingCardComponent],
+  imports: [CommonModule, CourtListingCardComponent],
   templateUrl: './club-detail-page.html',
   styleUrls: ['./club-detail-page.scss']
 })

@@ -1,6 +1,4 @@
 <div class="page page-gradient-bg bg-admin-like">
-  <app-header></app-header>
-
   <section class="hero">
     <div class="glow glow--hero-a"></div>
     <div class="glow glow--hero-b"></div>
@@ -91,6 +89,7 @@
               [style]="{'flex':'1'}"
               styleClass="custom-date-picker"
               appendTo="body"
+              [minDate]="minDate"
               (onSelect)="onDateSelect($event)">
             </p-datepicker>
           </div>
@@ -100,8 +99,10 @@
             *ngFor="let d of days"
             (click)="onSelectDay(d)"
             [class.detail-day-btn--active]="dateKey(d) === dateKey(selectedDate)"
+            [class.detail-day-btn--disabled]="isPastDate(d)"
             [attr.data-date-key]="dateKey(d)"
             class="detail-day-btn"
+            [disabled]="isPastDate(d)"
           >
             <div class="detail-day-weekday">{{ formatWeekday(d) }}</div>
             <div class="detail-day-date">{{ formatDayMonth(d) }}</div>
@@ -132,9 +133,10 @@
           <button
             *ngFor="let s of slotsForDay"
             (click)="onPickSlot(s)"
-            [disabled]="s.available === false"
+            [disabled]="s.available === false || isPastSlot(s)"
             [class.detail-slot-btn--active]="selectedSlot && selectedSlot.start===s.start && selectedSlot.end===s.end"
             [class.detail-slot-btn--booked]="s.available === false"
+            [class.detail-slot-btn--past]="isPastSlot(s)"
             class="detail-slot-btn"
           >
             {{ s.start }}–{{ s.end }}
@@ -258,8 +260,14 @@
             <span class="detail-summary-value">{{ selectedSlot.price | convertMoney:'EUR' }}</span>
           </div>
         </div>
+        <div *ngIf="!isAuthenticated" class="auth-prompt">
+          <svg class="auth-prompt__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <p class="auth-prompt__text">Create an account or sign in to proceed with booking</p>
+        </div>
         <button class="book-now-btn" [disabled]="!selectedSlot" (click)="onBookNow()">
-          Book Now
+          {{ isAuthenticated ? 'Book Now' : 'Create Account or Sign In' }}
         </button>
       </div>
     </aside>

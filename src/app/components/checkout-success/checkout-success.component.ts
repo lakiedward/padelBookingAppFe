@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { PaymentsService } from '../../services/payments.service';
 
 @Component({
   selector: 'app-checkout-success',
   standalone: true,
-  imports: [CommonModule, AppHeaderComponent],
+  imports: [CommonModule],
   templateUrl: './checkout-success.component.html',
   styleUrls: ['./checkout-success.component.scss']
 })

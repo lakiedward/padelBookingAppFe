@@ -8,7 +8,6 @@ import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse, CourtPhotoResponse, CourtResponse } from '../../models/court.models';
 import { AuthService } from '../../services/auth.service';
 import { ClubDetails } from '../../models/club.models';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { MapService } from '../../services/map.service';
 import { Subject, combineLatest } from 'rxjs';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
@@ -17,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-court-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePickerModule, AppHeaderComponent, ConvertMoneyPipe, RouterLink],
+  imports: [CommonModule, FormsModule, DatePickerModule, ConvertMoneyPipe, RouterLink],
   templateUrl: './court-detail.component.html',
   styleUrl: './court-detail.component.scss'
 })
@@ -45,6 +44,9 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
   private initialStartParam?: string;
   private hasAppliedInitialSelection = false;
   private pendingScrollToSlots = false;
+  minDate = new Date();
+
+  isAuthenticated = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -57,6 +59,7 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+    this.isAuthenticated = this.auth.isLoggedIn();
   }
 
   ngOnInit(): void {
@@ -251,21 +254,38 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
 
   onPickSlot(slot: { id: number; start: string; end: string; available?: boolean; price?: number; currency?: string }) {
     if (slot.available === false) return;
+    if (this.isPastSlot(slot)) return;
     this.selectedSlot = { id: slot.id, start: slot.start, end: slot.end, price: slot.price || 0, currency: 'EUR' };
   }
 
   onBookNow() {
     if (!this.selectedSlot || !this.court) return;
+    
+    if (this.isPastDate(this.selectedDate) || this.isPastSlot(this.selectedSlot)) {
+      return;
+    }
+
+    const bookingParams = {
+      courtId: this.courtId.toString(),
+      date: this.dateKey(this.selectedDate),
+      start: this.selectedSlot.start,
+      end: this.selectedSlot.end,
+      price: this.selectedSlot.price.toString(),
+      currency: 'EUR'
+    };
+
+    if (!this.isAuthenticated) {
+      const queryString = new URLSearchParams(bookingParams).toString();
+      const returnUrl = `/booking/${this.selectedSlot.id}?${queryString}`;
+      
+      this.router.navigate(['/auth'], {
+        queryParams: { returnUrl }
+      });
+      return;
+    }
 
     this.router.navigate(['/booking', this.selectedSlot.id], {
-      queryParams: {
-        courtId: this.courtId,
-        date: this.dateKey(this.selectedDate),
-        start: this.selectedSlot.start,
-        end: this.selectedSlot.end,
-        price: this.selectedSlot.price,
-        currency: 'EUR'
-      }
+      queryParams: bookingParams
     });
   }
 
@@ -392,6 +412,25 @@ export class CourtDetailComponent implements OnInit, OnDestroy {
   formatWeekdays(weekdays: number[]): string {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return weekdays.map(d => days[d]).join(', ');
+  }
+
+  isPastDate(date: Date): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    return compareDate < today;
+  }
+
+  isPastSlot(slot: { start: string }): boolean {
+    if (!this.isToday()) return false;
+    
+    const now = new Date();
+    const [hours, minutes] = slot.start.split(':').map(Number);
+    const slotTime = new Date();
+    slotTime.setHours(hours, minutes, 0, 0);
+    
+    return slotTime <= now;
   }
 
   surfaceFromTags(tags: string[]): string | null {

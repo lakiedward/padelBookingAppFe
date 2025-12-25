@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { BookingService } from '../../services/booking.service';
 import { PublicService } from '../../services/public.service';
+import { AuthService } from '../../services/auth.service';
 import { BookingSummaryResponse } from '../../models/booking.models';
 import { PaymentsService } from '../../services/payments.service';
 import { CourtResponse } from '../../models/court.models';
@@ -28,7 +28,7 @@ interface SlotDetails {
 @Component({
   selector: 'app-booking-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppHeaderComponent, ConvertMoneyPipe],
+  imports: [CommonModule, FormsModule, ConvertMoneyPipe],
   templateUrl: './booking-page.component.html',
   styleUrl: './booking-page.component.scss'
 })
@@ -46,6 +46,7 @@ export class BookingPageComponent implements OnInit {
     private bookingService: BookingService,
     private publicService: PublicService,
     private paymentsService: PaymentsService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -100,6 +101,22 @@ export class BookingPageComponent implements OnInit {
 
   onConfirmBooking(): void {
     if (!this.slotDetails) return;
+
+    // Check if user is authenticated before proceeding with payment
+    if (!this.authService.isLoggedIn()) {
+      // Store booking intent for after login
+      localStorage.setItem('pendingBooking', JSON.stringify({
+        ...this.slotDetails,
+        paymentMethod: this.selectedPaymentMethod,
+        returnUrl: this.router.url
+      }));
+      
+      // Redirect to auth page
+      this.router.navigate(['/auth'], { 
+        queryParams: { returnUrl: this.router.url } 
+      });
+      return;
+    }
 
     this.isSubmitting = true;
     this.bookingError = null;

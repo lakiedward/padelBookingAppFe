@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { PublicService } from '../../services/public.service';
 import { SelectModule } from 'primeng/select';
@@ -25,7 +24,7 @@ interface StatusFilterOption {
 @Component({
   selector: 'app-events-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppHeaderComponent, ConvertMoneyPipe, SelectModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, ConvertMoneyPipe, SelectModule, DatePickerModule],
   templateUrl: './events-page.component.html',
   styleUrls: ['./events-page.component.scss']
 })

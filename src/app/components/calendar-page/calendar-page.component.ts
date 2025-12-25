@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
@@ -26,7 +25,7 @@ type Reservation = {
 @Component({
   selector: 'app-calendar-page',
   standalone: true,
-  imports: [CommonModule, AppHeaderComponent, CourtListingCardComponent, Time24Pipe],
+  imports: [CommonModule, CourtListingCardComponent, Time24Pipe],
   templateUrl: './calendar-page.component.html',
   styleUrl: './calendar-page.component.scss'
 })

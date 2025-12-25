@@ -138,6 +138,31 @@ $white: #fff;
   }
 }
 .btn--block { width: 100%; }
+
+.btn--login {
+  height: 40px;
+  padding: 0 20px;
+  background: $accent;
+  border: 2px solid $accent;
+  color: #000a14;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 0 0 rgba(167, 238, 67, 0);
+
+  &:hover {
+    background: #b8ff54;
+    border-color: #b8ff54;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(167, 238, 67, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 .btn-icon { padding: 8px; border-radius: 8px; color: $text; background: transparent; border: 0; cursor: pointer; }
 .icon { width: 24px; height: 24px; }
 
@@ -353,5 +378,32 @@ $white: #fff;
   &:hover {
     background: rgba(255, 59, 48, 0.2);
     border-color: rgba(255, 59, 48, 0.5);
+  }
+}
+
+.drawer__login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(167, 238, 67, 0.15);
+  border: 1px solid rgba(167, 238, 67, 0.4);
+  color: $accent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: rgba(167, 238, 67, 0.25);
+    border-color: rgba(167, 238, 67, 0.6);
   }
 }

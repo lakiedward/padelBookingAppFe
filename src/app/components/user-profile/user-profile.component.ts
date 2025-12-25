@@ -3,12 +3,11 @@ import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, AppHeaderComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.scss'
 })

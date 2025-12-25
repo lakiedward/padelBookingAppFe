@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output, AfterViewInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
@@ -76,7 +76,8 @@ export class LoginComponent implements AfterViewInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private route: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -117,6 +118,36 @@ export class LoginComponent implements AfterViewInit {
     }, 0);
   }
 
+  private handlePostLoginRedirect() {
+    // Check for pending booking in localStorage
+    const pendingBooking = localStorage.getItem('pendingBooking');
+    if (pendingBooking) {
+      localStorage.removeItem('pendingBooking');
+      const booking = JSON.parse(pendingBooking);
+      // Navigate back to booking page with the same parameters
+      this.router.navigate(['/booking', booking.timeSlotId], {
+        queryParams: {
+          courtId: booking.courtId,
+          date: booking.date,
+          start: booking.startTime,
+          end: booking.endTime,
+          price: booking.price,
+          currency: booking.currency
+        }
+      });
+      return true;
+    }
+
+    // Check for returnUrl query parameter
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (returnUrl) {
+      this.router.navigateByUrl(returnUrl);
+      return true;
+    }
+
+    return false;
+  }
+
   private waitForGoogleSDK(maxAttempts = 20, delay = 200): Promise<void> {
     return new Promise((resolve, reject) => {
       let attempts = 0;
@@ -146,11 +177,12 @@ export class LoginComponent implements AfterViewInit {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.loading = false;
-        if (this.authService.isAdmin()) {
-          this.router.navigate(['/admin']);
-        } else if (this.authService.isUser()) {
-          this.router.navigate(['/courts']);
-        } else {
+        if (!this.handlePostLoginRedirect()) {
+          if (this.authService.isAdmin()) {
+            this.router.navigate(['/admin']);
+          } else if (this.authService.isUser()) {
+            this.router.navigate(['/courts']);
+          }
         }
       },
       error: () => {
@@ -293,12 +325,14 @@ export class LoginComponent implements AfterViewInit {
     this.authService.loginWithGoogle(response.credential).subscribe({
       next: () => {
         this.loading = false;
-        if (this.authService.isAdmin()) {
-          this.router.navigate(['/admin']);
-        } else if (this.authService.isUser()) {
-          this.router.navigate(['/courts']);
-        } else {
-          this.router.navigate(['/']);
+        if (!this.handlePostLoginRedirect()) {
+          if (this.authService.isAdmin()) {
+            this.router.navigate(['/admin']);
+          } else if (this.authService.isUser()) {
+            this.router.navigate(['/courts']);
+          } else {
+            this.router.navigate(['/']);
+          }
         }
       },
       error: () => {

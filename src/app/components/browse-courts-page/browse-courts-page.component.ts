@@ -7,7 +7,6 @@ import { AuthService } from '../../services/auth.service';
 import { PublicService } from '../../services/public.service';
 import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse } from '../../models/court.models';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 import { DatePickerModule } from 'primeng/datepicker';
 import { Select } from 'primeng/select';
 import { sportEmoji } from '../../utils/sport-emoji.util';
@@ -50,7 +49,7 @@ interface CourtItem {
 @Component({
   selector: 'app-browse-courts-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CourtListingCardComponent, AppHeaderComponent, DatePickerModule, Select],
+  imports: [CommonModule, FormsModule, CourtListingCardComponent, DatePickerModule, Select],
   templateUrl: './browse-courts-page.component.html',
   styleUrl: './browse-courts-page.component.scss'
 })

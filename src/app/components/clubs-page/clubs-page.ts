@@ -5,12 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { PublicService } from '../../services/public.service';
 import { ClubDetails, SportKey, SPORT_OPTIONS } from '../../models/club.models';
-import { AppHeaderComponent } from '../shared/app-header/app-header.component';
 
 @Component({
   selector: 'app-clubs-page',
   standalone: true,
-  imports: [CommonModule, AppHeaderComponent, RouterLink, FormsModule, SelectModule],
+  imports: [CommonModule, RouterLink, FormsModule, SelectModule],
   templateUrl: './clubs-page.html',
   styleUrl: './clubs-page.scss'
 })

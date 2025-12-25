@@ -14,6 +14,7 @@ import { filter, Subscription } from 'rxjs';
 export class AppHeaderComponent implements OnInit, OnDestroy {
   mobileOpen = false;
   private routerSubscription?: Subscription;
+  isAdminRoute = false;
 
   userEmail = computed(() => {
     const user = this.auth.currentUser$();
@@ -30,13 +31,18 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
     return user?.profileImageUrl;
   });
 
+  isAuthenticated = computed(() => {
+    return this.auth.currentUser$() !== null;
+  });
+
   constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => {
+      .subscribe((event: any) => {
         this.mobileOpen = false;
+        this.isAdminRoute = event.urlAfterRedirects.startsWith('/admin');
       });
   }
 
@@ -52,6 +58,10 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
 
   logout() {
     this.auth.logout();
+    this.router.navigate(['/auth']);
+  }
+
+  goToLogin() {
     this.router.navigate(['/auth']);
   }
 }

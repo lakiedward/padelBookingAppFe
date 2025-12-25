@@ -22,14 +22,12 @@ export const routes: Routes = [
   {
     path: 'courts',
     loadComponent: () => import('./components/browse-courts-page/browse-courts-page.component')
-      .then(m => m.BrowseCourtsPageComponent),
-    canActivate: [authGuard]
+      .then(m => m.BrowseCourtsPageComponent)
   },
   {
     path: 'court/:id',
     loadComponent: () => import('./components/court-detail/court-detail.component')
-      .then(m => m.CourtDetailComponent),
-    canActivate: [authGuard]
+      .then(m => m.CourtDetailComponent)
   },
 
   {
@@ -40,20 +38,17 @@ export const routes: Routes = [
 
   {
     path: 'clubs',
-    loadComponent: () => import('./components/clubs-page/clubs-page').then(m => m.ClubsPage),
-    canActivate: [authGuard]
+    loadComponent: () => import('./components/clubs-page/clubs-page').then(m => m.ClubsPage)
   },
   {
     path: 'clubs/:id',
-    loadComponent: () => import('./components/club-detail-page/club-detail-page').then(m => m.ClubDetailPageComponent),
-    canActivate: [authGuard]
+    loadComponent: () => import('./components/club-detail-page/club-detail-page').then(m => m.ClubDetailPageComponent)
   },
 
   {
     path: 'events',
     loadComponent: () => import('./components/events-page/events-page.component')
-      .then(m => m.EventsPageComponent),
-    canActivate: [authGuard]
+      .then(m => m.EventsPageComponent)
   },
 
   {
@@ -65,8 +60,7 @@ export const routes: Routes = [
   {
     path: 'booking/:timeSlotId',
     loadComponent: () => import('./components/booking-page/booking-page.component')
-      .then(m => m.BookingPageComponent),
-    canActivate: [authGuard]
+      .then(m => m.BookingPageComponent)
   },
   {
     path: 'checkout/success',
