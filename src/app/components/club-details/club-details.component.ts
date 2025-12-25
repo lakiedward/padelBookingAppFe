@@ -308,6 +308,26 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initMapOnce();
   }
 
+  cancel() {
+    if (this.isSaving()) return;
+    
+    const saved = this.clubService.lastSaved();
+    if (saved) {
+      this.applyDetailsToForm(saved);
+      this.isEditing.set(false);
+    } else {
+      // If no club is saved, navigate away or reset form
+      this.form.reset();
+      this.selectedSports = new Set<SportKey>(['tennis']);
+      this.savedLocations = [];
+      this.profilePreviewUrl.set(null);
+      this.wallpaperPreviewUrl.set(null);
+      this.selectedProfileFile = null;
+      this.selectedWallpaperFile = null;
+    }
+    this.submitted = false;
+  }
+
   private applyDetailsToForm(details: ClubDetails) {
     this.form.patchValue({
       name: details.name || '',

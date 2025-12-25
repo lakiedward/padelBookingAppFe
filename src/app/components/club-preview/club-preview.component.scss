@@ -29,7 +29,7 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  height: 320px;
+  height: 400px;
   background: linear-gradient(90deg, #0f1b26, #1a2332);
   background-size: cover;
   background-position: center;
@@ -38,7 +38,7 @@
   padding: 0;
 
   @media (max-width: 767px) {
-    height: 280px;
+    height: 360px;
   }
 }
 .hero-overlay {
@@ -71,7 +71,7 @@
 .sport { background: #a7ee43; color: #000a14; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 12px; }
 .location { color: #d6dde6; font-size: 14px; margin-top: 6px; }
 
-.container { padding: 16px 0 24px; }
+.container { padding: 0 0 24px; }
 
 .about, .contact, .courts {
   padding-left: 8px;
@@ -275,7 +275,7 @@
 
 .hero {
   position: relative;
-  height: 320px;
+  height: 400px;
   background: linear-gradient(90deg, #0f1b26, #1a2332);
   background-size: cover;
   background-position: center;
@@ -310,7 +310,7 @@
 .sport { background: #a7ee43; color: #000a14; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 12px; }
 .location { color: #d6dde6; font-size: 14px; margin-top: 6px; }
 
-.container { padding: 16px 0 24px; }
+.container { padding: 0 0 24px; }
 
 .about, .contact, .courts {
   padding-left: 8px;
@@ -380,10 +380,10 @@
 .club-preview .hero {
   margin-left: -24px;
   margin-right: -24px;
-  margin-top: -32px;
+  margin-top: -24px;
   width: calc(100% + 48px);
   max-width: none;
-  height: 320px;
+  height: 424px;
   border-radius: 0;
   overflow: hidden;
   position: relative;
@@ -395,18 +395,12 @@
 }
 
 @media (max-width: 767px) {
-  .club-preview {
+  .club-preview .hero {
     margin-left: -16px;
     margin-right: -16px;
+    margin-top: -32px;
     width: calc(100% + 32px);
-  }
-
-  .club-preview .hero {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: -24px;
-    width: 100%;
-    height: 280px;
+    height: 392px;
   }
 
   .club-preview .logo {
@@ -427,7 +421,7 @@
   }
 
   .hero .hero-actions {
-    top: 12px;
+    top: 44px;
     right: 12px;
     
     .btn {
@@ -442,8 +436,28 @@
   }
 
   .club-preview .container {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .club-preview .hero {
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-top: -32px;
+    width: calc(100% + 40px);
+    height: 432px;
+  }
+
+  .hero .hero-actions {
+    top: 48px;
+    right: 16px;
+  }
+
+  .club-preview .container {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 

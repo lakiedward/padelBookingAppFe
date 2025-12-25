@@ -86,7 +86,8 @@
     <section class="content-card" *ngIf="selectedMenu === 'courts'">
       <app-court-view
         (addCourt)="onAddCourtFromView()"
-        (editCourt)="onEditCourtFromView($event)">
+        (editCourt)="onEditCourtFromView($event)"
+        (viewBookings)="onManageBookingFromCourt($event)">
       </app-court-view>
     </section>
     <section class="content-card" *ngIf="selectedMenu === 'manage-booking'">

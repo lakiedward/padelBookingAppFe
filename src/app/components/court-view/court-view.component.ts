@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output, signal, ChangeDetectorRef } fr
 import { CommonModule } from '@angular/common';
 import { CourtService } from '../../services/court.service';
 import { CourtSummaryResponse, CourtResponse, CourtAvailabilityRuleResponse, BackendAvailabilityRuleType, CourtEquipmentResponse } from '../../models/court.models';
+import { SportKey, SPORT_OPTIONS } from '../../models/club.models';
 import { forkJoin } from 'rxjs';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
@@ -58,8 +59,11 @@ export class CourtViewComponent implements OnInit {
   @Output() viewBookings = new EventEmitter<number>();
 
   courts: CourtPanelData[] = [];
+  allCourts: CourtPanelData[] = [];
   isLoading = false;
   loadError: string | null = null;
+  selectedSport: SportKey | 'all' = 'all';
+  availableSports: (SportKey | 'all')[] = ['all'];
 
   constructor(
     private courtService: CourtService,
@@ -94,7 +98,9 @@ export class CourtViewComponent implements OnInit {
 
         forkJoin(detailRequests).subscribe({
           next: (detailedCourts) => {
-            this.courts = detailedCourts.map(c => this.mapCourtToPanel(c));
+            this.allCourts = detailedCourts.map(c => this.mapCourtToPanel(c));
+            this.extractAvailableSports();
+            this.filterCourts();
             this.isLoading = false;
             this.cdr.detectChanges();
           },
@@ -121,6 +127,33 @@ export class CourtViewComponent implements OnInit {
 
   onViewBookings(courtId: number) {
     this.viewBookings.emit(courtId);
+  }
+
+  onSportFilterChange() {
+    this.filterCourts();
+  }
+
+  onSportButtonClick(sport: SportKey | 'all') {
+    this.selectedSport = sport;
+    this.filterCourts();
+  }
+
+  private extractAvailableSports() {
+    const sportsSet = new Set<SportKey>();
+    this.allCourts.forEach(court => {
+      if (court.sport) {
+        sportsSet.add(court.sport as SportKey);
+      }
+    });
+    this.availableSports = ['all', ...Array.from(sportsSet).sort()];
+  }
+
+  private filterCourts() {
+    if (this.selectedSport === 'all') {
+      this.courts = this.allCourts;
+    } else {
+      this.courts = this.allCourts.filter(court => court.sport === this.selectedSport);
+    }
   }
 
   onDeleteCourt(courtId: number, courtName: string) {

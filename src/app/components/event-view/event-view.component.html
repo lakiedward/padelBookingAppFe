@@ -9,6 +9,28 @@
       <button type="button" class="btn btn--primary" (click)="onAddEventClick()">Add Event</button>
     </div>
   </div>
+  
+  <div class="sport-filter-row">
+    <div class="sport-filter-buttons">
+      <button
+        type="button"
+        class="sport-button"
+        [class.selected]="selectedSport === 'all'"
+        (click)="onSportButtonClick('all')"
+      >
+        All
+      </button>
+      <button
+        type="button"
+        class="sport-button"
+        *ngFor="let sport of availableSports.slice(1)"
+        [class.selected]="selectedSport === sport"
+        (click)="onSportButtonClick(sport)"
+      >
+        {{ sport | titlecase }}
+      </button>
+    </div>
+  </div>
 
   <div class="loading" *ngIf="isLoading">Loading events...</div>
   <div class="error" *ngIf="loadError">{{ loadError }}</div>

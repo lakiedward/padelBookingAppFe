@@ -76,7 +76,8 @@ $white: #fff;
 .drawer__mail { color: $muted; font-size: 14px; }
 
 .hero { position: relative; }
-.hero__inner { padding: 40px 16px 24px; }
+.hero__inner { padding: 24px 16px 24px; }
+.hero__head { text-align: center; }
 .hero__title { font-size: 40px; font-weight: 800; letter-spacing: 0.02em; }
 .hero__subtitle { color: $muted; margin-top: 8px; font-size: 16px; }
 .muted { color: #d6dde6; }

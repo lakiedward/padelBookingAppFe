@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { EventService } from '../../services/event.service';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { EventSummaryResponse, EventPanelData, eventSummaryToPanelData, getFormatDisplayName, getStatusDisplayName, EventStatus } from '../../models/event.models';
+import { SportKey } from '../../models/club.models';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 
@@ -19,8 +20,11 @@ export class EventViewComponent implements OnInit {
   @Output() editEvent = new EventEmitter<number>();
 
   events: EventPanelData[] = [];
+  allEvents: EventPanelData[] = [];
   isLoading = false;
   loadError: string | null = null;
+  selectedSport: SportKey | 'all' = 'all';
+  availableSports: (SportKey | 'all')[] = ['all'];
 
   constructor(
     private eventService: EventService,
@@ -41,7 +45,9 @@ export class EventViewComponent implements OnInit {
 
     this.eventService.getEvents().subscribe({
       next: (events) => {
-        this.events = events.map(e => eventSummaryToPanelData(e));
+        this.allEvents = events.map(e => eventSummaryToPanelData(e));
+        this.extractAvailableSports();
+        this.filterEvents();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -55,6 +61,29 @@ export class EventViewComponent implements OnInit {
 
   onAddEventClick() {
     this.addEvent.emit();
+  }
+
+  onSportButtonClick(sport: SportKey | 'all') {
+    this.selectedSport = sport;
+    this.filterEvents();
+  }
+
+  private extractAvailableSports() {
+    const sportsSet = new Set<SportKey>();
+    this.allEvents.forEach(event => {
+      if (event.sportKey) {
+        sportsSet.add(event.sportKey);
+      }
+    });
+    this.availableSports = ['all', ...Array.from(sportsSet).sort()];
+  }
+
+  private filterEvents() {
+    if (this.selectedSport === 'all') {
+      this.events = this.allEvents;
+    } else {
+      this.events = this.allEvents.filter(event => event.sportKey === this.selectedSport);
+    }
   }
 
   onEditEvent(eventId: number) {

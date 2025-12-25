@@ -170,15 +170,20 @@
 
     <div class="footer">
       <div class="hint">Make sure all information is accurate before saving</div>
-      <button pButton type="button" (click)="save()" class="btn btn--primary btn--sm" [disabled]="isSaving()">
-        <ng-container *ngIf="isSaving(); else normalContent">
-          <span class="u-spinner u-spinner--sm"></span>
-          <span>{{ hasExistingClub ? 'Updating Club...' : 'Creating Club...' }}</span>
-        </ng-container>
-        <ng-template #normalContent>
-          <span>{{ hasExistingClub ? 'Update Club' : 'Create Club' }}</span>
-        </ng-template>
-      </button>
+      <div class="button-group">
+        <button pButton type="button" (click)="cancel()" class="btn btn--secondary btn--sm" [disabled]="isSaving()">
+          <span>Cancel</span>
+        </button>
+        <button pButton type="button" (click)="save()" class="btn btn--primary btn--sm" [disabled]="isSaving()">
+          <ng-container *ngIf="isSaving(); else normalContent">
+            <span class="u-spinner u-spinner--sm"></span>
+            <span>{{ hasExistingClub ? 'Updating Club...' : 'Creating Club...' }}</span>
+          </ng-container>
+          <ng-template #normalContent>
+            <span>{{ hasExistingClub ? 'Update Club' : 'Create Club' }}</span>
+          </ng-template>
+        </button>
+      </div>
     </div>
   </form>
 
