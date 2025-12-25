@@ -18,9 +18,9 @@ export class App {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
-        this.showHeader.set(!event.url.startsWith('/auth'));
+        this.showHeader.set(!event.url.startsWith('/auth') && !event.url.startsWith('/admin'));
       });
     
-    this.showHeader.set(!this.router.url.startsWith('/auth'));
+    this.showHeader.set(!this.router.url.startsWith('/auth') && !this.router.url.startsWith('/admin'));
   }
 }

@@ -5,6 +5,8 @@ import { OwnerOnboardingComponent } from './components/owner-onboarding/owner-on
 import { authRedirectGuard } from './guards/auth-redirect.guard';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { adminRedirectGuard } from './guards/admin-redirect.guard';
+import { wildcardRedirectGuard } from './guards/wildcard-redirect.guard';
 
 export const routes: Routes = [
   {
@@ -22,12 +24,14 @@ export const routes: Routes = [
   {
     path: 'courts',
     loadComponent: () => import('./components/browse-courts-page/browse-courts-page.component')
-      .then(m => m.BrowseCourtsPageComponent)
+      .then(m => m.BrowseCourtsPageComponent),
+    canActivate: [adminRedirectGuard]
   },
   {
     path: 'court/:id',
     loadComponent: () => import('./components/court-detail/court-detail.component')
-      .then(m => m.CourtDetailComponent)
+      .then(m => m.CourtDetailComponent),
+    canActivate: [adminRedirectGuard]
   },
 
   {
@@ -38,17 +42,20 @@ export const routes: Routes = [
 
   {
     path: 'clubs',
-    loadComponent: () => import('./components/clubs-page/clubs-page').then(m => m.ClubsPage)
+    loadComponent: () => import('./components/clubs-page/clubs-page').then(m => m.ClubsPage),
+    canActivate: [adminRedirectGuard]
   },
   {
     path: 'clubs/:id',
-    loadComponent: () => import('./components/club-detail-page/club-detail-page').then(m => m.ClubDetailPageComponent)
+    loadComponent: () => import('./components/club-detail-page/club-detail-page').then(m => m.ClubDetailPageComponent),
+    canActivate: [adminRedirectGuard]
   },
 
   {
     path: 'events',
     loadComponent: () => import('./components/events-page/events-page.component')
-      .then(m => m.EventsPageComponent)
+      .then(m => m.EventsPageComponent),
+    canActivate: [adminRedirectGuard]
   },
 
   {
@@ -60,7 +67,8 @@ export const routes: Routes = [
   {
     path: 'booking/:timeSlotId',
     loadComponent: () => import('./components/booking-page/booking-page.component')
-      .then(m => m.BookingPageComponent)
+      .then(m => m.BookingPageComponent),
+    canActivate: [authGuard, adminRedirectGuard]
   },
   {
     path: 'checkout/success',
@@ -91,5 +99,12 @@ export const routes: Routes = [
     path: 'owner/onboarding/refresh',
     component: OwnerOnboardingComponent,
     canActivate: [adminGuard]
+  },
+
+  // Wildcard route - redirects based on user role
+  {
+    path: '**',
+    loadComponent: () => import('./components/wildcard-redirect/wildcard-redirect.component')
+      .then(m => m.WildcardRedirectComponent)
   }
 ];

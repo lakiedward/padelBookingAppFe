@@ -16,19 +16,41 @@
 
     <div class="actions actions--desktop">
       <ng-container *ngIf="isAuthenticated(); else loginButton">
-        <div class="user-profile" (click)="goToProfile()">
-          <div class="user-profile__avatar">
-            <svg *ngIf="!profileImageUrl()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
+        <div class="user-profile-dropdown" [class.open]="profileDropdownOpen">
+          <button class="user-profile" (click)="toggleProfileDropdown($event)">
+            <div class="user-profile__avatar">
+              <svg *ngIf="!profileImageUrl()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <img *ngIf="profileImageUrl()" [src]="profileImageUrl()" [alt]="username()" />
+            </div>
+            <div class="user-profile__info">
+              <span class="user-profile__name">{{ username() }}</span>
+            </div>
+            <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
-            <img *ngIf="profileImageUrl()" [src]="profileImageUrl()" [alt]="username()" />
-          </div>
-          <div class="user-profile__info">
-            <span class="user-profile__name">{{ username() }}</span>
+          </button>
+          
+          <div class="profile-dropdown-menu" *ngIf="profileDropdownOpen">
+            <button class="dropdown-item" (click)="goToProfile(); closeProfileDropdown()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Edit Profile</span>
+            </button>
+            <button class="dropdown-item" (click)="logout(); closeProfileDropdown()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Logout</span>
+            </button>
           </div>
         </div>
-        <button class="btn" (click)="logout()">Logout</button>
       </ng-container>
       <ng-template #loginButton>
         <button class="btn btn--login" (click)="goToLogin()">Sign In</button>

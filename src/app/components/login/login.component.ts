@@ -86,7 +86,22 @@ export class LoginComponent implements AfterViewInit {
     });
 
     this.loginForm.valueChanges.subscribe(() => {
-      if (this.authError) this.authError = false;
+      if (this.authError) {
+        this.authError = false;
+        // Clear auth error from individual fields
+        const emailCtrl = this.loginForm.get('email');
+        const passCtrl = this.loginForm.get('password');
+        
+        if (emailCtrl?.errors?.['auth']) {
+          const { auth, ...otherErrors } = emailCtrl.errors;
+          emailCtrl.setErrors(Object.keys(otherErrors).length ? otherErrors : null);
+        }
+        
+        if (passCtrl?.errors?.['auth']) {
+          const { auth, ...otherErrors } = passCtrl.errors;
+          passCtrl.setErrors(Object.keys(otherErrors).length ? otherErrors : null);
+        }
+      }
     });
   }
 
@@ -169,6 +184,21 @@ export class LoginComponent implements AfterViewInit {
   onSignIn() {
     this.submitted = true;
     this.authError = false;
+    
+    // Clear any previous auth errors before validation
+    const emailCtrl = this.loginForm.get('email');
+    const passCtrl = this.loginForm.get('password');
+    
+    if (emailCtrl?.errors?.['auth']) {
+      const { auth, ...otherErrors } = emailCtrl.errors;
+      emailCtrl.setErrors(Object.keys(otherErrors).length ? otherErrors : null);
+    }
+    
+    if (passCtrl?.errors?.['auth']) {
+      const { auth, ...otherErrors } = passCtrl.errors;
+      passCtrl.setErrors(Object.keys(otherErrors).length ? otherErrors : null);
+    }
+    
     if (!this.loginForm.valid || this.loading) return;
 
     this.loading = true;

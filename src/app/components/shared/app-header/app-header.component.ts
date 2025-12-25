@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { filter, Subscription } from 'rxjs';
@@ -15,6 +15,7 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
   mobileOpen = false;
   private routerSubscription?: Subscription;
   isAdminRoute = false;
+  profileDropdownOpen = false;
 
   userEmail = computed(() => {
     const user = this.auth.currentUser$();
@@ -35,7 +36,11 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
     return this.auth.currentUser$() !== null;
   });
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService, 
+    private router: Router,
+    private elementRef: ElementRef
+  ) {}
 
   ngOnInit() {
     this.routerSubscription = this.router.events
@@ -52,6 +57,17 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
 
   toggleMobile() { this.mobileOpen = !this.mobileOpen; }
 
+  toggleProfileDropdown(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.profileDropdownOpen = !this.profileDropdownOpen;
+  }
+
+  closeProfileDropdown() {
+    this.profileDropdownOpen = false;
+  }
+
   goToProfile() {
     this.router.navigate(['/profile']);
   }
@@ -63,5 +79,12 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
 
   goToLogin() {
     this.router.navigate(['/auth']);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.closeProfileDropdown();
+    }
   }
 }
