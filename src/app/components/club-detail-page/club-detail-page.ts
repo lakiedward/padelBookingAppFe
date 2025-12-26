@@ -7,7 +7,7 @@ import { ClubDetails, SportKey } from '../../models/club.models';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { forkJoin } from 'rxjs';
 import { Time24Pipe } from '../../pipes/time24.pipe';
-import { sportEmoji } from '../../utils/sport-emoji.util';
+import { normalizeSportName } from '../../utils/normalize-sport-name.util';
 
 interface CourtListingData {
   courtId: number;
@@ -120,7 +120,7 @@ export class ClubDetailPageComponent implements OnInit {
     return {
       courtId: c.id,
       image: this.courtService.toAbsoluteUrl(c.primaryPhotoUrl) || 'https://placehold.co/1200x800?text=Court',
-      emoji: sportEmoji(c.sport),
+      emoji: normalizeSportName(c.sport),
       title: c.name,
       club: this.club()?.name || '',
       location: this.club()?.locations?.[0]?.address || '',

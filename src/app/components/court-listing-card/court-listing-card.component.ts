@@ -26,6 +26,28 @@ export class CourtListingCardComponent {
   imageError = false;
   fallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"%3E%3Crect fill="%231a2332" width="400" height="300"/%3E%3Ctext fill="%238aa0b5" font-family="system-ui" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image Available%3C/text%3E%3C/svg%3E';
 
+  getSportIcon(): string | null {
+    const sportName = this.emoji.toLowerCase().trim();
+    
+    const sportMap: { [key: string]: string } = {
+      'tennis': 'assets/icons/tennis.svg',
+      'padel': 'assets/icons/padel.svg',
+      'football': 'assets/icons/football.svg',
+      'soccer': 'assets/icons/football.svg',
+      'basketball': 'assets/icons/basketball.svg',
+      'volleyball': 'assets/icons/volleyball.svg',
+      'badminton': 'assets/icons/badminton.svg',
+      'squash': 'assets/icons/squash.svg',
+      'handball': 'assets/icons/handball.svg',
+      'pingpong': 'assets/icons/pingpong.svg',
+      'ping pong': 'assets/icons/pingpong.svg',
+      'table tennis': 'assets/icons/pingpong.svg',
+      'table-tennis': 'assets/icons/pingpong.svg'
+    };
+    
+    return sportMap[sportName] || null;
+  }
+
   handleCardClick() {
     this.cardClick.emit();
   }

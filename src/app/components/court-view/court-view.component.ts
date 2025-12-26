@@ -314,6 +314,28 @@ export class CourtViewComponent implements OnInit {
 
   trackByIndex(index: number) { return index; }
 
+  getSportIcon(sport: string): string | null {
+    const sportName = sport.toLowerCase().trim();
+    
+    const sportMap: { [key: string]: string } = {
+      'tennis': 'assets/icons/tennis.svg',
+      'padel': 'assets/icons/padel.svg',
+      'football': 'assets/icons/football.svg',
+      'soccer': 'assets/icons/football.svg',
+      'basketball': 'assets/icons/basketball.svg',
+      'volleyball': 'assets/icons/volleyball.svg',
+      'badminton': 'assets/icons/badminton.svg',
+      'squash': 'assets/icons/squash.svg',
+      'handball': 'assets/icons/handball.svg',
+      'pingpong': 'assets/icons/pingpong.svg',
+      'ping pong': 'assets/icons/pingpong.svg',
+      'table tennis': 'assets/icons/pingpong.svg',
+      'table-tennis': 'assets/icons/pingpong.svg'
+    };
+    
+    return sportMap[sportName] || null;
+  }
+
   private hhmmToMinutes(hhmm: string): number {
     const [h, m] = hhmm.split(':').map(Number);
     return h * 60 + m;

@@ -9,7 +9,7 @@ import { CourtService } from '../../services/court.service';
 import { CourtAvailabilityRuleResponse } from '../../models/court.models';
 import { DatePickerModule } from 'primeng/datepicker';
 import { Select } from 'primeng/select';
-import { sportEmoji } from '../../utils/sport-emoji.util';
+import { normalizeSportName } from '../../utils/normalize-sport-name.util';
 import { catchError, forkJoin, map, of } from 'rxjs';
 
 type SportFilter =
@@ -291,7 +291,7 @@ export class BrowseCourtsPageComponent implements OnInit {
         const baseItems = courts.map(c => ({
           courtId: c.id,
           image: this.courtService.toAbsoluteUrl(c.primaryPhotoUrl) || 'https://placehold.co/1200x800?text=Court',
-          emoji: sportEmoji(c.sport),
+          emoji: normalizeSportName(c.sport),
           title: c.name,
           club: c.clubName,
           location: c.clubName,

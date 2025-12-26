@@ -136,7 +136,7 @@
                 tabindex="0"
               >
                 <div class="res-item__left">
-                  <div class="emoji">{{ r.sport }}</div>
+                  <img *ngIf="getSportIcon(r.sport)" [src]="getSportIcon(r.sport)" [alt]="r.sport" class="emoji" />
                   <div class="meta">
                     <div class="title">{{ r.court }}</div>
                   </div>
@@ -159,7 +159,7 @@
               tabindex="0"
             >
               <div class="res-item__left">
-                <div class="emoji">{{ r.sport }}</div>
+                <img *ngIf="getSportIcon(r.sport)" [src]="getSportIcon(r.sport)" [alt]="r.sport" class="emoji" />
                 <div class="meta">
                   <div class="title">{{ r.court }}</div>
                 </div>

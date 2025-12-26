@@ -56,7 +56,7 @@
 
         <div class="hero-bottom">
           <div class="left">
-            <div class="icon-box" aria-hidden="true">{{ getSportIcon(e.sportKey) }}</div>
+            <img *ngIf="getSportIcon(e.sportKey)" [src]="getSportIcon(e.sportKey)" [alt]="e.sportKey" class="icon-box" />
             <div class="text">
               <h3>{{ e.name }}</h3>
               <p class="muted">{{ getFormatDisplay(e) }} • {{ e.sportKey }}</p>

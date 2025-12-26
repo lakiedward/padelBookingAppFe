@@ -12,6 +12,7 @@ import { Time24Pipe } from '../../pipes/time24.pipe';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { normalizeSportName } from '../../utils/normalize-sport-name.util';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -192,7 +193,7 @@ export class ManageBookingComponent implements OnInit, OnChanges {
             end: this.formatTimeToHHMM(endDateTime),
             club: 'Club',
             court: booking.courtName,
-            sport: this.getSportEmoji(booking.activityName),
+            sport: normalizeSportName(booking.activityName),
             username: booking.username,
             userId: booking.userId,
             userEmail: booking.userEmail ?? undefined,
@@ -219,20 +220,6 @@ export class ManageBookingComponent implements OnInit, OnChanges {
 
   private formatTimeToHHMM(date: Date): string {
     return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-  }
-
-  private getSportEmoji(activityName: string): string {
-    const emojiMap: Record<string, string> = {
-      'tennis': '🎾',
-      'padel': '🏓',
-      'basketball': '🏀',
-      'volleyball': '🏐',
-      'football': '⚽',
-      'soccer': '⚽'
-    };
-
-    const normalized = activityName.toLowerCase();
-    return emojiMap[normalized] || '🎯';
   }
 
   readonly eventsByDay = computed<Record<string, string[]>>(() => {
@@ -337,7 +324,7 @@ export class ManageBookingComponent implements OnInit, OnChanges {
           end: this.formatTimeToHHMM(endDateTime),
           club: 'Club',
           court: updated.courtName,
-          sport: this.getSportEmoji(updated.activityName),
+          sport: normalizeSportName(updated.activityName),
           username: updated.username,
           userId: updated.userId,
           userEmail: updated.userEmail ?? undefined,

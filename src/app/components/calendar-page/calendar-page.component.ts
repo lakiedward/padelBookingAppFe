@@ -5,7 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { Time24Pipe } from '../../pipes/time24.pipe';
-import { sportEmoji } from '../../utils/sport-emoji.util';
+import { normalizeSportName } from '../../utils/normalize-sport-name.util';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -66,7 +66,7 @@ export class CalendarPageComponent implements OnInit {
             end: this.formatTimeToHHMM(endDateTime),
             club: 'Club',
             court: booking.courtName,
-            sport: sportEmoji(booking.activityName),
+            sport: normalizeSportName(booking.activityName),
             city: 'City',
             timeSlotId: booking.timeSlotId
           };
@@ -300,6 +300,28 @@ export class CalendarPageComponent implements OnInit {
       event.preventDefault();
       this.onReservationClick(reservation);
     }
+  }
+
+  getSportIcon(sportName: string): string | null {
+    const sport = sportName.toLowerCase().trim();
+    
+    const sportMap: { [key: string]: string } = {
+      'tennis': 'assets/icons/tennis.svg',
+      'padel': 'assets/icons/padel.svg',
+      'football': 'assets/icons/football.svg',
+      'soccer': 'assets/icons/football.svg',
+      'basketball': 'assets/icons/basketball.svg',
+      'volleyball': 'assets/icons/volleyball.svg',
+      'badminton': 'assets/icons/badminton.svg',
+      'squash': 'assets/icons/squash.svg',
+      'handball': 'assets/icons/handball.svg',
+      'pingpong': 'assets/icons/pingpong.svg',
+      'ping pong': 'assets/icons/pingpong.svg',
+      'table tennis': 'assets/icons/pingpong.svg',
+      'table-tennis': 'assets/icons/pingpong.svg'
+    };
+    
+    return sportMap[sport] || null;
   }
 
   private pickReservationForNavigation(reservations: Reservation[]): Reservation | undefined {

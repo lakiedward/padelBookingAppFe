@@ -45,7 +45,7 @@
         <div class="img" [style.background-image]="c.imageUrl ? 'url(' + c.imageUrl + ')' : ''"></div>
         <div class="hero-gradient" aria-hidden="true"></div>
 
-        <div class="icon-box" aria-hidden="true">🎾</div>
+        <img *ngIf="getSportIcon(c.sport)" [src]="getSportIcon(c.sport)" [alt]="c.sport" class="icon-box" />
 
         <div class="hero-actions desktop">
           <button type="button" class="btn btn--primary btn--sm" (click)="onEditCourt(c.id); $event.stopPropagation()">

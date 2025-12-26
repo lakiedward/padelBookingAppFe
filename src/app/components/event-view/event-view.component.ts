@@ -134,11 +134,26 @@ export class EventViewComponent implements OnInit {
     }
   }
 
-  getSportIcon(sportKey: string): string {
-    const sport = sportKey.toLowerCase();
-    if (sport === 'tennis') return '🎾';
-    if (sport === 'padel') return '🏸';
-    return '🏆';
+  getSportIcon(sportKey: string): string | null {
+    const sportName = sportKey.toLowerCase().trim();
+    
+    const sportMap: { [key: string]: string } = {
+      'tennis': 'assets/icons/tennis.svg',
+      'padel': 'assets/icons/padel.svg',
+      'football': 'assets/icons/football.svg',
+      'soccer': 'assets/icons/football.svg',
+      'basketball': 'assets/icons/basketball.svg',
+      'volleyball': 'assets/icons/volleyball.svg',
+      'badminton': 'assets/icons/badminton.svg',
+      'squash': 'assets/icons/squash.svg',
+      'handball': 'assets/icons/handball.svg',
+      'pingpong': 'assets/icons/pingpong.svg',
+      'ping pong': 'assets/icons/pingpong.svg',
+      'table tennis': 'assets/icons/pingpong.svg',
+      'table-tennis': 'assets/icons/pingpong.svg'
+    };
+    
+    return sportMap[sportName] || null;
   }
 
   formatDate(date: Date): string {

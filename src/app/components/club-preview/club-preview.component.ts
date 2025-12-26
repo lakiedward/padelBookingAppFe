@@ -5,7 +5,7 @@ import { CourtSummaryResponse, CourtResponse, BackendAvailabilityRuleType } from
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
 import { CourtService } from '../../services/court.service';
 import { Time24Pipe } from '../../pipes/time24.pipe';
-import { sportEmoji } from '../../utils/sport-emoji.util';
+import { normalizeSportName } from '../../utils/normalize-sport-name.util';
 
 interface CourtListingData {
   id: string;
@@ -100,7 +100,7 @@ export class ClubPreviewComponent implements OnInit {
       }
     }
     
-    const emoji = sportEmoji(summary.sport as any);
+    const emoji = normalizeSportName(summary.sport as any);
     
     const price = 'N/A';
     const availableDate = 'N/A';
@@ -136,7 +136,7 @@ export class ClubPreviewComponent implements OnInit {
       }
     }
     
-    const emoji = sportEmoji(court.sport as any);
+    const emoji = normalizeSportName(court.sport as any);
     
     const { price, availableDate, slots } = this.extractAvailabilityInfo(court);
 

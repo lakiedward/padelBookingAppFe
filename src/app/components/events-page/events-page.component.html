@@ -178,7 +178,7 @@
           </div>
 
           <div class="event-hero__content">
-            <div class="event-hero__icon" aria-hidden="true">{{ sportIcon(event.sportKey) }}</div>
+            <img *ngIf="sportIcon(event.sportKey)" [src]="sportIcon(event.sportKey)" [alt]="event.sportKey" class="event-hero__icon" />
             <div class="event-hero__text">
               <h3>{{ event.name }}</h3>
               <p class="muted">{{ formatEventType(event) }} • {{ formatEventFormat(event) }}</p>

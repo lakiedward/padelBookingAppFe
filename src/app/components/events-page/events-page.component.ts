@@ -188,13 +188,26 @@ export class EventsPageComponent implements OnInit {
     return normalized;
   }
 
-  protected sportIcon(sportKey: SportKey): string {
-    const normalized = sportKey.toLowerCase();
-    if (normalized.includes('padel')) return '🏸';
-    if (normalized.includes('tennis')) return '🎾';
-    if (normalized.includes('football') || normalized.includes('soccer')) return '⚽';
-    if (normalized.includes('basket')) return '🏀';
-    return '🏆';
+  protected sportIcon(sportKey: SportKey): string | null {
+    const sportName = sportKey.toLowerCase().trim();
+    
+    const sportMap: { [key: string]: string } = {
+      'tennis': 'assets/icons/tennis.svg',
+      'padel': 'assets/icons/padel.svg',
+      'football': 'assets/icons/football.svg',
+      'soccer': 'assets/icons/football.svg',
+      'basketball': 'assets/icons/basketball.svg',
+      'volleyball': 'assets/icons/volleyball.svg',
+      'badminton': 'assets/icons/badminton.svg',
+      'squash': 'assets/icons/squash.svg',
+      'handball': 'assets/icons/handball.svg',
+      'pingpong': 'assets/icons/pingpong.svg',
+      'ping pong': 'assets/icons/pingpong.svg',
+      'table tennis': 'assets/icons/pingpong.svg',
+      'table-tennis': 'assets/icons/pingpong.svg'
+    };
+    
+    return sportMap[sportName] || null;
   }
 
   protected cardStatusClass(event: EventPanelData): string {
