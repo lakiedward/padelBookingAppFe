@@ -26,6 +26,52 @@
     justify-content: center;
   }
 
+  .info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: rgba(167, 238, 67, 0.1);
+    border: 1px solid rgba(167, 238, 67, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+
+    .info-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(167, 238, 67, 0.2);
+      border-radius: 10px;
+
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .info-content {
+      flex: 1;
+
+      h4 {
+        color: #a7ee43;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+      }
+
+      p {
+        color: #d6dde6;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        opacity: 0.9;
+      }
+    }
+  }
+
   .mobile-header {
     display: none;
     position: fixed;
@@ -671,6 +717,31 @@
     .grid {
       grid-template-columns: 1fr;
       gap: 16px;
+    }
+
+    .info-card {
+      padding: 16px;
+      gap: 12px;
+
+      .info-icon {
+        width: 32px;
+        height: 32px;
+
+        svg {
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .info-content {
+        h4 {
+          font-size: 16px;
+        }
+
+        p {
+          font-size: 13px;
+        }
+      }
     }
 
     .sports {

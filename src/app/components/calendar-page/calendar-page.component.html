@@ -139,7 +139,6 @@
                   <div class="emoji">{{ r.sport }}</div>
                   <div class="meta">
                     <div class="title">{{ r.court }}</div>
-                    <div class="sub">{{ r.club }}<ng-container *ngIf="r.city"> • {{ r.city }}</ng-container></div>
                   </div>
                 </div>
                 <div class="time">{{ r.start | time24 }} – {{ r.end | time24 }}</div>
@@ -163,7 +162,6 @@
                 <div class="emoji">{{ r.sport }}</div>
                 <div class="meta">
                   <div class="title">{{ r.court }}</div>
-                  <div class="sub">{{ r.club }}<ng-container *ngIf="r.city"> • {{ r.city }}</ng-container></div>
                 </div>
               </div>
               <div class="time">{{ r.start | time24 }} – {{ r.end | time24 }}</div>

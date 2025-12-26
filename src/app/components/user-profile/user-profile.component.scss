@@ -70,6 +70,19 @@ $white: #fff;
   .profile-title {
     font-size: 32px;
   }
+
+  .form-actions {
+    flex-direction: row;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 24px;
+
+    .btn {
+      flex: 1;
+      max-width: 140px;
+      min-width: 120px;
+    }
+  }
 }
 
 .profile-card {
@@ -112,10 +125,16 @@ $white: #fff;
   background: rgba(167, 238, 67, 0.08);
   box-shadow: 0 4px 20px rgba(167, 238, 67, 0.2);
   transition: all 0.3s ease;
+  cursor: pointer;
 
   &:hover {
     transform: scale(1.05);
     box-shadow: 0 6px 28px rgba(167, 238, 67, 0.3);
+
+    .avatar-overlay {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 }
 
@@ -123,6 +142,55 @@ $white: #fff;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: opacity 0.3s ease;
+
+  &.loading {
+    opacity: 0.3;
+  }
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+
+    .spinner-circle {
+      stroke: $accent;
+      animation: dash 1.5s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
 }
 
 .avatar-placeholder {
@@ -133,11 +201,60 @@ $white: #fff;
   justify-content: center;
   background: rgba(167, 238, 67, 0.12);
 
-  svg {
-    width: 70px;
-    height: 70px;
-    color: $accent;
+  .avatar-icon {
+    svg {
+      width: 70px;
+      height: 70px;
+      color: $accent;
+    }
   }
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: $white;
+  }
+
+  span {
+    color: $white;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.field-label {
+  display: block;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
 .username-display {
@@ -149,6 +266,51 @@ $white: #fff;
     font-size: 24px;
     font-weight: 700;
     letter-spacing: 0.5px;
+  }
+}
+
+.phone-display {
+  text-align: center;
+  width: 100%;
+  margin-top: 8px;
+
+  span {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.phone-input {
+  width: 100%;
+  max-width: 300px;
+  height: 50px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(214, 221, 230, 0.15);
+  border-radius: 12px;
+  color: $white;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-align: center;
+  margin-top: 8px;
+
+  &::placeholder {
+    color: rgba(214, 221, 230, 0.4);
+  }
+
+  &:hover {
+    border-color: rgba(167, 238, 67, 0.3);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $accent;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(167, 238, 67, 0.15);
+    transform: translateY(-1px);
   }
 }
 

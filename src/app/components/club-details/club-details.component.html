@@ -14,6 +14,18 @@
   <ng-container *ngIf="!isLoading(); else loadingTpl">
   <form *ngIf="isEditing(); else previewBlock" [formGroup]="form" [class.submitted]="submitted" [class.saving]="isSaving()">
 
+    <div class="info-card">
+      <div class="info-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#a7ee43"/>
+        </svg>
+      </div>
+      <div class="info-content">
+        <h4>{{ hasExistingClub ? 'Edit your club details' : 'Welcome! Let\'s create your club' }}</h4>
+        <p>{{ hasExistingClub ? 'Update your club information below. You can modify basic details, location, sports categories, and images. Changes will be reflected immediately after saving.' : 'Fill in your club details below to get started. You\'ll need to provide basic information, location, sports categories, and images. Once saved, you can manage courts and bookings from your club dashboard.' }}</p>
+      </div>
+    </div>
+
     <div class="section">
       <h3>Club Details</h3>
     </div>
