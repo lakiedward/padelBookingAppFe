@@ -397,9 +397,14 @@
         color: #000a14;
         border-color: rgba(167, 238, 67, 0.4);
         box-shadow: 0 2px 8px rgba(167, 238, 67, 0.2);
+
+        .sport-icon img {
+          filter: brightness(0) saturate(100%);
+        }
       }
       .sport-icon { width: 40px; height: 40px; }
       .sport-icon img, .sport-icon svg { width: 40px; height: 40px; display: block; }
+      .sport-icon img[src*="padel.svg"] { width: 48px; height: 48px; }
       .label { font-size: 14px; font-weight: 700; margin-top: 4px; }
     }
   }
