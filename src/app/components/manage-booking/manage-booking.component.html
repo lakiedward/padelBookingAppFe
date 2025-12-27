@@ -99,7 +99,8 @@
                   *ngFor="let b of (bookingsByDay(c.date) | slice:0:3)"
                   (click)="openBookingFullPage(b); $event.stopPropagation()"
                 >
-                  <span class="cal-event__icon">{{ b.sport }}</span>
+                  <img *ngIf="getSportIcon(b.sport)" [src]="getSportIcon(b.sport)" [alt]="b.sport" class="cal-event__icon" />
+                  <span *ngIf="!getSportIcon(b.sport)" class="cal-event__icon-text">{{ b.sport }}</span>
                   <span class="cal-event__text" [title]="b.username || 'User'">{{ b.username || 'User' }}</span>
                 </div>
               </div>
@@ -135,7 +136,8 @@
                       *ngFor="let b of (bookingsByDay(day.date) | slice:0:1)"
                       (click)="openBookingFullPage(b); $event.stopPropagation()"
                     >
-                      <span class="cal-event__icon">{{ b.sport }}</span>
+                      <img *ngIf="getSportIcon(b.sport)" [src]="getSportIcon(b.sport)" [alt]="b.sport" class="cal-event__icon" />
+                      <span *ngIf="!getSportIcon(b.sport)" class="cal-event__icon-text">{{ b.sport }}</span>
                       <span class="cal-event__text" [title]="b.username || 'User'">{{ b.username || 'User' }}</span>
                     </div>
                   </div>
@@ -176,7 +178,8 @@
                     (click)="openBookingFullPage(b)"
                   >
                     <div class="booking-card__compact-header">
-                      <div class="booking-card__sport booking-card__sport--small">{{ b.sport }}</div>
+                      <img *ngIf="getSportIcon(b.sport)" [src]="getSportIcon(b.sport)" [alt]="b.sport" class="booking-card__sport-icon" />
+                      <span *ngIf="!getSportIcon(b.sport)" class="booking-card__sport">{{ b.sport }}</span>
                       <div class="booking-card__time booking-card__time--small">{{ b.start | time24 }} – {{ b.end | time24 }}</div>
                     </div>
                     <div class="booking-card__compact-body">
@@ -207,7 +210,8 @@
               (click)="openBookingFullPage(b)"
             >
               <div class="booking-card__header">
-                <div class="booking-card__sport">{{ b.sport }}</div>
+                <img *ngIf="getSportIcon(b.sport)" [src]="getSportIcon(b.sport)" [alt]="b.sport" class="booking-card__sport-icon" />
+                <span *ngIf="!getSportIcon(b.sport)" class="booking-card__sport">{{ b.sport }}</span>
                 <div class="booking-card__time">{{ b.start | time24 }} – {{ b.end | time24 }}</div>
               </div>
               <div class="booking-card__body">

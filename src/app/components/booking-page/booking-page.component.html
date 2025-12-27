@@ -15,7 +15,9 @@
 
         
         <div *ngIf="!isLoading && !slotDetails" class="booking-error-card">
-          <div class="error-icon">⚠️</div>
+          <div class="error-icon">
+            <img src="assets/icons/alert-triangle.svg" alt="Warning" />
+          </div>
           <h2 class="error-title">Booking Information Missing</h2>
           <p class="error-message">{{ bookingError || 'Unable to load booking details.' }}</p>
           <button class="btn btn--primary" (click)="onCancel()">Go Back to Courts</button>
@@ -33,7 +35,7 @@
 
             
             <div class="booking-section">
-              <h3 class="section-title">📅 Booking Details</h3>
+              <h3 class="section-title">Booking Details</h3>
 
               <div class="summary-grid">
                 <div class="summary-item">
@@ -71,7 +73,7 @@
 
             
             <div class="booking-section">
-              <h3 class="section-title">💳 Payment Method</h3>
+              <h3 class="section-title">Payment Method</h3>
 
               <div class="payment-methods">
                 
@@ -93,7 +95,9 @@
                     <label for="payment-cash"></label>
                   </div>
                   <div class="payment-info">
-                    <div class="payment-icon">💵</div>
+                    <div class="payment-icon">
+                      <img src="assets/icons/cash.svg" alt="Cash" />
+                    </div>
                     <div class="payment-details">
                       <span class="payment-name">Cash</span>
                       <span class="payment-desc">Pay at the venue</span>
@@ -118,7 +122,9 @@
                     <label for="payment-card"></label>
                   </div>
                   <div class="payment-info">
-                    <div class="payment-icon">💳</div>
+                    <div class="payment-icon">
+                      <img src="assets/icons/card.svg" alt="Card" />
+                    </div>
                     <div class="payment-details">
                       <span class="payment-name">Card</span>
                       <span class="payment-desc">Credit or Debit Card</span>
@@ -130,7 +136,7 @@
 
             
             <div *ngIf="bookingError" class="booking-error">
-              <span class="error-icon-small">⚠️</span>
+              <img src="assets/icons/alert-triangle.svg" alt="Warning" class="error-icon-small" />
               <span class="error-text">{{ bookingError }}</span>
             </div>
 

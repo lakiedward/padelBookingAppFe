@@ -519,9 +519,16 @@ $white: #fff;
 }
 
 .cal-event__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.cal-event__icon-text {
   font-size: 13px;
   flex-shrink: 0;
   margin-top: 1px;
+  color: rgba(255,255,255,0.7);
 }
 
 .cal-event__text {
@@ -598,8 +605,14 @@ $white: #fff;
   }
 
   .cal-event__icon {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+  }
+  .cal-event__icon-text {
     font-size: 14px;
     margin-top: 2px;
+    color: rgba(255,255,255,0.7);
   }
 
   .cal-event__text {
@@ -862,15 +875,35 @@ $white: #fff;
   border-bottom: 1px solid $border;
 }
 
+.booking-card__sport-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(167, 238, 67, 0.2);
+  border: 1px solid rgba(167, 238, 67, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.booking-card__sport-icon img {
+  width: 24px;
+  height: 24px;
+}
+
 .booking-card__sport {
   width: 40px;
   height: 40px;
   border-radius: 10px;
   background: rgba(167, 238, 67, 0.2);
   border: 1px solid rgba(167, 238, 67, 0.3);
-  display: grid;
-  place-items: center;
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: $accent;
   flex-shrink: 0;
 }
 
@@ -966,10 +999,15 @@ $white: #fff;
   border-radius: 4px;
   background: rgba(167, 238, 67, 0.2);
   border: 1px solid rgba(167, 238, 67, 0.3);
-  display: grid;
-  place-items: center;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.booking-card__sport--small img {
+  width: 12px;
+  height: 12px;
 }
 
 .booking-card__time--small {
@@ -1035,6 +1073,14 @@ $white: #fff;
     padding: 20px;
   }
 
+  .booking-card__sport-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .booking-card__sport-icon img {
+    width: 28px;
+    height: 28px;
+  }
   .booking-card__sport {
     width: 48px;
     height: 48px;
@@ -1071,7 +1117,10 @@ $white: #fff;
   .booking-card__sport--small {
     width: 24px;
     height: 24px;
-    font-size: 14px;
+  }
+  .booking-card__sport--small img {
+    width: 14px;
+    height: 14px;
   }
 
   .booking-card__time--small {
@@ -1711,9 +1760,12 @@ $white: #fff;
   .booking-card__sport--small {
     width: 16px;
     height: 16px;
-    font-size: 9px;
     flex-shrink: 0;
     margin-bottom: 2px;
+  }
+  .booking-card__sport--small img {
+    width: 10px;
+    height: 10px;
   }
 
   .booking-card__time--small {
@@ -1775,9 +1827,12 @@ $white: #fff;
   .booking-card__sport--small {
     width: 18px;
     height: 18px;
-    font-size: 10px;
     flex-shrink: 0;
     margin-bottom: 2px;
+  }
+  .booking-card__sport--small img {
+    width: 11px;
+    height: 11px;
   }
 
   .booking-card__time--small {
