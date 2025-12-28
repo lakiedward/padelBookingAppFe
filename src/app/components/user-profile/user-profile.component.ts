@@ -97,10 +97,8 @@ export class UserProfileComponent {
 
   saveProfile() {
     const user = this.currentUser();
-    console.log('Current user:', user);
-    console.log('User ID:', user?.id);
-    if (!user || !user.id) {
-      alert('User ID not found. Please log in again.');
+    if (!user) {
+      alert('User not found. Please log in again.');
       return;
     }
 
@@ -114,7 +112,7 @@ export class UserProfileComponent {
     }
 
     // Call the update profile API
-    this.http.put(`${environment.apiBaseUrl}/api/users/${user.id}`, formData).subscribe({
+    this.http.put(`${environment.apiBaseUrl}/api/user/profile`, formData).subscribe({
       next: (updatedUser: any) => {
         // Update the local user data
         const updatedUserData = {
