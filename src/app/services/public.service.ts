@@ -59,6 +59,14 @@ export class PublicService {
     return this.http.get<CourtSummaryResponse[]>(`${this.apiBase}/api/public/clubs/${clubId}/courts`);
   }
 
+  getPublicEventsByClubId(clubId: string | number): Observable<EventSummaryResponse[]> {
+    return this.http.get<EventSummaryResponse[]>(`${this.apiBase}/api/public/clubs/${clubId}/events`);
+  }
+
+  getPublicEventById(eventId: string | number): Observable<EventSummaryResponse> {
+    return this.http.get<EventSummaryResponse>(`${this.apiBase}/api/public/events/${eventId}`);
+  }
+
   getClubProfileImageUrl(clubId: string | number): string {
     return `${this.apiBase}/api/public/clubs/${clubId}/profile-image`;
   }

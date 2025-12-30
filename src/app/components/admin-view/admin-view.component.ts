@@ -27,7 +27,6 @@ export class AdminViewComponent implements AfterViewInit {
   editingCourtId?: number;
   showCreateEventModal = false;
   editingEventId?: number;
-  mobileMenuOpen = false;
   preselectCourtId: number | null = null;
 
   @ViewChild(CourtViewComponent) courtViewComponent?: CourtViewComponent;
@@ -51,11 +50,6 @@ export class AdminViewComponent implements AfterViewInit {
 
   select(menu: AdminMenuKey) {
     this.selectedMenu = menu;
-    this.mobileMenuOpen = false;
-  }
-
-  toggleMobileMenu() {
-    this.mobileMenuOpen = !this.mobileMenuOpen;
   }
 
   onCourtsRequestedFromChild() {

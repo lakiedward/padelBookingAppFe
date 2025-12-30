@@ -1,0 +1,181 @@
+<div class="page page-gradient-bg bg-admin-like">
+  <section class="hero">
+    <div class="glow glow--hero-a"></div>
+    <div class="glow glow--hero-b"></div>
+    <div class="glow glow--hero-c"></div>
+
+    <div class="container hero__inner">
+      <main class="detail-main">
+        <section class="detail-left">
+          <!-- Event Hero Card -->
+          <div class="detail-hero-card">
+            <div class="detail-hero-img-wrap">
+              <img *ngIf="heroImage" [src]="heroImage" [alt]="event?.name || 'Event'" class="detail-hero-img" />
+              <div *ngIf="!heroImage" class="detail-hero-fallback"></div>
+              <div class="detail-hero-overlay"></div>
+              
+              <div class="detail-hero-top-left" *ngIf="event && getSportIcon(event.sportKey)">
+                <div class="sport-icon-badge">
+                  <img [src]="getSportIcon(event.sportKey)" [alt]="event.sportKey" />
+                </div>
+              </div>
+
+              <div class="detail-hero-content">
+                <div class="detail-hero-info">
+                  <h1 class="detail-hero-title">{{ event?.name || 'Loading...' }}</h1>
+                  <div class="detail-hero-subtitle">{{ formatEventType(event!) }} • {{ formatEventFormat(event!) }}</div>
+                  <div class="detail-badges">
+                    <span class="detail-badge detail-badge--primary">{{ event?.sportKey || '...' }}</span>
+                    <span class="detail-badge" [ngClass]="getStatusClass(event!.status)">{{ formatStatus(event!) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Details Card -->
+          <div class="detail-info-card">
+            <h2 class="detail-info-title">Event Details</h2>
+            
+            <div class="detail-info-grid">
+              <div class="detail-info-item">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  Event Period
+                </div>
+                <div class="detail-info-value">{{ formatDateRange(event!) }}</div>
+              </div>
+
+              <div class="detail-info-item" *ngIf="event?.registrationDeadline">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  Registration Deadline
+                </div>
+                <div class="detail-info-value">{{ formatDate(event!.registrationDeadline!) }}</div>
+              </div>
+
+              <div class="detail-info-item">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  Participants
+                </div>
+                <div class="detail-info-value">
+                  <span *ngIf="event?.maxParticipants">{{ event!.currentParticipants }}/{{ event!.maxParticipants }} Players</span>
+                  <span *ngIf="!event?.maxParticipants">{{ event!.currentParticipants }} Players</span>
+                </div>
+              </div>
+
+              <div class="detail-info-item">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                  Courts
+                </div>
+                <div class="detail-info-value">{{ event?.courtCount }} {{ event?.courtCount === 1 ? 'Court' : 'Courts' }}</div>
+              </div>
+
+              <div class="detail-info-item" *ngIf="event?.price">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                  Entry Fee
+                </div>
+                <div class="detail-info-value">{{ event!.price | convertMoney:'EUR' }}</div>
+              </div>
+            </div>
+
+            <div class="detail-description" *ngIf="event?.description">
+              <h3 class="detail-description-title">Description</h3>
+              <p class="detail-description-text">{{ event!.description }}</p>
+            </div>
+          </div>
+
+          <!-- Club Section -->
+          <div class="detail-club-card" *ngIf="club">
+            <div class="detail-club-header">
+              <div class="detail-club-info">
+                <div class="detail-club-logo" *ngIf="getClubProfileImageUrl()">
+                  <img [src]="getClubProfileImageUrl()!" [alt]="club.name" />
+                </div>
+                <div class="detail-club-text">
+                  <h3 class="detail-club-name">{{ club.name }}</h3>
+                  <div class="detail-club-location" *ngIf="club.locations && club.locations.length">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    {{ club.locations[0].address }}
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn--secondary" (click)="navigateToClub()">
+                View Club
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right Sidebar - Join Section -->
+        <aside class="detail-right">
+          <div class="detail-booking-card">
+            <div class="detail-booking-header">
+              <div class="detail-booking-title">Join Event</div>
+              <div class="detail-booking-price" *ngIf="event?.price">
+                <span class="price-value">{{ event!.price | convertMoney:'EUR' }}</span>
+                <span class="price-label">Entry fee</span>
+              </div>
+              <div class="detail-booking-price" *ngIf="!event?.price">
+                <span class="price-value">Free</span>
+                <span class="price-label">No entry fee</span>
+              </div>
+            </div>
+
+            <div class="detail-booking-actions">
+              <button 
+                type="button" 
+                class="btn btn--primary btn--large" 
+                (click)="onJoinEvent()"
+                [disabled]="!canJoinEvent() || isEventFull()"
+              >
+                <span *ngIf="!isEventFull() && canJoinEvent()">Join Event</span>
+                <span *ngIf="isEventFull()">Event Full</span>
+                <span *ngIf="!canJoinEvent() && !isEventFull()">Registration Closed</span>
+              </button>
+              <button type="button" class="btn btn--ghost" (click)="onBack()">Back to Events</button>
+            </div>
+
+            <div class="detail-booking-note" *ngIf="!isAuthenticated">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>You need to log in to join this event</span>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </section>
+</div>

@@ -168,17 +168,20 @@
     </div>
 
     <section class="grid" *ngIf="!loading() && !loadError() && hasResults()">
-      <article class="event-card" *ngFor="let event of filteredEvents(); trackBy: trackEvent">
+      <article class="event-card" *ngFor="let event of filteredEvents(); trackBy: trackEvent" (click)="navigateToEvent(event.id)">
         <div class="event-hero">
           <div class="event-cover" [ngStyle]="{ 'background-image': coverImageUrl(event) ? 'url(' + coverImageUrl(event) + ')' : '' }"></div>
           <div class="event-hero__overlay" aria-hidden="true"></div>
+
+          <div class="event-hero__icon-corner">
+            <img *ngIf="sportIcon(event.sportKey)" [src]="sportIcon(event.sportKey)" [alt]="event.sportKey" class="event-hero__icon" />
+          </div>
 
           <div class="event-hero__badge">
             <span class="badge" [ngClass]="cardStatusClass(event)">{{ formatStatus(event) }}</span>
           </div>
 
           <div class="event-hero__content">
-            <img *ngIf="sportIcon(event.sportKey)" [src]="sportIcon(event.sportKey)" [alt]="event.sportKey" class="event-hero__icon" />
             <div class="event-hero__text">
               <h3>{{ event.name }}</h3>
               <p class="muted">{{ formatEventType(event) }} • {{ formatEventFormat(event) }}</p>
@@ -205,7 +208,7 @@
             <span class="label">Club</span>
             <span class="value">{{ event.clubName }}</span>
           </div>
-          <button type="button" class="btn btn--accent">View Details</button>
+          <button type="button" class="btn btn--accent" (click)="navigateToEvent(event.id); $event.stopPropagation()">View Details</button>
         </div>
       </article>
     </section>

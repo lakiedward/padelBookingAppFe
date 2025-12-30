@@ -12,7 +12,6 @@ import { filter, Subscription } from 'rxjs';
   styleUrl: './app-header.component.scss'
 })
 export class AppHeaderComponent implements OnInit, OnDestroy {
-  mobileOpen = false;
   private routerSubscription?: Subscription;
   isAdminRoute = false;
   profileDropdownOpen = false;
@@ -46,7 +45,6 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
     this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
-        this.mobileOpen = false;
         this.isAdminRoute = event.urlAfterRedirects.startsWith('/admin');
       });
   }
@@ -54,8 +52,6 @@ export class AppHeaderComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.routerSubscription?.unsubscribe();
   }
-
-  toggleMobile() { this.mobileOpen = !this.mobileOpen; }
 
   toggleProfileDropdown(event?: Event) {
     if (event) {

@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -18,7 +18,8 @@ import { takeUntil } from 'rxjs/operators';
   standalone: true,
   imports: [CommonModule, FormsModule, DatePickerModule, ConvertMoneyPipe, RouterLink],
   templateUrl: './court-detail.component.html',
-  styleUrl: './court-detail.component.scss'
+  styleUrl: './court-detail.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class CourtDetailComponent implements OnInit, OnDestroy {
   isLoading = true;

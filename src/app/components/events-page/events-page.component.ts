@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { PublicService } from '../../services/public.service';
 import { SelectModule } from 'primeng/select';
@@ -141,7 +142,8 @@ export class EventsPageComponent implements OnInit {
 
   constructor(
     private readonly publicService: PublicService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -341,6 +343,10 @@ export class EventsPageComponent implements OnInit {
       this.timeFrom !== null ||
       this.timeTo !== null
     );
+  }
+
+  protected navigateToEvent(eventId: number): void {
+    this.router.navigate(['/events', eventId]);
   }
 
   private fetchEvents(): void {

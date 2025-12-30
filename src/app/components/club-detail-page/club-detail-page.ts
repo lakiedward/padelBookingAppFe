@@ -8,6 +8,8 @@ import { CourtListingCardComponent } from '../court-listing-card/court-listing-c
 import { forkJoin } from 'rxjs';
 import { Time24Pipe } from '../../pipes/time24.pipe';
 import { normalizeSportName } from '../../utils/normalize-sport-name.util';
+import { EventPanelData, EventSummaryResponse, eventSummaryToPanelData, getEventTypeDisplayName, getFormatDisplayName, getStatusDisplayName } from '../../models/event.models';
+import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 
 interface CourtListingData {
   courtId: number;
@@ -28,7 +30,7 @@ interface CourtListingData {
 @Component({
   selector: 'app-club-detail-page',
   standalone: true,
-  imports: [CommonModule, CourtListingCardComponent],
+  imports: [CommonModule, CourtListingCardComponent, ConvertMoneyPipe],
   templateUrl: './club-detail-page.html',
   styleUrls: ['./club-detail-page.scss']
 })
@@ -41,6 +43,11 @@ export class ClubDetailPageComponent implements OnInit {
   realCourts = signal<CourtListingData[]>([]);
   isLoadingCourts = signal(false);
   courtsLoadError = signal<string | null>(null);
+
+  activeEventFilter = signal<'all' | SportKey>('all');
+  events = signal<EventPanelData[]>([]);
+  isLoadingEvents = signal(false);
+  eventsLoadError = signal<string | null>(null);
 
   private time24Pipe = new Time24Pipe();
 
@@ -71,6 +78,7 @@ export class ClubDetailPageComponent implements OnInit {
         this.club.set(club);
         this.isLoading.set(false);
         this.loadRealCourts();
+        this.loadEvents();
       },
       error: (err) => {
         console.error('Failed to load club details:', err);
@@ -244,5 +252,114 @@ export class ClubDetailPageComponent implements OnInit {
     const first3 = allTimes.slice(0, 3);
     const remaining = allTimes.length - 3;
     return [...first3, `+${remaining} more`];
+  }
+
+  private loadEvents(): void {
+    const clubId = this.club()?.id;
+    if (!clubId) {
+      this.isLoadingEvents.set(false);
+      return;
+    }
+
+    this.isLoadingEvents.set(true);
+    this.eventsLoadError.set(null);
+    
+    this.publicService.getPublicEventsByClubId(clubId).subscribe({
+      next: (eventSummaries: EventSummaryResponse[]) => {
+        const panels = eventSummaries.map(eventSummaryToPanelData);
+        this.events.set(panels);
+        this.isLoadingEvents.set(false);
+      },
+      error: () => {
+        this.eventsLoadError.set('Failed to load events');
+        this.isLoadingEvents.set(false);
+        this.events.set([]);
+      }
+    });
+  }
+
+  setEventFilter(filter: 'all' | SportKey) {
+    this.activeEventFilter.set(filter);
+  }
+
+  getUniqueSportsFromEvents(): SportKey[] {
+    const events = this.events();
+    const sportsSet = new Set<SportKey>();
+    events.forEach(e => {
+      if (e.sportKey) sportsSet.add(e.sportKey);
+    });
+    return Array.from(sportsSet);
+  }
+
+  eventsBySport(s: SportKey | 'all'): EventPanelData[] {
+    const all = this.events();
+    if (s === 'all') return all;
+    return all.filter(e => e.sportKey === s);
+  }
+
+  formatDateRange(event: EventPanelData): string {
+    const start = event.startDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short'
+    });
+    const end = event.endDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short'
+    });
+    return `${start} – ${end}`;
+  }
+
+  formatEventType(event: EventPanelData): string {
+    return getEventTypeDisplayName(event.eventType);
+  }
+
+  formatEventFormat(event: EventPanelData): string {
+    return getFormatDisplayName(event.format);
+  }
+
+  formatStatus(event: EventPanelData): string {
+    return getStatusDisplayName(event.status);
+  }
+
+  eventSportIcon(sportKey: SportKey): string | null {
+    const sportName = sportKey.toLowerCase().trim();
+    
+    const sportMap: { [key: string]: string } = {
+      'tennis': 'assets/icons/tennis.svg',
+      'padel': 'assets/icons/padel.svg',
+      'football': 'assets/icons/football.svg',
+      'soccer': 'assets/icons/football.svg',
+      'basketball': 'assets/icons/basketball.svg',
+      'volleyball': 'assets/icons/volleyball.svg',
+      'badminton': 'assets/icons/badminton.svg',
+      'squash': 'assets/icons/squash.svg',
+      'handball': 'assets/icons/handball.svg',
+      'pingpong': 'assets/icons/pingpong.svg',
+      'ping pong': 'assets/icons/pingpong.svg',
+      'table tennis': 'assets/icons/pingpong.svg',
+      'table-tennis': 'assets/icons/pingpong.svg'
+    };
+    
+    return sportMap[sportName] || null;
+  }
+
+  eventCoverImageUrl(event: EventPanelData): string | null {
+    return this.publicService.toAbsoluteUrl(event.coverImageUrl);
+  }
+
+  cardStatusClass(event: EventPanelData): string {
+    const status = event.status;
+    if (status === 'PUBLISHED' || status === 'ONGOING') {
+      return 'badge--primary';
+    } else if (status === 'COMPLETED') {
+      return 'badge--muted';
+    } else if (status === 'CANCELLED') {
+      return 'badge--danger';
+    }
+    return 'badge--warning';
+  }
+
+  navigateToEvent(eventId: number): void {
+    this.router.navigate(['/events', eventId]);
   }
 }

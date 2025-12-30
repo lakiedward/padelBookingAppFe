@@ -166,6 +166,142 @@
           </ng-container>
         </ng-container>
       </section>
+
+      <div class="top-divider" role="separator" aria-hidden="true"></div>
+
+      
+      <section class="events">
+        <div class="events-header">
+          <h2>Club Events</h2>
+        </div>
+
+        
+        <div *ngIf="isLoadingEvents()" class="events-loading">
+          <div class="spinner"></div>
+          <p>Loading events...</p>
+        </div>
+
+        
+        <div *ngIf="eventsLoadError() && !isLoadingEvents()" class="events-error">
+          <p class="muted">{{ eventsLoadError() }}</p>
+        </div>
+
+        
+        <ng-container *ngIf="!isLoadingEvents() && !eventsLoadError()">
+          
+          <div *ngIf="events().length === 0" class="no-events">
+            <p class="muted">No events available yet.</p>
+          </div>
+
+          
+          <ng-container *ngIf="events().length > 0">
+            <div class="filters">
+              <button type="button" class="chip" [class.active]="activeEventFilter() === 'all'" (click)="setEventFilter('all')">All</button>
+              <button type="button" class="chip" *ngFor="let s of getUniqueSportsFromEvents(); trackBy: trackByIndex" [class.active]="activeEventFilter() === s" (click)="setEventFilter(s)">{{ s | titlecase }}</button>
+            </div>
+            <ng-container *ngIf="activeEventFilter() !== 'all'; else allEvents">
+              <h3 class="section-sub">{{ activeEventFilter() | titlecase }}</h3>
+              <div class="events-grid">
+                <article class="event-card" *ngFor="let event of eventsBySport(activeEventFilter())" (click)="navigateToEvent(event.id)">
+                  <div class="event-hero">
+                    <div class="event-cover" [ngStyle]="{ 'background-image': eventCoverImageUrl(event) ? 'url(' + eventCoverImageUrl(event) + ')' : '' }"></div>
+                    <div class="event-hero__overlay" aria-hidden="true"></div>
+
+                    <div class="event-hero__icon-corner">
+                      <img *ngIf="eventSportIcon(event.sportKey)" [src]="eventSportIcon(event.sportKey)" [alt]="event.sportKey" class="event-hero__icon" />
+                    </div>
+
+                    <div class="event-hero__badge">
+                      <span class="badge" [ngClass]="cardStatusClass(event)">{{ formatStatus(event) }}</span>
+                    </div>
+
+                    <div class="event-hero__content">
+                      <div class="event-hero__text">
+                        <h3>{{ event.name }}</h3>
+                        <p class="muted">{{ formatEventType(event) }} • {{ formatEventFormat(event) }}</p>
+                        <div class="chips">
+                          <span class="chip chip--ghost">{{ event.courtCount }} {{ event.courtCount === 1 ? 'Court' : 'Courts' }}</span>
+                          <span class="chip chip--ghost" *ngIf="event.maxParticipants">
+                            {{ event.currentParticipants }}/{{ event.maxParticipants }} Players
+                          </span>
+                        </div>
+                      </div>
+                      <div class="event-hero__price" *ngIf="event.price">
+                        <span class="price">{{ event.price | convertMoney:'EUR' }}</span>
+                        <span class="note">Entry fee</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="event-body">
+                    <div class="event-detail">
+                      <span class="label">Dates</span>
+                      <span class="value">{{ formatDateRange(event) }}</span>
+                    </div>
+                    <div class="event-detail">
+                      <span class="label">Club</span>
+                      <span class="value">{{ event.clubName }}</span>
+                    </div>
+                    <button type="button" class="btn btn--accent">View Details</button>
+                  </div>
+                </article>
+              </div>
+            </ng-container>
+            <ng-template #allEvents>
+              <ng-container *ngFor="let s of getUniqueSportsFromEvents(); trackBy: trackByIndex">
+                <ng-container *ngIf="eventsBySport(s).length">
+                  <h3 class="section-sub">{{ s | titlecase }}</h3>
+                  <div class="events-grid">
+                    <article class="event-card" *ngFor="let event of eventsBySport(s)" (click)="navigateToEvent(event.id)">
+                      <div class="event-hero">
+                        <div class="event-cover" [ngStyle]="{ 'background-image': eventCoverImageUrl(event) ? 'url(' + eventCoverImageUrl(event) + ')' : '' }"></div>
+                        <div class="event-hero__overlay" aria-hidden="true"></div>
+
+                        <div class="event-hero__icon-corner">
+                          <img *ngIf="eventSportIcon(event.sportKey)" [src]="eventSportIcon(event.sportKey)" [alt]="event.sportKey" class="event-hero__icon" />
+                        </div>
+
+                        <div class="event-hero__badge">
+                          <span class="badge" [ngClass]="cardStatusClass(event)">{{ formatStatus(event) }}</span>
+                        </div>
+
+                        <div class="event-hero__content">
+                          <div class="event-hero__text">
+                            <h3>{{ event.name }}</h3>
+                            <p class="muted">{{ formatEventType(event) }} • {{ formatEventFormat(event) }}</p>
+                            <div class="chips">
+                              <span class="chip chip--ghost">{{ event.courtCount }} {{ event.courtCount === 1 ? 'Court' : 'Courts' }}</span>
+                              <span class="chip chip--ghost" *ngIf="event.maxParticipants">
+                                {{ event.currentParticipants }}/{{ event.maxParticipants }} Players
+                              </span>
+                            </div>
+                          </div>
+                          <div class="event-hero__price" *ngIf="event.price">
+                            <span class="price">{{ event.price | convertMoney:'EUR' }}</span>
+                            <span class="note">Entry fee</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="event-body">
+                        <div class="event-detail">
+                          <span class="label">Dates</span>
+                          <span class="value">{{ formatDateRange(event) }}</span>
+                        </div>
+                        <div class="event-detail">
+                          <span class="label">Club</span>
+                          <span class="value">{{ event.clubName }}</span>
+                        </div>
+                        <button type="button" class="btn btn--accent">View Details</button>
+                      </div>
+                    </article>
+                  </div>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ng-container>
+        </ng-container>
+      </section>
     </div>
   </div>
 </div>

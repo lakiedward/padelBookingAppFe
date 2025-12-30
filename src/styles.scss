@@ -35,6 +35,15 @@ html, body {
 .u-spinner--xl { --u-spinner-size: 32px; --u-spinner-border: 4px; }
 @keyframes u-spin { to { transform: rotate(360deg); } }
 
+/* PrimeNG Date Picker global styles */
+::ng-deep .p-datepicker-panel {
+  z-index: 9999999 !important;
+  background: #1a2332 !important;
+  border: 1px solid rgba(214, 221, 230, 0.15) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
 /* PrimeNG Toast responsive styles */
 ::ng-deep .p-toast {
   .p-toast-message {
