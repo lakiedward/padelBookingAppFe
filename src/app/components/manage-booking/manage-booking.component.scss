@@ -1176,6 +1176,7 @@ $white: #fff;
     padding: 12px;
     border-radius: 16px;
   }
+}
 
 @media (max-width: 767px) {
   .calendar-panel {
@@ -1193,6 +1194,7 @@ $white: #fff;
   }
 }
 
+@media (max-width: 1023px) {
   .toolbar {
     display: flex;
     flex-direction: column;

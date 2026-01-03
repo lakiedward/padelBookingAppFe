@@ -24,7 +24,6 @@
 .admin-container > .content,
 .admin-container > .bottom-nav {
   position: relative;
-  z-index: 2;
 }
 
 .admin-container.page-gradient-bg::before,
@@ -333,8 +332,8 @@
 
   .topbar {
     padding: 10px 16px;
-    background: #0b1117; /* Fundal solid pentru a elimina transparența */
-    border-bottom: none; /* Eliminăm linia (border-ul) care apărea sub topbar */
+    background: #0b1117; /* Solid background to remove transparency */
+    border-bottom: none; /* Remove the line (border) that appeared under the topbar */
 
     .brand { display: flex; }
     .separator { display: block; height: 20px; margin: 0 8px; }
@@ -350,7 +349,7 @@
   }
 
   .content {
-    padding: 12px 0 88px; /* Adăugăm puțin padding-top pentru a preveni tăierea butoanelor */
+    padding: 12px 0 88px; /* Add some padding-top to prevent buttons from being cut off */
   }
 
   .content-card {
@@ -388,8 +387,8 @@
 
   .topbar {
     padding: 12px 20px;
-    background: #0b1117; /* Fundal solid */
-    border-bottom: none; /* Eliminăm border-ul și pe tabletă */
+    background: #0b1117; /* Solid background */
+    border-bottom: none; /* Remove the border on tablet as well */
 
     .brand { display: flex; }
 
@@ -410,7 +409,7 @@
   }
 
   .content {
-    padding: 16px 0 92px; /* Adăugăm padding-top și pe tabletă */
+    padding: 16px 0 92px; /* Add padding-top on tablet as well */
   }
 
   .content-card {

@@ -209,7 +209,7 @@
   gap: 8px;
 
   @media (max-width: 767px) {
-    top: 20px; /* Coborâm butoanele mai jos pentru a nu fi tăiate sau prea aproape de margine */
+    top: 20px; /* Move buttons down to avoid being cut off or too close to the edge */
     right: 12px;
   }
 
@@ -281,7 +281,7 @@
   @media (max-width: 767px) {
     margin-left: -16px;
     margin-right: -16px;
-    margin-top: -12px; /* Margine negativă care se potrivește cu noul padding din admin-view */
+    margin-top: -12px; /* Negative margin to match the new padding in admin-view */
     width: calc(100% + 32px);
     height: 360px;
   }

@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, isDevMode } from '@angular/core';
 import { ClubDetailsComponent } from '../club-details/club-details.component';
 import { CourtViewComponent } from '../court-view/court-view.component';
 import { CreateCourtComponent } from '../create-court/create-court.component';
@@ -155,9 +155,13 @@ export class AdminViewComponent implements OnInit, AfterViewInit, OnDestroy {
         container.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
-    } catch {}
+    } catch (err) {
+      if (isDevMode()) console.error('scrollAdminContentToTop error', err);
+    }
 
     // Fallback for unexpected layouts
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (err) {
+      if (isDevMode()) console.error('scrollAdminContentToTop fallback error', err);
+    }
   }
 }
