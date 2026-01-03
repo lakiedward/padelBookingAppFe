@@ -1,5 +1,6 @@
 .club-details {
   position: relative;
+  padding: 0;
 
   .saving-overlay {
     position: fixed;
@@ -710,6 +711,10 @@
   form {
     position: relative;
     transition: opacity 0.2s ease;
+
+    @media (min-width: 1024px) {
+      padding: 0 20px;
+    }
 
     &.saving {
       pointer-events: none;

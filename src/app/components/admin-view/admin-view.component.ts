@@ -124,13 +124,13 @@ export class AdminViewComponent implements OnInit, AfterViewInit, OnDestroy {
   onManageBookingFromClub(courtId: number) {
     this.preselectCourtId = courtId;
     this.select('manage-booking');
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    this.scrollAdminContentToTop();
   }
 
   onManageBookingFromCourt(courtId: number) {
     this.preselectCourtId = courtId;
     this.select('manage-booking');
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    this.scrollAdminContentToTop();
   }
 
   getAvailableSports(): SportKey[] {
@@ -143,5 +143,21 @@ export class AdminViewComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) return;
     this.document?.documentElement?.classList.toggle(this.scrollLockClass, enabled);
     this.document?.body?.classList.toggle(this.scrollLockClass, enabled);
+  }
+
+  private scrollAdminContentToTop() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      // In AdminView, scrolling happens inside the `<main class="content">` container
+      // because `html/body` are scroll-locked to prevent double scrollbars.
+      const container = this.document.querySelector('.admin-container > main.content') as HTMLElement | null;
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    } catch {}
+
+    // Fallback for unexpected layouts
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
   }
 }
