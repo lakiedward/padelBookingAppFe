@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, isDevMode } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Inject, PLATFORM_ID, ViewChild, isDevMode } from '@angular/core';
 import { ClubDetailsComponent } from '../club-details/club-details.component';
 import { CourtViewComponent } from '../court-view/court-view.component';
 import { CreateCourtComponent } from '../create-court/create-court.component';
@@ -20,8 +20,7 @@ type AdminMenuKey = 'club-management' | 'courts' | 'events' | 'manage-booking';
   templateUrl: './admin-view.component.html',
   styleUrl: './admin-view.component.scss'
 })
-export class AdminViewComponent implements OnInit, AfterViewInit, OnDestroy {
-  private readonly scrollLockClass = 'admin-scroll-lock';
+export class AdminViewComponent implements AfterViewInit {
   selectedMenu: AdminMenuKey = 'club-management';
   courtsMode: 'view' | 'create' = 'view';
   showCreateCourtModal = false;
@@ -47,16 +46,8 @@ export class AdminViewComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
-    this.setScrollLock(true);
-  }
-
   ngAfterViewInit() {
     this.cdr.detectChanges();
-  }
-
-  ngOnDestroy() {
-    this.setScrollLock(false);
   }
 
   select(menu: AdminMenuKey) {
@@ -137,12 +128,6 @@ export class AdminViewComponent implements OnInit, AfterViewInit, OnDestroy {
     const clubSports = this.clubService.lastSaved()?.sports || [];
     const sports = new Set<SportKey>(['padel', 'tennis', ...clubSports]);
     return Array.from(sports);
-  }
-
-  private setScrollLock(enabled: boolean) {
-    if (!isPlatformBrowser(this.platformId)) return;
-    this.document?.documentElement?.classList.toggle(this.scrollLockClass, enabled);
-    this.document?.body?.classList.toggle(this.scrollLockClass, enabled);
   }
 
   private scrollAdminContentToTop() {

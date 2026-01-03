@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@use '../../styles/variables' as vars;
 
 :host {
   display: block;
@@ -351,7 +351,7 @@
   }
 
   .content {
-    padding: $admin-content-padding-mobile 0 88px; /* Add some padding-top to prevent buttons from being cut off */
+    padding: vars.$admin-content-padding-mobile 0 88px; /* Add some padding-top to prevent buttons from being cut off */
   }
 
   .content-card {
@@ -411,7 +411,7 @@
   }
 
   .content {
-    padding: $admin-content-padding-tablet 0 92px; /* Add padding-top on tablet as well */
+    padding: vars.$admin-content-padding-tablet 0 92px; /* Add padding-top on tablet as well */
   }
 
   .content-card {
