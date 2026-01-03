@@ -1,3 +1,5 @@
+@import '../../styles/variables';
+
 /* Reset default margins and padding */
 :host {
   display: block;
@@ -281,7 +283,7 @@
   @media (max-width: 767px) {
     margin-left: -16px;
     margin-right: -16px;
-    margin-top: -12px; /* Negative margin to match the new padding in admin-view */
+    margin-top: -#{$admin-content-padding-mobile}; /* Negative margin to match the new padding in admin-view */
     width: calc(100% + 32px);
     height: 360px;
   }
@@ -289,7 +291,7 @@
   @media (min-width: 768px) and (max-width: 1023px) {
     margin-left: -20px;
     margin-right: -20px;
-    margin-top: -16px;
+    margin-top: -#{$admin-content-padding-tablet};
     width: calc(100% + 40px);
     height: 400px;
   }

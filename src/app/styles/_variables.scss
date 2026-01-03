@@ -1,0 +1,12 @@
+$admin-content-padding-mobile: 12px !default;
+$admin-content-padding-tablet: 16px !default;
+
+$admin-card-padding-mobile: 16px !default;
+$admin-card-padding-tablet: 20px !default;
+
+:root {
+  --admin-content-padding-mobile: #{$admin-content-padding-mobile};
+  --admin-content-padding-tablet: #{$admin-content-padding-tablet};
+  --admin-card-padding-mobile: #{$admin-card-padding-mobile};
+  --admin-card-padding-tablet: #{$admin-card-padding-tablet};
+}

@@ -1,4 +1,5 @@
 @use "sass:color";
+@import '../../styles/variables';
 $bg: #0f1b26;
 $panel: rgba(255, 255, 255, 0.08);
 $panel-strong: rgba(255, 255, 255, 0.06);
@@ -1173,28 +1174,23 @@ $white: #fff;
   }
 
   .calendar-panel {
+    margin-top: 8px;
     padding: 12px;
     border-radius: 16px;
-  }
-}
 
-@media (max-width: 767px) {
-  .calendar-panel {
-    margin-left: -16px;
-    margin-right: -16px;
-    width: calc(100% + 32px);
-  }
-}
+    @media (max-width: 767px) {
+      margin-left: calc(-1 * var(--admin-card-padding-mobile, 16px));
+      margin-right: calc(-1 * var(--admin-card-padding-mobile, 16px));
+      width: calc(100% + (2 * var(--admin-card-padding-mobile, 16px)));
+    }
 
-@media (min-width: 768px) and (max-width: 1023px) {
-  .calendar-panel {
-    margin-left: -20px;
-    margin-right: -20px;
-    width: calc(100% + 40px);
+    @media (min-width: 768px) {
+      margin-left: calc(-1 * var(--admin-card-padding-tablet, 20px));
+      margin-right: calc(-1 * var(--admin-card-padding-tablet, 20px));
+      width: calc(100% + (2 * var(--admin-card-padding-tablet, 20px)));
+    }
   }
-}
 
-@media (max-width: 1023px) {
   .toolbar {
     display: flex;
     flex-direction: column;
@@ -1360,11 +1356,6 @@ $white: #fff;
     min-width: 0;
     flex: 1;
     overflow: visible;
-  }
-
-  .calendar-panel {
-    margin-top: 8px;
-    padding: 12px;
   }
 }
 
