@@ -20,9 +20,10 @@
 }
 
 .top-divider {
-  height: 1px;
-  background: rgba(214,221,230,0.15);
-  margin: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(167,238,67,0.3) 20%, rgba(167,238,67,0.3) 80%, transparent);
+  margin: 24px 0;
+  border-radius: 2px;
 }
 
 .hero {
@@ -269,8 +270,10 @@
 .danger-btn .icon { width: 18px; height: 18px; }
 
 .top-divider {
-  height: 1px;
-  background: rgba(214,221,230,0.15);
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(167,238,67,0.3) 20%, rgba(167,238,67,0.3) 80%, transparent);
+  margin: 24px 0;
+  border-radius: 2px;
 }
 
 .hero {

@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-event-detail',
   standalone: true,
-  imports: [CommonModule, ConvertMoneyPipe, RouterLink],
+  imports: [CommonModule, ConvertMoneyPipe],
   templateUrl: './event-detail.component.html',
   styleUrl: './event-detail.component.scss'
 })

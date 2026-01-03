@@ -49,8 +49,10 @@ $white: #fff;
 }
 
 .top-divider {
-  height: 1px;
-  background: $border;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(167,238,67,0.3) 20%, rgba(167,238,67,0.3) 80%, transparent);
+  margin: 24px 0;
+  border-radius: 2px;
 }
 
 .hero {
@@ -90,8 +92,8 @@ $white: #fff;
 }
 
 .logo {
-  width: 96px;
-  height: 96px;
+  width: 128px;
+  height: 128px;
   border-radius: 16px;
   overflow: hidden;
   border: 3px solid $accent;

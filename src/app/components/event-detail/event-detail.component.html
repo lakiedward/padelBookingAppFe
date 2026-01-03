@@ -1,5 +1,10 @@
 <div class="page page-gradient-bg bg-admin-like">
-  <section class="hero">
+  <div class="state" *ngIf="isLoading" style="min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Loading event details…</p>
+  </div>
+
+  <section class="hero" *ngIf="!isLoading">
     <div class="glow glow--hero-a"></div>
     <div class="glow glow--hero-b"></div>
     <div class="glow glow--hero-c"></div>
@@ -7,13 +12,12 @@
     <div class="container hero__inner">
       <main class="detail-main">
         <section class="detail-left">
-          <!-- Event Hero Card -->
           <div class="detail-hero-card">
             <div class="detail-hero-img-wrap">
               <img *ngIf="heroImage" [src]="heroImage" [alt]="event?.name || 'Event'" class="detail-hero-img" />
               <div *ngIf="!heroImage" class="detail-hero-fallback"></div>
               <div class="detail-hero-overlay"></div>
-              
+
               <div class="detail-hero-top-left" *ngIf="event && getSportIcon(event.sportKey)">
                 <div class="sport-icon-badge">
                   <img [src]="getSportIcon(event.sportKey)" [alt]="event.sportKey" />
@@ -36,7 +40,7 @@
           <!-- Event Details Card -->
           <div class="detail-info-card">
             <h2 class="detail-info-title">Event Details</h2>
-            
+
             <div class="detail-info-grid">
               <div class="detail-info-item">
                 <div class="detail-info-label">
@@ -86,7 +90,7 @@
                   </svg>
                   Courts
                 </div>
-                <div class="detail-info-value">{{ event?.courtCount }} {{ event?.courtCount === 1 ? 'Court' : 'Courts' }}</div>
+                <div class="detail-info-value">{{ event?.courtCount && event!.courtCount > 0 ? (event!.courtCount + ' ' + (event!.courtCount === 1 ? 'Court' : 'Courts')) : '—' }}</div>
               </div>
 
               <div class="detail-info-item" *ngIf="event?.price">
@@ -152,26 +156,23 @@
             </div>
 
             <div class="detail-booking-actions">
-              <button 
-                type="button" 
-                class="btn btn--primary btn--large" 
+              <button
+                type="button"
+                class="btn btn--primary btn--large"
                 (click)="onJoinEvent()"
-                [disabled]="!canJoinEvent() || isEventFull()"
               >
-                <span *ngIf="!isEventFull() && canJoinEvent()">Join Event</span>
-                <span *ngIf="isEventFull()">Event Full</span>
-                <span *ngIf="!canJoinEvent() && !isEventFull()">Registration Closed</span>
+                <span *ngIf="!isAuthenticated">Create Account or Sign In</span>
+                <span *ngIf="isAuthenticated && !isEventFull() && canJoinEvent()">Join Event</span>
+                <span *ngIf="isAuthenticated && isEventFull()">Event Full</span>
+                <span *ngIf="isAuthenticated && !canJoinEvent() && !isEventFull()">Registration Closed</span>
               </button>
-              <button type="button" class="btn btn--ghost" (click)="onBack()">Back to Events</button>
             </div>
 
-            <div class="detail-booking-note" *ngIf="!isAuthenticated">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            <div class="auth-prompt" *ngIf="!isAuthenticated">
+              <svg class="auth-prompt__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               </svg>
-              <span>You need to log in to join this event</span>
+              <p class="auth-prompt__text">Create an account or sign in to proceed with booking</p>
             </div>
           </div>
         </aside>
