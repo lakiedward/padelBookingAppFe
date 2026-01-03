@@ -11,10 +11,23 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  overflow-x: hidden;
-  overflow-y: auto;
   height: 100%;
   width: 100%;
+}
+
+html {
+  overflow: hidden; /* Let body handle scrolling */
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Prevent double scrollbars when pages manage their own scroll container (e.g. AdminView `.content`). */
+html.admin-scroll-lock,
+body.admin-scroll-lock {
+  overflow: hidden !important;
 }
 
 .u-spinner {
