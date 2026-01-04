@@ -46,7 +46,8 @@ export class OwnerOnboardingComponent implements OnInit {
 
   resumeOnboarding() {
     this.loading = true;
-    this.payments.initConnect({}).subscribe({
+    const baseUrl = window.location.origin;
+    this.payments.initConnect({ baseUrl }).subscribe({
       next: (res) => { try { window.location.href = res.url; } catch {} },
       error: (err) => { this.error = err?.error?.message || 'Failed to start onboarding'; this.loading = false; }
     });
