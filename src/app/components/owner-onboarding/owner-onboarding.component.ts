@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { PaymentsService } from '../../services/payments.service';
 
@@ -13,6 +13,7 @@ import { PaymentsService } from '../../services/payments.service';
 export class OwnerOnboardingComponent implements OnInit {
   private readonly payments = inject(PaymentsService);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
   loading = true;
   error?: string;
@@ -46,10 +47,22 @@ export class OwnerOnboardingComponent implements OnInit {
 
   resumeOnboarding() {
     this.loading = true;
-    const baseUrl = window.location.origin;
+    
+    let baseUrl = '';
+    if (isPlatformBrowser(this.platformId)) {
+      baseUrl = window.location.origin;
+    }
+
     this.payments.initConnect({ baseUrl }).subscribe({
-      next: (res) => { try { window.location.href = res.url; } catch {} },
-      error: (err) => { this.error = err?.error?.message || 'Failed to start onboarding'; this.loading = false; }
+      next: (res) => { 
+        if (isPlatformBrowser(this.platformId)) {
+          window.location.href = res.url;
+        }
+      },
+      error: (err) => { 
+        this.error = err?.error?.message || 'Failed to start onboarding'; 
+        this.loading = false; 
+      }
     });
   }
 

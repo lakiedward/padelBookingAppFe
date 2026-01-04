@@ -6,6 +6,7 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
 import { finalize, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { MessageService } from 'primeng/api';
@@ -100,7 +101,12 @@ export class RegisterComponent implements AfterViewInit {
       }
       this.authService.registerAdmin({ email, password })
         .pipe(
-          switchMap(() => this.paymentsService.initConnect({ baseUrl: window.location.origin })),
+          switchMap(() => {
+            if (isPlatformBrowser(this.platformId)) {
+              return this.paymentsService.initConnect({ baseUrl: window.location.origin });
+            }
+            return of(null);
+          }),
           finalize(() => {
             this.loading = false;
             this.cdr.detectChanges();
@@ -108,7 +114,9 @@ export class RegisterComponent implements AfterViewInit {
         )
         .subscribe({
           next: (res) => {
-            try { window.location.href = res.url; } catch {}
+            if (isPlatformBrowser(this.platformId) && res?.url) {
+              window.location.href = res.url;
+            }
           },
           error: (err) => {
             const msg = err?.error?.message || 'Stripe onboarding could not be started. Please try again.';
@@ -329,6 +337,7 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   private renderGoogleButton(googleGlobal: GoogleIdentity) {
+    if (!isPlatformBrowser(this.platformId)) return;
     const buttonContainer = this.document?.getElementById('googleButtonContainerRegister');
     if (!buttonContainer) return;
     buttonContainer.innerHTML = '';
@@ -345,6 +354,7 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   private attachResizeHandler(googleGlobal: GoogleIdentity) {
+    if (!isPlatformBrowser(this.platformId)) return;
     const handler = () => this.renderGoogleButton(googleGlobal);
     window.addEventListener('resize', handler);
     this.removeResizeListener = () => window.removeEventListener('resize', handler);
