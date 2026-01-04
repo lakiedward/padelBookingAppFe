@@ -36,9 +36,9 @@
 /* Sidebar Styles (Desktop) */
 .sidebar {
   grid-area: sidebar;
-  background: rgba(11, 17, 23, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-right: 1px solid rgba(214, 221, 230, 0.2);
   display: flex;
   flex-direction: column;
@@ -109,7 +109,7 @@
     border-top: 1px solid rgba(214, 221, 230, 0.1);
 
     .logout-btn {
-      display: flex;
+      display: none; /* Hidden on desktop, shown on mobile */
       align-items: center;
       gap: 12px;
       width: 100%;
@@ -237,7 +237,7 @@
   }
 
   .logout-btn-header {
-    display: none; /* Hidden on desktop */
+    display: inline-flex; /* Show on desktop */
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
@@ -326,6 +326,10 @@
 
   .sidebar {
     display: none;
+
+    &-footer .logout-btn {
+      display: flex; /* Show logout in sidebar footer on mobile */
+    }
   }
 
   .bottom-nav {

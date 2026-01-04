@@ -45,22 +45,25 @@
                  [class.cal-day--faded]="!c.inCurrent" [class.cal-day--today]="isToday(c.date)" (click)="onDayClick(c.date)">
               <div class="cal-day__header">
                 <div class="cal-day__title">{{ weekdayShort(c.date) }}</div>
-                <ng-container [ngSwitch]="reservationsByDay(c.date).length">
-                  <span *ngSwitchCase="0"></span>
-                  <span *ngSwitchDefault class="cal-day__badge">{{ reservationsByDay(c.date).length }}</span>
-                </ng-container>
               </div>
               <div class="cal-day__content">
                 <div class="cal-day__num">{{ c.date.getDate() }}</div>
                 <div class="cal-day__body">
-                  <div class="cal-event" *ngFor="let r of (reservationsByDay(c.date) | slice:0:3)">
+                  <div class="cal-event" *ngFor="let r of (reservationsByDay(c.date) | slice:0:3); let i = index" [title]="r.court">
                     <img *ngIf="getSportIcon(r.sport)" [src]="getSportIcon(r.sport)" [alt]="r.sport" class="cal-event__icon" />
                     <span *ngIf="!getSportIcon(r.sport)" class="cal-event__icon-text">{{ r.sport }}</span>
-                    <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                    <span class="cal-event__title">Court</span>
+                    <span class="cal-event__badge">{{ i + 1 }}</span>
+                  </div>
+                  <div class="cal-event cal-event--event" *ngFor="let e of (eventsByDay(c.date) | slice:0:(3 - reservationsByDay(c.date).length)); let i = index" [title]="e.name">
+                    <img *ngIf="getSportIcon(e.sportKey)" [src]="getSportIcon(e.sportKey)" [alt]="e.sportKey" class="cal-event__icon" />
+                    <span *ngIf="!getSportIcon(e.sportKey)" class="cal-event__icon-text">{{ e.sportKey }}</span>
+                    <span class="cal-event__title">Event</span>
+                    <span class="cal-event__badge cal-event__badge--event">{{ i + 1 }}</span>
                   </div>
                 </div>
               </div>
-              <div class="cal-day__footer" *ngIf="reservationsByDay(c.date).length > 3">+{{ reservationsByDay(c.date).length - 3 }} more</div>
+              <div class="cal-day__footer" *ngIf="(reservationsByDay(c.date).length + eventsByDay(c.date).length) > 3">+{{ (reservationsByDay(c.date).length + eventsByDay(c.date).length) - 3 }} more</div>
             </div>
           </div>
         </div>
@@ -78,22 +81,25 @@
                      [class.cal-day--faded]="!day.inCurrent" [class.cal-day--today]="isToday(day.date)" (click)="onDayClick(day.date)">
                   <div class="cal-day__header">
                     <div class="cal-day__title">{{ weekdayShort(day.date) }}</div>
-                    <ng-container [ngSwitch]="reservationsByDay(day.date).length">
-                      <span *ngSwitchCase="0"></span>
-                      <span *ngSwitchDefault class="cal-day__badge">{{ reservationsByDay(day.date).length }}</span>
-                    </ng-container>
                   </div>
                   <div class="cal-day__content">
                     <div class="cal-day__num">{{ day.date.getDate() }}</div>
                     <div class="cal-day__body">
-                      <div class="cal-event" *ngFor="let r of (reservationsByDay(day.date) | slice:0:1)">
+                      <div class="cal-event" *ngFor="let r of (reservationsByDay(day.date) | slice:0:1); let i = index" [title]="r.court">
                         <img *ngIf="getSportIcon(r.sport)" [src]="getSportIcon(r.sport)" [alt]="r.sport" class="cal-event__icon" />
                         <span *ngIf="!getSportIcon(r.sport)" class="cal-event__icon-text">{{ r.sport }}</span>
-                        <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                        <span class="cal-event__title">Court</span>
+                        <span class="cal-event__badge">{{ i + 1 }}</span>
+                      </div>
+                      <div class="cal-event cal-event--event" *ngFor="let e of (eventsByDay(day.date) | slice:0:(1 - reservationsByDay(day.date).length)); let i = index" [title]="e.name">
+                        <img *ngIf="getSportIcon(e.sportKey)" [src]="getSportIcon(e.sportKey)" [alt]="e.sportKey" class="cal-event__icon" />
+                        <span *ngIf="!getSportIcon(e.sportKey)" class="cal-event__icon-text">{{ e.sportKey }}</span>
+                        <span class="cal-event__title">Event</span>
+                        <span class="cal-event__badge cal-event__badge--event">{{ i + 1 }}</span>
                       </div>
                     </div>
                   </div>
-                  <div class="cal-day__footer" *ngIf="reservationsByDay(day.date).length > 1">+{{ reservationsByDay(day.date).length - 1 }} more</div>
+                  <div class="cal-day__footer" *ngIf="(reservationsByDay(day.date).length + eventsByDay(day.date).length) > 1">+{{ (reservationsByDay(day.date).length + eventsByDay(day.date).length) - 1 }} more</div>
                 </div>
               </div>
             </div>
@@ -114,18 +120,21 @@
               <div class="cal-day cal--week" [class.cal-day--today]="isToday(d)">
                 <div class="cal-day__header">
                   <div class="cal-day__title">{{ weekdayShort(d) }}</div>
-                  <ng-container [ngSwitch]="reservationsByDay(d).length">
-                    <span *ngSwitchCase="0"></span>
-                    <span *ngSwitchDefault class="cal-day__badge">{{ reservationsByDay(d).length }}</span>
-                  </ng-container>
                 </div>
                 <div class="cal-day__content">
                   <div class="cal-day__num">{{ d.getDate() }}</div>
                   <div class="cal-day__body">
-                    <div class="cal-event" *ngFor="let r of reservationsByDay(d)">
+                    <div class="cal-event" *ngFor="let r of reservationsByDay(d); let i = index" [title]="r.court">
                       <img *ngIf="getSportIcon(r.sport)" [src]="getSportIcon(r.sport)" [alt]="r.sport" class="cal-event__icon" />
                       <span *ngIf="!getSportIcon(r.sport)" class="cal-event__icon-text">{{ r.sport }}</span>
-                      <span class="cal-event__text" [title]="r.court">{{ r.court }}</span>
+                      <span class="cal-event__title">Court</span>
+                      <span class="cal-event__badge">{{ i + 1 }}</span>
+                    </div>
+                    <div class="cal-event cal-event--event" *ngFor="let e of eventsByDay(d); let i = index" [title]="e.name">
+                      <img *ngIf="getSportIcon(e.sportKey)" [src]="getSportIcon(e.sportKey)" [alt]="e.sportKey" class="cal-event__icon" />
+                      <span *ngIf="!getSportIcon(e.sportKey)" class="cal-event__icon-text">{{ e.sportKey }}</span>
+                      <span class="cal-event__title">Event</span>
+                      <span class="cal-event__badge cal-event__badge--event">{{ i + 1 }}</span>
                     </div>
                   </div>
                 </div>
@@ -204,6 +213,33 @@
             [slots]="getCourtSlots(court.court)"
             mode="reservation"
             (cardClick)="onCourtCardClick(court)"
+          />
+        </div>
+      </div>
+
+      
+      <div *ngIf="viewMode() === 'week' || viewMode() === 'day'" class="events-section">
+        <h3 class="events-section__title">Your Events</h3>
+        
+        
+        <div *ngIf="isLoadingEvents" style="text-align: center; padding: 40px; color: #8aa0b5;">
+          Loading your events...
+        </div>
+        
+        
+        <div *ngIf="!isLoadingEvents && getEventsForCurrentView().length === 0" style="text-align: center; padding: 40px; color: #8aa0b5;">
+          <p>No events found for this period.</p>
+          <p style="font-size: 14px; margin-top: 8px;">Join an event to see it here!</p>
+        </div>
+        
+        
+        <div *ngIf="!isLoadingEvents && getEventsForCurrentView().length > 0" class="events-grid">
+          <app-event-card
+            *ngFor="let event of getEventsForCurrentView()"
+            [event]="event"
+            [isAuthenticated]="true"
+            [isJoined]="true"
+            (viewDetailsClick)="onEventDetailsClick($event)"
           />
         </div>
       </div>

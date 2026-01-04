@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnInit, Output, ChangeDetectorRef } from '@ang
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../services/event.service';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
-import { EventSummaryResponse, EventPanelData, eventSummaryToPanelData, getFormatDisplayName, getStatusDisplayName, EventStatus } from '../../models/event.models';
+import { EventSummaryResponse, EventPanelData, eventSummaryToPanelData, getStatusDisplayName, EventStatus } from '../../models/event.models';
 import { SportKey } from '../../models/club.models';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
@@ -111,7 +111,7 @@ export class EventViewComponent implements OnInit {
   }
 
   getFormatDisplay(event: EventPanelData): string {
-    return getFormatDisplayName(event.format);
+    return event.format;
   }
 
   getStatusDisplay(event: EventPanelData): string {

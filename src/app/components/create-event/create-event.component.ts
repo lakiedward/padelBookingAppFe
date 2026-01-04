@@ -5,15 +5,12 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { EventService } from '../../services/event.service';
 import { CourtService } from '../../services/court.service';
+import { ClubService } from '../../services/club.service';
 import {
   CreateEventRequest,
   UpdateEventRequest,
-  EventType,
-  EventFormat,
   EventStatus,
-  getFormatsForSport,
-  getFormatDisplayName,
-  getEventTypeDisplayName,
+  ParticipationType,
   getStatusDisplayName
 } from '../../models/event.models';
 import { SportKey } from '../../models/club.models';
@@ -22,16 +19,6 @@ import { CourtSummaryResponse } from '../../models/court.models';
 interface SportOption {
   label: string;
   value: SportKey;
-}
-
-interface FormatOption {
-  label: string;
-  value: EventFormat;
-}
-
-interface EventTypeOption {
-  label: string;
-  value: EventType;
 }
 
 interface StatusOption {
@@ -64,19 +51,7 @@ export class CreateEventComponent implements OnInit, OnChanges {
   coverImageFile: File | null = null;
   coverImagePreview: string | null = null;
 
-  sportOptions: SportOption[] = [
-    { label: 'Tennis', value: 'tennis' },
-    { label: 'Padel', value: 'padel' }
-  ];
-
-  formatOptions: FormatOption[] = [];
-
-  eventTypeOptions: EventTypeOption[] = [
-    { label: getEventTypeDisplayName(EventType.TOURNAMENT), value: EventType.TOURNAMENT },
-    { label: getEventTypeDisplayName(EventType.LEAGUE), value: EventType.LEAGUE },
-    { label: getEventTypeDisplayName(EventType.SOCIAL), value: EventType.SOCIAL },
-    { label: getEventTypeDisplayName(EventType.TRAINING), value: EventType.TRAINING }
-  ];
+  sportOptions: SportOption[] = [];
 
   statusOptions: StatusOption[] = [
     { label: getStatusDisplayName(EventStatus.DRAFT), value: EventStatus.DRAFT },
@@ -93,17 +68,20 @@ export class CreateEventComponent implements OnInit, OnChanges {
   constructor(
     private fb: FormBuilder,
     private eventService: EventService,
-    private courtService: CourtService
+    private courtService: CourtService,
+    private clubService: ClubService
   ) {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
       description: [''],
-      eventType: new FormControl<EventType | ''>('', { nonNullable: true, validators: [Validators.required] }),
       sport: new FormControl<SportKey | ''>('', { nonNullable: true, validators: [Validators.required] }),
-      format: new FormControl<EventFormat | ''>('', { nonNullable: true, validators: [Validators.required] }),
+      format: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100)]],
       startDate: [null, Validators.required],
       endDate: [null, Validators.required],
       registrationDeadline: [null],
+      participationType: ['INDIVIDUAL'],
+      numberOfTeams: [null, [Validators.min(1), Validators.max(100)]],
+      playersPerTeam: [null, [Validators.min(1), Validators.max(20)]],
       maxParticipants: [null, [Validators.min(2), Validators.max(1000)]],
       price: [null, [Validators.min(0), Validators.max(99999.99)]],
       status: new FormControl<EventStatus>(EventStatus.DRAFT, { nonNullable: true })
@@ -111,12 +89,42 @@ export class CreateEventComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
+    this.loadClubSports();
     this.loadCourts();
     this.setupSportWatcher();
 
     if (this.eventId) {
       this.loadEvent();
     }
+  }
+
+  loadClubSports() {
+    this.clubService.getMyClub().subscribe({
+      next: (club) => {
+        this.sportOptions = (club.sports || []).map(sport => ({
+          label: this.formatSportLabel(sport),
+          value: sport
+        }));
+      },
+      error: (err) => {
+        console.error('Failed to load club sports:', err);
+      }
+    });
+  }
+
+  private formatSportLabel(sport: SportKey): string {
+    const labels: Record<string, string> = {
+      'tennis': 'Tennis',
+      'padel': 'Padel',
+      'football': 'Football',
+      'basketball': 'Basketball',
+      'volleyball': 'Volleyball',
+      'badminton': 'Badminton',
+      'squash': 'Squash',
+      'pingpong': 'Ping Pong',
+      'handball': 'Handball'
+    };
+    return labels[sport] || sport.charAt(0).toUpperCase() + sport.slice(1);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -144,17 +152,6 @@ export class CreateEventComponent implements OnInit, OnChanges {
   setupSportWatcher() {
     this.form.get('sport')?.valueChanges.subscribe((sport: SportKey | '') => {
       if (sport) {
-        const formats = getFormatsForSport(sport);
-        this.formatOptions = formats.map(f => ({
-          label: getFormatDisplayName(f),
-          value: f
-        }));
-
-        const currentFormat = this.form.get('format')?.value;
-        if (currentFormat && !formats.includes(currentFormat)) {
-          this.form.get('format')?.setValue('');
-        }
-
         this.updateFilteredCourts();
 
         this.selectedCourtIds = this.selectedCourtIds.filter(courtId => {
@@ -162,8 +159,6 @@ export class CreateEventComponent implements OnInit, OnChanges {
           return court && court.sport.toLowerCase() === sport.toLowerCase();
         });
       } else {
-        this.formatOptions = [];
-        this.form.get('format')?.setValue('');
         this.filteredCourtOptions = [];
       }
     });
@@ -194,12 +189,14 @@ export class CreateEventComponent implements OnInit, OnChanges {
         this.form.patchValue({
           name: event.name,
           description: event.description,
-          eventType: event.eventType as EventType,
           sport: event.sportKey as SportKey,
-          format: event.format as EventFormat,
+          format: event.format,
           startDate: new Date(event.startDate),
           endDate: new Date(event.endDate),
           registrationDeadline: event.registrationDeadline ? new Date(event.registrationDeadline) : null,
+          participationType: event.participationType || 'INDIVIDUAL',
+          numberOfTeams: event.numberOfTeams,
+          playersPerTeam: event.playersPerTeam,
           maxParticipants: event.maxParticipants,
           price: event.price,
           status: event.status as EventStatus
@@ -269,19 +266,31 @@ export class CreateEventComponent implements OnInit, OnChanges {
 
     const formValue = this.form.value;
 
+    // Calculate maxParticipants based on participation type
+    let maxParticipants: number | null = null;
+    if (formValue.participationType === 'TEAM') {
+      const teams = formValue.numberOfTeams || 0;
+      const playersPerTeam = formValue.playersPerTeam || 0;
+      maxParticipants = teams * playersPerTeam;
+    } else {
+      maxParticipants = formValue.maxParticipants || null;
+    }
+
     const details: CreateEventRequest | UpdateEventRequest = {
       name: formValue.name,
       description: formValue.description || null,
-      eventType: formValue.eventType,
       sportKey: formValue.sport,
       format: formValue.format,
       startDate: this.formatDateForBackend(formValue.startDate),
       endDate: this.formatDateForBackend(formValue.endDate),
       registrationDeadline: formValue.registrationDeadline ? this.formatDateForBackend(formValue.registrationDeadline) : null,
-      maxParticipants: formValue.maxParticipants || null,
+      participationType: formValue.participationType as ParticipationType,
+      numberOfTeams: formValue.numberOfTeams || null,
+      playersPerTeam: formValue.playersPerTeam || null,
+      maxParticipants: maxParticipants,
       price: formValue.price || null,
       courtIds: this.selectedCourtIds,
-      ...(this.eventId ? { status: formValue.status } : {})
+      status: formValue.status
     };
 
     const request$ = this.eventId
@@ -306,9 +315,9 @@ export class CreateEventComponent implements OnInit, OnChanges {
 
   resetForm() {
     this.form.reset({
-      eventType: '',
       sport: '',
       format: '',
+      participationType: 'INDIVIDUAL',
       status: EventStatus.DRAFT
     });
     this.selectedCourtIds = [];

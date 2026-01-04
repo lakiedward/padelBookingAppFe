@@ -67,6 +67,7 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = signal(true);
 
   @Output() courtsRequested = new EventEmitter<void>();
+  @Output() eventsRequested = new EventEmitter<void>();
   @Output() manageBookingRequested = new EventEmitter<number>();
 
   hasExistingClub = false;
@@ -171,6 +172,10 @@ export class ClubDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onEditCourtsRequested() {
     this.courtsRequested.emit();
+  }
+
+  onEditEventsRequested() {
+    this.eventsRequested.emit();
   }
 
   onManageBooking(courtId: number) {

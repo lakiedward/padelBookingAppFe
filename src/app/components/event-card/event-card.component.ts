@@ -5,8 +5,6 @@ import { PublicService } from '../../services/public.service';
 import {
   EventPanelData,
   EventStatus,
-  getEventTypeDisplayName,
-  getFormatDisplayName,
   getStatusDisplayName
 } from '../../models/event.models';
 import { SportKey } from '../../models/club.models';
@@ -39,12 +37,8 @@ export class EventCardComponent {
     return `${start} – ${end}`;
   }
 
-  protected formatEventType(event: EventPanelData): string {
-    return getEventTypeDisplayName(event.eventType);
-  }
-
   protected formatEventFormat(event: EventPanelData): string {
-    return getFormatDisplayName(event.format);
+    return event.format;
   }
 
   protected formatStatus(event: EventPanelData): string {

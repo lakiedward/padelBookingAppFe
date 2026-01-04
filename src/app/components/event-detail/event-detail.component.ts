@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PublicService } from '../../services/public.service';
-import { EventPanelData, eventSummaryToPanelData, getEventTypeDisplayName, getFormatDisplayName, getStatusDisplayName, EventStatus } from '../../models/event.models';
+import { EventPanelData, eventSummaryToPanelData, getStatusDisplayName, EventStatus } from '../../models/event.models';
 import { ClubDetails } from '../../models/club.models';
 import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { AuthService } from '../../services/auth.service';
@@ -143,12 +143,8 @@ export class EventDetailComponent implements OnInit {
     });
   }
 
-  formatEventType(event: EventPanelData): string {
-    return getEventTypeDisplayName(event.eventType);
-  }
-
   formatEventFormat(event: EventPanelData): string {
-    return getFormatDisplayName(event.format);
+    return event.format;
   }
 
   formatStatus(event: EventPanelData): string {

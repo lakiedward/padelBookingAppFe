@@ -59,6 +59,10 @@ export class AdminViewComponent implements AfterViewInit {
     this.courtsMode = 'view';
   }
 
+  onEventsRequestedFromChild() {
+    this.select('events');
+  }
+
   onLogout() {
     this.auth.logout();
     this.router.navigate(['/auth']);

@@ -38,20 +38,6 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="eventType">Event Type *</label>
-            <p-select
-              inputId="eventType"
-              formControlName="eventType"
-              [options]="eventTypeOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select type"
-              styleClass="w-full"
-              [class.invalid]="form.get('eventType')?.invalid && form.get('eventType')?.touched">
-            </p-select>
-          </div>
-
-          <div class="form-group" *ngIf="isEditMode">
             <label for="status">Status *</label>
             <p-select
               inputId="status"
@@ -90,20 +76,13 @@
 
           <div class="form-group">
             <label for="format">Format *</label>
-            <p-select
-              inputId="format"
+            <input
+              type="text"
+              id="format"
               formControlName="format"
-              [options]="formatOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select format"
-              [disabled]="!form.get('sport')?.value || formatOptions.length === 0"
-              styleClass="w-full"
+              class="form-control"
+              placeholder="e.g., Americano, Round Robin"
               [class.invalid]="form.get('format')?.invalid && form.get('format')?.touched">
-            </p-select>
-            <div class="help-text" *ngIf="!form.get('sport')?.value">
-              Select a sport first
-            </div>
             <div class="error-message" *ngIf="form.get('format')?.invalid && form.get('format')?.touched">
               Format is required
             </div>
@@ -167,8 +146,54 @@
       <section class="form-section">
         <h3 class="section-title">Participants & Pricing</h3>
 
-        <div class="form-row">
+        <div class="form-group">
+          <label>Participation Type</label>
+          <div class="radio-group">
+            <label class="radio-option" [class.selected]="form.get('participationType')?.value === 'INDIVIDUAL'">
+              <input
+                type="radio"
+                formControlName="participationType"
+                value="INDIVIDUAL">
+              <span class="radio-label">Individual</span>
+            </label>
+            <label class="radio-option" [class.selected]="form.get('participationType')?.value === 'TEAM'">
+              <input
+                type="radio"
+                formControlName="participationType"
+                value="TEAM">
+              <span class="radio-label">Teams</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="form.get('participationType')?.value === 'TEAM'">
           <div class="form-group">
+            <label for="numberOfTeams">Number of Teams</label>
+            <input
+              type="number"
+              id="numberOfTeams"
+              formControlName="numberOfTeams"
+              class="form-control"
+              placeholder="e.g., 8"
+              min="1"
+              max="100">
+          </div>
+
+          <div class="form-group">
+            <label for="playersPerTeam">Players per Team</label>
+            <input
+              type="number"
+              id="playersPerTeam"
+              formControlName="playersPerTeam"
+              class="form-control"
+              placeholder="e.g., 2"
+              min="1"
+              max="20">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" *ngIf="form.get('participationType')?.value === 'INDIVIDUAL'">
             <label for="maxParticipants">Max Participants</label>
             <input
               type="number"

@@ -13,7 +13,6 @@ type PaymentMethod = 'cash' | 'card';
 interface EventJoinDetails {
   eventId: number;
   eventName: string;
-  eventType: string;
   format: string;
   sport: string;
   startDate: Date;
@@ -80,7 +79,6 @@ export class EventJoinConfirmationComponent implements OnInit {
         this.eventDetails = {
           eventId: eventSummary.id,
           eventName: eventSummary.name,
-          eventType: eventSummary.eventType,
           format: eventSummary.format,
           sport: eventSummary.sportKey,
           startDate: eventData.startDate,
@@ -178,11 +176,6 @@ export class EventJoinConfirmationComponent implements OnInit {
       year: 'numeric'
     });
     return `${start} – ${end}`;
-  }
-
-  getEventTypeDisplay(): string {
-    if (!this.eventDetails) return '';
-    return this.eventDetails.eventType.replace(/_/g, ' ');
   }
 
   getFormatDisplay(): string {

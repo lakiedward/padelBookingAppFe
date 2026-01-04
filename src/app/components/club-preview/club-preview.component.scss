@@ -193,6 +193,15 @@
   }
 }
 
+.no-courts {
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .chip {
   border-radius: 999px;
@@ -420,4 +429,111 @@
 .about, .contact {
   padding-top: 20px;
   padding-bottom: 20px;
+}
+
+// Events section styles
+.events {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(214,221,230,0.15);
+  padding-left: 8px;
+  padding-right: 8px;
+
+  @media (min-width: 768px) {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  @media (min-width: 1024px) {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+.events h2 {
+  font-size: 20px;
+  margin: 8px 0 8px;
+}
+
+.events-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.events .hint {
+  color: #8aa0b5;
+  font-size: 13px;
+}
+
+.events-header .controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: block;
+      stroke: currentColor;
+    }
+
+    &--primary {
+      background: #a7ee43;
+      color: #000a14;
+      border-color: rgba(167, 238, 67, 0.4);
+
+      &:hover {
+        filter: brightness(1.05);
+      }
+    }
+  }
+}
+
+.events-loading,
+.events-error,
+.no-events {
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.section-sub {
+  font-size: 16px;
+  font-weight: 600;
+  color: #a7ee43;
+  margin: 16px 0 12px;
 }

@@ -27,7 +27,7 @@
               <div class="detail-hero-content">
                 <div class="detail-hero-info">
                   <h1 class="detail-hero-title">{{ event?.name || 'Loading...' }}</h1>
-                  <div class="detail-hero-subtitle">{{ formatEventType(event!) }} • {{ formatEventFormat(event!) }}</div>
+                  <div class="detail-hero-subtitle">{{ formatEventFormat(event!) }}</div>
                   <div class="detail-badges">
                     <span class="detail-badge detail-badge--primary">{{ event?.sportKey || '...' }}</span>
                     <span class="detail-badge" [ngClass]="getStatusClass(event!.status)">{{ formatStatus(event!) }}</span>
@@ -74,11 +74,67 @@
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
+                  Participation Type
+                </div>
+                <div class="detail-info-value">
+                  <span>{{ event?.participationType === 'TEAM' ? 'Teams' : 'Individual' }}</span>
+                </div>
+              </div>
+
+              <div class="detail-info-item" *ngIf="event?.participationType === 'TEAM' && event?.numberOfTeams">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  Number of Teams
+                </div>
+                <div class="detail-info-value">{{ event!.numberOfTeams }} Teams</div>
+              </div>
+
+              <div class="detail-info-item" *ngIf="event?.participationType === 'TEAM' && event?.playersPerTeam">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  Players per Team
+                </div>
+                <div class="detail-info-value">{{ event!.playersPerTeam }} {{ event!.playersPerTeam === 1 ? 'Player' : 'Players' }}</div>
+              </div>
+
+              <div class="detail-info-item" *ngIf="event?.participationType === 'INDIVIDUAL'">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
                   Participants
                 </div>
                 <div class="detail-info-value">
                   <span *ngIf="event?.maxParticipants">{{ event!.currentParticipants }}/{{ event!.maxParticipants }} Players</span>
                   <span *ngIf="!event?.maxParticipants">{{ event!.currentParticipants }} Players</span>
+                </div>
+              </div>
+
+              <div class="detail-info-item" *ngIf="event?.participationType === 'TEAM' && event?.maxParticipants">
+                <div class="detail-info-label">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  Total Participants
+                </div>
+                <div class="detail-info-value">
+                  <span>{{ event!.currentParticipants }}/{{ event!.maxParticipants }} Players</span>
                 </div>
               </div>
 

@@ -15,7 +15,7 @@
     <div class="event-hero__content">
       <div class="event-hero__text">
         <h3>{{ event.name }}</h3>
-        <p class="muted">{{ formatEventType(event) }} • {{ formatEventFormat(event) }}</p>
+        <p class="muted">{{ formatEventFormat(event) }}</p>
         <div class="chips">
           <span class="chip chip--ghost">{{ event.courtCount }} {{ event.courtCount === 1 ? 'Court' : 'Courts' }}</span>
           <span class="chip chip--ghost" *ngIf="event.maxParticipants">

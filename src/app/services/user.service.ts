@@ -16,7 +16,6 @@ export interface UserEventParticipation {
   id: number;
   eventId: number;
   eventName: string;
-  eventType: string;
   format: string;
   sportKey: string;
   startDate: string;

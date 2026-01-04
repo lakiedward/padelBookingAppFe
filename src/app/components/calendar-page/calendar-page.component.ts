@@ -3,9 +3,13 @@ import { Component, computed, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
+import { UserService, UserEventParticipation } from '../../services/user.service';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
+import { EventCardComponent } from '../event-card/event-card.component';
 import { Time24Pipe } from '../../pipes/time24.pipe';
 import { normalizeSportName } from '../../utils/normalize-sport-name.util';
+import { EventPanelData, EventStatus } from '../../models/event.models';
+import { SportKey } from '../../models/club.models';
 
 type ViewMode = 'month' | 'week' | 'day';
 
@@ -25,7 +29,7 @@ type Reservation = {
 @Component({
   selector: 'app-calendar-page',
   standalone: true,
-  imports: [CommonModule, CourtListingCardComponent, Time24Pipe],
+  imports: [CommonModule, CourtListingCardComponent, EventCardComponent, Time24Pipe],
   templateUrl: './calendar-page.component.html',
   styleUrl: './calendar-page.component.scss'
 })
@@ -33,31 +37,35 @@ export class CalendarPageComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private router: Router,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private userService: UserService
   ) {}
 
   mobileOpen = false;
   isLoading = true;
+  isLoadingEvents = true;
 
   anchor = signal(new Date());
   viewMode = signal<ViewMode>('month');
 
   reservations = signal<Reservation[]>([]);
+  events = signal<EventPanelData[]>([]);
 
   ngOnInit(): void {
     this.loadUserBookings();
+    this.loadUserEvents();
   }
 
   private loadUserBookings(): void {
     this.isLoading = true;
-    
+
     this.bookingService.getMyBookings().subscribe({
       next: (bookings) => {
-        
+
         const reservations: Reservation[] = bookings.map(booking => {
           const startDateTime = new Date(booking.startTime);
           const endDateTime = new Date(booking.endTime);
-          
+
           return {
             id: booking.id.toString(),
             courtId: booking.courtId,
@@ -71,7 +79,7 @@ export class CalendarPageComponent implements OnInit {
             timeSlotId: booking.timeSlotId
           };
         });
-        
+
         this.reservations.set(reservations);
         this.isLoading = false;
       },
@@ -90,23 +98,85 @@ export class CalendarPageComponent implements OnInit {
     return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 
-  
+  private loadUserEvents(): void {
+    this.isLoadingEvents = true;
 
-  readonly eventsByDay = computed<Record<string, string[]>>(() => {
-    const m: Record<string, string[]> = {};
-    for (const r of this.reservations()) {
-      (m[r.date] ??= []).push(`${r.sport} ${r.court} ${r.start}`);
-    }
-    return m;
-  });
+    this.userService.getMyEvents().subscribe({
+      next: (userEvents) => {
+        const eventPanels: EventPanelData[] = userEvents.map(event => ({
+          id: event.eventId,
+          name: event.eventName,
+          description: null,
+          sportKey: event.sportKey as SportKey,
+          format: event.format,
+          startDate: new Date(event.startDate),
+          endDate: new Date(event.endDate),
+          registrationDeadline: null,
+          participationType: 'INDIVIDUAL',
+          numberOfTeams: null,
+          playersPerTeam: null,
+          maxParticipants: null,
+          currentParticipants: 0,
+          price: null,
+          currency: null,
+          status: EventStatus.PUBLISHED,
+          coverImageUrl: event.coverImageUrl || null,
+          courtCount: 0,
+          clubName: event.clubName
+        }));
 
-  toggleMobile() { this.mobileOpen = !this.mobileOpen; }
-  logout() { this.auth.logout(); this.router.navigate(['/auth']); }
-
-  setView(mode: ViewMode) { 
-    this.viewMode.set(mode); 
+        this.events.set(eventPanels);
+        this.isLoadingEvents = false;
+      },
+      error: () => {
+        this.events.set([]);
+        this.isLoadingEvents = false;
+      }
+    });
   }
-  
+
+  getEventsForCurrentView(): EventPanelData[] {
+    const currentViewMode = this.viewMode();
+    const currentAnchor = this.anchor();
+    const allEvents = this.events();
+
+    if (currentViewMode === 'month') {
+      return allEvents;
+    }
+
+    if (currentViewMode === 'day') {
+      const anchorDateKey = this.toDateKey(currentAnchor);
+      return allEvents.filter(event => {
+        const eventStartKey = this.toDateKey(event.startDate);
+        const eventEndKey = this.toDateKey(event.endDate);
+        return anchorDateKey >= eventStartKey && anchorDateKey <= eventEndKey;
+      });
+    }
+
+    if (currentViewMode === 'week') {
+      const weekStart = this.startOfWeekMon(currentAnchor);
+      const weekEnd = this.endOfWeekMon(currentAnchor);
+      const weekStartKey = this.toDateKey(weekStart);
+      const weekEndKey = this.toDateKey(weekEnd);
+
+      return allEvents.filter(event => {
+        const eventStartKey = this.toDateKey(event.startDate);
+        const eventEndKey = this.toDateKey(event.endDate);
+        return !(eventEndKey < weekStartKey || eventStartKey > weekEndKey);
+      });
+    }
+
+    return allEvents;
+  }
+
+  onEventDetailsClick(eventId: number): void {
+    this.router.navigate(['/event', eventId]);
+  }
+
+  setView(mode: ViewMode) {
+    this.viewMode.set(mode);
+  }
+
   onDayClick(date: Date) {
     this.anchor.set(date);
     this.viewMode.set('day');
@@ -154,21 +224,21 @@ export class CalendarPageComponent implements OnInit {
   getWeeksInMonth(): { date: Date; inCurrent: boolean }[][] {
     const matrix = this.monthMatrix();
     const weeks: { date: Date; inCurrent: boolean }[][] = [];
-    
+
     for (let i = 0; i < matrix.length; i += 7) {
       weeks.push(matrix.slice(i, i + 7));
     }
-    
+
     return weeks;
   }
 
   formatWeekRange(week: { date: Date; inCurrent: boolean }[]): string {
     const firstDay = week[0].date;
     const lastDay = week[6].date;
-    
+
     const firstMonth = firstDay.toLocaleDateString('en-US', { month: 'short' });
     const lastMonth = lastDay.toLocaleDateString('en-US', { month: 'short' });
-    
+
     if (firstMonth === lastMonth) {
       return `${firstMonth} ${firstDay.getDate()}-${lastDay.getDate()}`;
     } else {
@@ -188,15 +258,24 @@ export class CalendarPageComponent implements OnInit {
       .sort((a, b) => a.start.localeCompare(b.start));
   }
 
+  eventsByDay(date: Date): EventPanelData[] {
+    const key = this.toDateKey(date);
+    return this.events().filter(event => {
+      const eventStartKey = this.toDateKey(event.startDate);
+      const eventEndKey = this.toDateKey(event.endDate);
+      return key >= eventStartKey && key <= eventEndKey;
+    });
+  }
+
   getUniqueCourts(): { courtId: number; court: string; club: string; sport: string }[] {
     const unique = new Map<string, { courtId: number; court: string; club: string; sport: string }>();
-    
+
     const currentViewMode = this.viewMode();
     const currentAnchor = this.anchor();
     const anchorDateKey = this.toDateKey(currentAnchor);
-    
+
     let filteredReservations: Reservation[];
-    
+
     if (currentViewMode === 'day') {
       filteredReservations = this.reservations().filter(r => r.date === anchorDateKey);
     } else if (currentViewMode === 'week') {
@@ -204,37 +283,37 @@ export class CalendarPageComponent implements OnInit {
       const weekEnd = this.endOfWeekMon(currentAnchor);
       const weekStartKey = this.toDateKey(weekStart);
       const weekEndKey = this.toDateKey(weekEnd);
-      
+
       filteredReservations = this.reservations().filter(r => r.date >= weekStartKey && r.date <= weekEndKey);
     } else {
       filteredReservations = this.reservations();
     }
-    
+
     filteredReservations.forEach(r => {
       const key = `${r.court}-${r.club}`;
       if (!unique.has(key)) {
         unique.set(key, { courtId: r.courtId, court: r.court, club: r.club, sport: r.sport });
       }
     });
-    
+
     const result = Array.from(unique.values());
     return result;
   }
 
   getReservationsForCourt(courtName: string): Reservation[] {
     let filteredReservations = this.reservations().filter(r => r.court === courtName);
-    
+
     if (this.viewMode() === 'day') {
       filteredReservations = filteredReservations.filter(r => r.date === this.toDateKey(this.anchor()));
     }
-    
+
     return filteredReservations.sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
   }
 
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       weekday: 'short'
     });
@@ -260,7 +339,7 @@ export class CalendarPageComponent implements OnInit {
   getNextAvailableDate(courtName: string): string {
     const reservations = this.getReservationsForCourt(courtName);
     if (reservations.length === 0) return '';
-    
+
     const firstReservation = reservations[0];
     return firstReservation.date;
   }
@@ -268,7 +347,7 @@ export class CalendarPageComponent implements OnInit {
   getCourtSlots(courtName: string): string[] {
     const reservations = this.getReservationsForCourt(courtName);
     if (reservations.length === 0) return [];
-    
+
     const slots = reservations.map(r => {
       const start = new Date(`${r.date}T${r.start}`);
       const end = new Date(`${r.date}T${r.end}`);
@@ -276,12 +355,12 @@ export class CalendarPageComponent implements OnInit {
       const endStr = end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
       return `${startStr} – ${endStr}`;
     });
-    
+
     if (slots.length > 3) {
       const remaining = slots.length - 3;
       return [...slots.slice(0, 3), `+${remaining} more`];
     }
-    
+
     return slots;
   }
 
@@ -304,7 +383,7 @@ export class CalendarPageComponent implements OnInit {
 
   getSportIcon(sportName: string): string | null {
     const sport = sportName.toLowerCase().trim();
-    
+
     const sportMap: { [key: string]: string } = {
       'tennis': 'assets/icons/tennis.svg',
       'padel': 'assets/icons/padel.svg',
@@ -320,7 +399,7 @@ export class CalendarPageComponent implements OnInit {
       'table tennis': 'assets/icons/pingpong.svg',
       'table-tennis': 'assets/icons/pingpong.svg'
     };
-    
+
     return sportMap[sport] || null;
   }
 

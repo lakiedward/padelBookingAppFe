@@ -3,9 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ClubDetails, SportKey } from '../../models/club.models';
 import { CourtSummaryResponse, CourtResponse, BackendAvailabilityRuleType } from '../../models/court.models';
 import { CourtListingCardComponent } from '../court-listing-card/court-listing-card.component';
+import { EventCardComponent } from '../event-card/event-card.component';
 import { CourtService } from '../../services/court.service';
+import { EventService } from '../../services/event.service';
 import { Time24Pipe } from '../../pipes/time24.pipe';
 import { normalizeSportName } from '../../utils/normalize-sport-name.util';
+import { EventPanelData, eventSummaryToPanelData } from '../../models/event.models';
 
 interface CourtListingData {
   id: string;
@@ -25,7 +28,7 @@ interface CourtListingData {
 @Component({
   selector: 'app-club-preview',
   standalone: true,
-  imports: [CommonModule, CourtListingCardComponent],
+  imports: [CommonModule, CourtListingCardComponent, EventCardComponent],
   templateUrl: './club-preview.component.html',
   styleUrl: './club-preview.component.scss'
 })
@@ -34,19 +37,29 @@ export class ClubPreviewComponent implements OnInit {
   @Output() editRequested = new EventEmitter<void>();
   @Output() deleteRequested = new EventEmitter<void>();
   @Output() editCourtsRequested = new EventEmitter<void>();
+  @Output() editEventsRequested = new EventEmitter<void>();
   @Output() manageBookingRequested = new EventEmitter<number>();
 
   activeCourtFilter = signal<'all' | SportKey>('all');
   realCourts = signal<CourtListingData[]>([]);
   isLoadingCourts = signal(false);
   courtsLoadError = signal<string | null>(null);
+
+  activeEventFilter = signal<'all' | SportKey>('all');
+  events = signal<EventPanelData[]>([]);
+  isLoadingEvents = signal(false);
+  eventsLoadError = signal<string | null>(null);
   
   private time24Pipe = new Time24Pipe();
 
-  constructor(private courtService: CourtService) {}
+  constructor(
+    private courtService: CourtService,
+    private eventService: EventService
+  ) {}
 
   ngOnInit(): void {
     this.loadRealCourts();
+    this.loadEvents();
   }
 
   private loadRealCourts(): void {
@@ -301,6 +314,8 @@ export class ClubPreviewComponent implements OnInit {
 
   onEditCourts() { this.editCourtsRequested.emit(); }
 
+  onEditEvents() { this.editEventsRequested.emit(); }
+
   onCourtCardClick(c: CourtListingData) {
     const idNum = Number(c.id);
     if (!Number.isNaN(idNum)) {
@@ -320,5 +335,46 @@ export class ClubPreviewComponent implements OnInit {
     courts.forEach(c => sportsSet.add(c.sport));
     const uniqueSports = Array.from(sportsSet);
     return uniqueSports;
+  }
+
+  private loadEvents(): void {
+    this.isLoadingEvents.set(true);
+    this.eventsLoadError.set(null);
+
+    this.eventService.getEvents().subscribe({
+      next: (eventSummaries) => {
+        const panels = eventSummaries.map(eventSummaryToPanelData);
+        this.events.set(panels);
+        this.isLoadingEvents.set(false);
+      },
+      error: () => {
+        this.eventsLoadError.set('Failed to load events');
+        this.isLoadingEvents.set(false);
+        this.events.set([]);
+      }
+    });
+  }
+
+  setEventFilter(filter: 'all' | SportKey): void {
+    this.activeEventFilter.set(filter);
+  }
+
+  getUniqueSportsFromEvents(): SportKey[] {
+    const events = this.events();
+    const sportsSet = new Set<SportKey>();
+    events.forEach(e => {
+      if (e.sportKey) sportsSet.add(e.sportKey);
+    });
+    return Array.from(sportsSet);
+  }
+
+  eventsBySport(s: SportKey | 'all'): EventPanelData[] {
+    const all = this.events();
+    if (s === 'all') return all;
+    return all.filter(e => e.sportKey === s);
+  }
+
+  onEventCardClick(eventId: number): void {
+    // Events are managed in the Events tab, so we can just log or ignore
   }
 }

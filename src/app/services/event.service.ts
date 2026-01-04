@@ -52,16 +52,18 @@ export class EventService {
     const backendDetails = {
       name: details.name,
       description: details.description || null,
-      eventType: details.eventType,
       sportKey: details.sportKey,
       format: details.format,
       startDate: this.formatDate(details.startDate),
       endDate: this.formatDate(details.endDate),
       registrationDeadline: details.registrationDeadline ? this.formatDate(details.registrationDeadline) : null,
+      participationType: details.participationType,
+      numberOfTeams: details.numberOfTeams,
+      playersPerTeam: details.playersPerTeam,
       maxParticipants: details.maxParticipants,
       price: details.price,
       courtIds: details.courtIds,
-      ...(isUpdate && 'status' in details ? { status: (details as UpdateEventRequest).status } : {})
+      ...(details.status ? { status: details.status } : {})
     };
 
     formData.append('details', JSON.stringify(backendDetails));
