@@ -100,7 +100,7 @@ export class RegisterComponent implements AfterViewInit {
       }
       this.authService.registerAdmin({ email, password })
         .pipe(
-          switchMap(() => this.paymentsService.initConnect({})),
+          switchMap(() => this.paymentsService.initConnect({ baseUrl: window.location.origin })),
           finalize(() => {
             this.loading = false;
             this.cdr.detectChanges();
