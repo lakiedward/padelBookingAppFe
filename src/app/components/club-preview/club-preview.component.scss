@@ -20,6 +20,13 @@
   align-items: stretch;
 }
 
+.top-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(167,238,67,0.3) 20%, rgba(167,238,67,0.3) 80%, transparent);
+  margin: 24px 0;
+  border-radius: 2px;
+}
+
 .hero {
   position: relative;
   width: 100%;
@@ -86,8 +93,8 @@
 
 .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.titles h1 { 
-  margin: 0; 
+.titles h1 {
+  margin: 0;
   font-size: 28px;
   @media (max-width: 767px) { font-size: 24px; }
 }
@@ -270,6 +277,119 @@
   }
 }
 
+.danger-btn .icon { width: 18px; height: 18px; }
+
+.top-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(167,238,67,0.3) 20%, rgba(167,238,67,0.3) 80%, transparent);
+  margin: 24px 0;
+  border-radius: 2px;
+}
+
+.hero {
+  position: relative;
+  height: 400px;
+  background: linear-gradient(90deg, #0f1b26, #1a2332);
+  background-size: cover;
+  background-position: center;
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+}
+.hero-content {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 16px;
+  display: flex;
+  align-items: end;
+  gap: 16px;
+}
+.logo {
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid #a7ee43;
+  background: rgba(15,27,38,0.9);
+  flex-shrink: 0;
+}
+.logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.titles h1 { margin: 0; font-size: 28px; }
+.meta { display: flex; gap: 8px; margin-top: 4px; }
+.sport { background: #a7ee43; color: #000a14; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+.location { color: #d6dde6; font-size: 14px; margin-top: 6px; }
+
+.container { padding: 0 0 24px; }
+
+.about, .contact, .courts {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+@media (min-width: 768px) {
+  .about, .contact, .courts {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+@media (min-width: 1024px) {
+  .about, .contact, .courts {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+.about h2, .contact h2, .courts h2 { font-size: 20px; margin: 8px 0 8px; }
+.about p { color: #fff; white-space: pre-line; }
+
+.contact .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 640px) { .contact .grid { grid-template-columns: 1fr 1fr; } }
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.icon-box {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  border-radius: 16px;
+  background: rgba(167,238,67,0.2);
+  border: 1px solid rgba(167,238,67,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #a7ee43;
+  font-size: 22px;
+}
+.contact-item .content .title { color: #a7ee43; font-weight: 700; font-size: 14px; }
+.contact-item .content .value { color: #fff; font-size: 16px; margin-top: 4px; }
+
+.courts { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(214,221,230,0.15); }
+.courts-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.courts .hint { color: #8aa0b5; font-size: 13px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip {
+  border-radius: 999px;
+  padding: 6px 12px;
+  border: 1px solid rgba(214,221,230,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+}
+.chip.active { background: #a7ee43; color: #000a14; border-color: #a7ee43; }
+
+:host, .club-preview {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+}
 .club-preview .hero {
   margin-left: -24px;
   margin-right: -24px;

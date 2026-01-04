@@ -63,6 +63,12 @@ export const routes: Routes = [
       .then(m => m.EventDetailComponent),
     canActivate: [adminRedirectGuard]
   },
+  {
+    path: 'events/:id/join',
+    loadComponent: () => import('./components/event-join-confirmation/event-join-confirmation.component')
+      .then(m => m.EventJoinConfirmationComponent),
+    canActivate: [authGuard, adminRedirectGuard]
+  },
 
   {
     path: 'calendar',

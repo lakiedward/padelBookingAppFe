@@ -2,17 +2,17 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ConvertMoneyPipe } from '../../pipes/convert-money.pipe';
 import { PublicService } from '../../services/public.service';
+import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
+import { EventCardComponent } from '../event-card/event-card.component';
 import {
   EventPanelData,
   EventStatus,
   EventSummaryResponse,
   eventSummaryToPanelData,
-  getEventTypeDisplayName,
-  getFormatDisplayName,
   getStatusDisplayName
 } from '../../models/event.models';
 import { SportKey } from '../../models/club.models';
@@ -25,7 +25,7 @@ interface StatusFilterOption {
 @Component({
   selector: 'app-events-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConvertMoneyPipe, SelectModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, SelectModule, DatePickerModule, EventCardComponent],
   templateUrl: './events-page.component.html',
   styleUrls: ['./events-page.component.scss']
 })
@@ -39,6 +39,8 @@ export class EventsPageComponent implements OnInit {
   protected readonly selectedStatus = signal<'all' | EventStatus>('all');
   protected readonly filtersExpanded = signal(false);
   protected readonly searchQuery = signal('');
+  protected readonly joinedEventIds = signal<Set<number>>(new Set());
+  protected readonly isAuthenticated = signal(false);
 
   protected readonly statusFilters: StatusFilterOption[] = [
     { label: 'All Statuses', value: 'all' },
@@ -119,15 +121,15 @@ export class EventsPageComponent implements OnInit {
   locationOptions: { label: string; value: string }[] = [
     { label: 'All locations', value: 'all' }
   ];
-  
+
   selectedClub: string = 'all';
   clubOptions: { label: string; value: string }[] = [
     { label: 'All clubs', value: 'all' }
   ];
-  
+
   private clubToLocationMap = new Map<string, string>();
   private allClubOptions: { label: string; value: string }[] = [];
-  
+
   sortBy: string = 'date-asc';
   sortOptions: { label: string; value: string }[] = [
     { label: 'Date: Earliest first', value: 'date-asc' },
@@ -135,19 +137,25 @@ export class EventsPageComponent implements OnInit {
     { label: 'Price: Low to High', value: 'price-asc' },
     { label: 'Price: High to Low', value: 'price-desc' }
   ];
-  
+
   selectedDate: Date | null = null;
   timeFrom: Date | null = null;
   timeTo: Date | null = null;
 
   constructor(
     private readonly publicService: PublicService,
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
     private readonly cdr: ChangeDetectorRef,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
+    this.isAuthenticated.set(this.authService.isLoggedIn());
     this.fetchEvents();
+    if (this.isAuthenticated()) {
+      this.fetchUserJoinedEvents();
+    }
   }
 
   protected selectSport(filter: SportKey | 'all'): void {
@@ -158,76 +166,12 @@ export class EventsPageComponent implements OnInit {
     this.selectedStatus.set(filter);
   }
 
-  protected formatDateRange(event: EventPanelData): string {
-    const start = event.startDate.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short'
-    });
-    const end = event.endDate.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short'
-    });
-    return `${start} – ${end}`;
-  }
-
-  protected formatEventType(event: EventPanelData): string {
-    return getEventTypeDisplayName(event.eventType);
-  }
-
-  protected formatEventFormat(event: EventPanelData): string {
-    return getFormatDisplayName(event.format);
-  }
-
-  protected formatStatus(event: EventPanelData): string {
-    return getStatusDisplayName(event.status);
-  }
-
   protected sportLabel(sport: SportKey | 'all'): string {
     if (sport === 'all') {
       return 'All Sports';
     }
     const normalized = sport.charAt(0).toUpperCase() + sport.slice(1);
     return normalized;
-  }
-
-  protected sportIcon(sportKey: SportKey): string | null {
-    const sportName = sportKey.toLowerCase().trim();
-    
-    const sportMap: { [key: string]: string } = {
-      'tennis': 'assets/icons/tennis.svg',
-      'padel': 'assets/icons/padel.svg',
-      'football': 'assets/icons/football.svg',
-      'soccer': 'assets/icons/football.svg',
-      'basketball': 'assets/icons/basketball.svg',
-      'volleyball': 'assets/icons/volleyball.svg',
-      'badminton': 'assets/icons/badminton.svg',
-      'squash': 'assets/icons/squash.svg',
-      'handball': 'assets/icons/handball.svg',
-      'pingpong': 'assets/icons/pingpong.svg',
-      'ping pong': 'assets/icons/pingpong.svg',
-      'table tennis': 'assets/icons/pingpong.svg',
-      'table-tennis': 'assets/icons/pingpong.svg'
-    };
-    
-    return sportMap[sportName] || null;
-  }
-
-  protected cardStatusClass(event: EventPanelData): string {
-    switch (event.status) {
-      case EventStatus.PUBLISHED:
-      case EventStatus.ONGOING:
-        return 'badge--primary';
-      case EventStatus.COMPLETED:
-        return 'badge--muted';
-      case EventStatus.CANCELLED:
-        return 'badge--danger';
-      default:
-        return 'badge--warning';
-    }
-  }
-
-  protected coverImageUrl(event: EventPanelData): string | null {
-    return this.publicService.toAbsoluteUrl(event.coverImageUrl);
   }
 
   protected trackEvent(index: number, event: EventPanelData): number {
@@ -286,14 +230,14 @@ export class EventsPageComponent implements OnInit {
           .filter(opt => this.clubToLocationMap.get(opt.value) === this.selectedLocation)
       ];
     }
-    
+
     if (this.selectedClub !== 'all') {
       const clubLocation = this.clubToLocationMap.get(this.selectedClub);
       if (clubLocation !== this.selectedLocation && this.selectedLocation !== 'all') {
         this.selectedClub = 'all';
       }
     }
-    
+
     this.cdr.detectChanges();
   }
 
@@ -363,5 +307,21 @@ export class EventsPageComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  private fetchUserJoinedEvents(): void {
+    this.userService.getMyEvents().subscribe({
+      next: (userEvents) => {
+        const eventIds = new Set(userEvents.map(e => e.eventId));
+        this.joinedEventIds.set(eventIds);
+      },
+      error: (err) => {
+        console.error('Failed to load user joined events', err);
+      }
+    });
+  }
+
+  protected isEventJoined(eventId: number): boolean {
+    return this.joinedEventIds().has(eventId);
   }
 }

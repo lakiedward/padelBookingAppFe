@@ -21,6 +21,8 @@ export class EventDetailComponent implements OnInit {
   club?: ClubDetails;
   heroImage = '';
   isAuthenticated = false;
+  participants: any[] = [];
+  isLoadingParticipants = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -50,11 +52,13 @@ export class EventDetailComponent implements OnInit {
       next: (eventSummary) => {
         this.event = eventSummaryToPanelData(eventSummary);
         this.heroImage = this.getCoverImageUrl(this.event);
-        
+
         if (eventSummary.clubId) {
           this.loadClubDetails(eventSummary.clubId);
         }
-        
+
+        this.loadParticipants();
+
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -77,6 +81,22 @@ export class EventDetailComponent implements OnInit {
     });
   }
 
+  private loadParticipants() {
+    this.isLoadingParticipants = true;
+    this.publicService.getEventParticipants(this.eventId).subscribe({
+      next: (participants) => {
+        this.participants = participants;
+        this.isLoadingParticipants = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load participants:', err);
+        this.isLoadingParticipants = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   onBack() {
     this.router.navigate(['/events']);
   }
@@ -85,14 +105,14 @@ export class EventDetailComponent implements OnInit {
     if (!this.event) return;
 
     if (!this.isAuthenticated) {
-      const returnUrl = `/events/${this.eventId}`;
+      const returnUrl = `/events/${this.eventId}/join`;
       this.router.navigate(['/auth'], {
         queryParams: { returnUrl }
       });
       return;
     }
 
-    alert('Join event functionality coming soon!');
+    this.router.navigate(['/events', this.eventId, 'join']);
   }
 
   navigateToClub() {
@@ -151,7 +171,7 @@ export class EventDetailComponent implements OnInit {
 
   getSportIcon(sportKey: string): string | null {
     const sportName = sportKey.toLowerCase().trim();
-    
+
     const sportMap: { [key: string]: string } = {
       'tennis': 'assets/icons/tennis.svg',
       'padel': 'assets/icons/padel.svg',
@@ -167,7 +187,7 @@ export class EventDetailComponent implements OnInit {
       'table tennis': 'assets/icons/pingpong.svg',
       'table-tennis': 'assets/icons/pingpong.svg'
     };
-    
+
     return sportMap[sportName] || null;
   }
 
@@ -178,6 +198,10 @@ export class EventDetailComponent implements OnInit {
   getClubProfileImageUrl(): string | null {
     const clubId = this.club?.id;
     return clubId ? this.publicService.getClubProfileImageUrl(clubId) : null;
+  }
+
+  getUserProfileImageUrl(userId: number): string {
+    return this.publicService.getUserProfileImageUrl(userId);
   }
 
   canJoinEvent(): boolean {
