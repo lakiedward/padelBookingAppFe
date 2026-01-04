@@ -90,7 +90,7 @@
                   </svg>
                   Courts
                 </div>
-                <div class="detail-info-value">{{ event?.courtCount && event!.courtCount > 0 ? (event!.courtCount + ' ' + (event!.courtCount === 1 ? 'Court' : 'Courts')) : '—' }}</div>
+                <div class="detail-info-value">{{ event?.courtCount }} {{ event?.courtCount === 1 ? 'Court' : 'Courts' }}</div>
               </div>
 
               <div class="detail-info-item" *ngIf="event?.price">
@@ -108,6 +108,35 @@
             <div class="detail-description" *ngIf="event?.description">
               <h3 class="detail-description-title">Description</h3>
               <p class="detail-description-text">{{ event!.description }}</p>
+            </div>
+          </div>
+
+          <!-- Participants Section -->
+          <div class="detail-participants-card" *ngIf="participants.length > 0 || isLoadingParticipants">
+            <h2 class="detail-info-title">Participants</h2>
+
+            <div class="state" *ngIf="isLoadingParticipants" style="min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              <div class="spinner" aria-hidden="true"></div>
+              <p>Loading participants…</p>
+            </div>
+
+            <div class="participants-grid" *ngIf="!isLoadingParticipants && participants.length > 0">
+              <div class="participant-item" *ngFor="let participant of participants">
+                <div class="participant-avatar">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <div class="participant-info">
+                  <div class="participant-name">{{ participant.name || participant.fullName || participant.firstName || participant.username || 'Participant' }}</div>
+                  <div class="participant-phone" *ngIf="participant.phoneNumber || participant.phone">{{ participant.phoneNumber || participant.phone }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="empty-state" *ngIf="!isLoadingParticipants && participants.length === 0">
+              <p>No participants yet</p>
             </div>
           </div>
 

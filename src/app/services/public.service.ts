@@ -17,7 +17,7 @@ export class PublicService {
   getPublicCourts(): Observable<CourtSummaryResponse[]> {
     return this.http.get<CourtSummaryResponse[]>(`${this.apiBase}/api/public/courts`);
   }
-  
+
   getPublicClubs(): Observable<ClubDetails[]> {
     return this.http.get<ClubDetails[]>(`${this.apiBase}/api/public/clubs`).pipe(
       map(clubs => clubs.map(club => ({
@@ -65,6 +65,14 @@ export class PublicService {
 
   getPublicEventById(eventId: string | number): Observable<EventSummaryResponse> {
     return this.http.get<EventSummaryResponse>(`${this.apiBase}/api/public/events/${eventId}`);
+  }
+
+  getEventParticipants(eventId: string | number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiBase}/api/public/events/${eventId}/participants`);
+  }
+
+  getUserProfileImageUrl(userId: string | number): string {
+    return `${this.apiBase}/api/public/users/${userId}/profile-image`;
   }
 
   getClubProfileImageUrl(clubId: string | number): string {

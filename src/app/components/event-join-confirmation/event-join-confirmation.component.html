@@ -1,0 +1,190 @@
+<div class="page page-gradient-bg bg-admin-like">
+  <section class="hero">
+    <div class="glow glow--hero-a"></div>
+    <div class="glow glow--hero-b"></div>
+    <div class="glow glow--hero-c"></div>
+
+    <div class="container hero__inner">
+      <main class="booking-main">
+
+        
+        <div *ngIf="isLoading" class="booking-loading">
+          <div class="u-spinner u-spinner--lg"></div>
+          <p class="loading-text">Loading event details...</p>
+        </div>
+
+        
+        <div *ngIf="!isLoading && !eventDetails" class="booking-error-card">
+          <div class="error-icon">
+            <img src="assets/icons/alert-triangle.svg" alt="Warning" />
+          </div>
+          <h2 class="error-title">Event Information Missing</h2>
+          <p class="error-message">{{ joinError || 'Unable to load event details.' }}</p>
+          <button class="btn btn--primary" (click)="onCancel()">Go Back to Events</button>
+        </div>
+
+        
+        <div *ngIf="!isLoading && eventDetails" class="booking-container">
+
+          <div class="booking-card">
+            
+            <div class="booking-header">
+              <h1 class="booking-title">Confirm Your Participation</h1>
+              <p class="booking-subtitle">Review event details and complete your registration</p>
+            </div>
+
+            
+            <div class="booking-section">
+              <h3 class="section-title">Event Details</h3>
+
+              <div class="summary-grid">
+                <div class="summary-item summary-item--full">
+                  <span class="summary-label">Event Name</span>
+                  <span class="summary-value">{{ eventDetails.eventName }}</span>
+                </div>
+
+                <div class="summary-item">
+                  <span class="summary-label">Event Type</span>
+                  <span class="summary-value">{{ getEventTypeDisplay() }}</span>
+                </div>
+
+                <div class="summary-item">
+                  <span class="summary-label">Format</span>
+                  <span class="summary-value">{{ getFormatDisplay() }}</span>
+                </div>
+
+                <div class="summary-item">
+                  <span class="summary-label">Sport</span>
+                  <span class="summary-value">{{ eventDetails.sport }}</span>
+                </div>
+
+                <div class="summary-item" *ngIf="eventDetails.clubName">
+                  <span class="summary-label">Club</span>
+                  <span class="summary-value">{{ eventDetails.clubName }}</span>
+                </div>
+
+                <div class="summary-item summary-item--full">
+                  <span class="summary-label">Event Period</span>
+                  <span class="summary-value">{{ formatDateRange() }}</span>
+                </div>
+
+                <div class="summary-item" *ngIf="eventDetails.registrationDeadline">
+                  <span class="summary-label">Registration Deadline</span>
+                  <span class="summary-value">{{ formatDate(eventDetails.registrationDeadline) }}</span>
+                </div>
+
+                <div class="summary-item" *ngIf="eventDetails.maxParticipants">
+                  <span class="summary-label">Spots Available</span>
+                  <span class="summary-value">{{ getSpotsRemaining() }} / {{ eventDetails.maxParticipants }}</span>
+                </div>
+              </div>
+
+              
+              <div class="price-card">
+                <span class="price-label">{{ isFree() ? 'Entry Fee' : 'Total Price' }}</span>
+                <span class="price-value" *ngIf="!isFree()">{{ eventDetails.price | convertMoney:'EUR' }}</span>
+                <span class="price-value price-value--free" *ngIf="isFree()">Free</span>
+              </div>
+            </div>
+
+            
+            <div class="booking-section" *ngIf="!isFree()">
+              <h3 class="section-title">Payment Method</h3>
+
+              <div class="payment-methods">
+                
+                <div
+                  class="payment-method"
+                  [class.payment-method--active]="selectedPaymentMethod === 'cash'"
+                  [class.payment-method--disabled]="false"
+                  (click)="onSelectPaymentMethod('cash')"
+                >
+                  <div class="payment-radio">
+                    <input
+                      type="radio"
+                      id="payment-cash"
+                      name="paymentMethod"
+                      value="cash"
+                      [checked]="selectedPaymentMethod === 'cash'"
+                      (change)="onSelectPaymentMethod('cash')"
+                    />
+                    <label for="payment-cash"></label>
+                  </div>
+                  <div class="payment-info">
+                    <div class="payment-icon">
+                      <img src="assets/icons/cash.svg" alt="Cash" />
+                    </div>
+                    <div class="payment-details">
+                      <span class="payment-name">Cash</span>
+                      <span class="payment-desc">Pay at the venue</span>
+                    </div>
+                  </div>
+                </div>
+
+                
+                <div
+                  class="payment-method"
+                  [class.payment-method--active]="selectedPaymentMethod === 'card'"
+                  (click)="onSelectPaymentMethod('card')"
+                >
+                  <div class="payment-radio">
+                    <input
+                      type="radio"
+                      id="payment-card"
+                      name="paymentMethod"
+                      value="card"
+                      [checked]="selectedPaymentMethod === 'card'"
+                    />
+                    <label for="payment-card"></label>
+                  </div>
+                  <div class="payment-info">
+                    <div class="payment-icon">
+                      <img src="assets/icons/card.svg" alt="Card" />
+                    </div>
+                    <div class="payment-details">
+                      <span class="payment-name">Card</span>
+                      <span class="payment-desc">Credit or Debit Card</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            
+            <div *ngIf="joinError" class="booking-error">
+              <img src="assets/icons/alert-triangle.svg" alt="Warning" class="error-icon-small" />
+              <span class="error-text">{{ joinError }}</span>
+            </div>
+
+            
+            <div class="booking-actions">
+              <button
+                class="btn btn--secondary btn--large"
+                (click)="onCancel()"
+                [disabled]="isSubmitting"
+              >
+                Cancel
+              </button>
+
+              <button
+                class="btn btn--primary btn--large"
+                (click)="onConfirmJoin()"
+                [disabled]="isSubmitting"
+              >
+                <span *ngIf="!isSubmitting">
+                  {{ selectedPaymentMethod === 'card' && !isFree() ? 'Proceed to Payment' : 'Confirm Participation' }}
+                </span>
+                <span *ngIf="isSubmitting" class="btn-loading">
+                  <div class="u-spinner u-spinner--sm"></div>
+                  <span>Processing...</span>
+                </span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </section>
+</div>

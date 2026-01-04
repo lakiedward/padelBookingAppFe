@@ -93,7 +93,7 @@
             <div class="filter-row filter-row--second">
               <div class="filter-item">
                 <label class="filter-label">Location</label>
-                <p-select 
+                <p-select
                   [options]="locationOptions"
                   [(ngModel)]="selectedLocation"
                   (ngModelChange)="onLocationChange()"
@@ -108,7 +108,7 @@
 
               <div class="filter-item">
                 <label class="filter-label">Club Name</label>
-                <p-select 
+                <p-select
                   [options]="clubOptions"
                   [(ngModel)]="selectedClub"
                   placeholder="All clubs"
@@ -122,7 +122,7 @@
 
               <div class="filter-item">
                 <label class="filter-label">Sort</label>
-                <p-select 
+                <p-select
                   [options]="sortOptions"
                   [(ngModel)]="sortBy"
                   optionLabel="label"
@@ -168,49 +168,14 @@
     </div>
 
     <section class="grid" *ngIf="!loading() && !loadError() && hasResults()">
-      <article class="event-card" *ngFor="let event of filteredEvents(); trackBy: trackEvent" (click)="navigateToEvent(event.id)">
-        <div class="event-hero">
-          <div class="event-cover" [ngStyle]="{ 'background-image': coverImageUrl(event) ? 'url(' + coverImageUrl(event) + ')' : '' }"></div>
-          <div class="event-hero__overlay" aria-hidden="true"></div>
-
-          <div class="event-hero__icon-corner">
-            <img *ngIf="sportIcon(event.sportKey)" [src]="sportIcon(event.sportKey)" [alt]="event.sportKey" class="event-hero__icon" />
-          </div>
-
-          <div class="event-hero__badge">
-            <span class="badge" [ngClass]="cardStatusClass(event)">{{ formatStatus(event) }}</span>
-          </div>
-
-          <div class="event-hero__content">
-            <div class="event-hero__text">
-              <h3>{{ event.name }}</h3>
-              <p class="muted">{{ formatEventType(event) }} • {{ formatEventFormat(event) }}</p>
-              <div class="chips">
-                <span class="chip chip--ghost">{{ event.courtCount }} {{ event.courtCount === 1 ? 'Court' : 'Courts' }}</span>
-                <span class="chip chip--ghost" *ngIf="event.maxParticipants">
-                  {{ event.currentParticipants }}/{{ event.maxParticipants }} Players
-                </span>
-              </div>
-            </div>
-            <div class="event-hero__price" *ngIf="event.price">
-              <span class="price">{{ event.price | convertMoney:'EUR' }}</span>
-              <span class="note">Entry fee</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="event-body">
-          <div class="event-detail">
-            <span class="label">Dates</span>
-            <span class="value">{{ formatDateRange(event) }}</span>
-          </div>
-          <div class="event-detail">
-            <span class="label">Club</span>
-            <span class="value">{{ event.clubName }}</span>
-          </div>
-          <button type="button" class="btn btn--accent" (click)="navigateToEvent(event.id); $event.stopPropagation()">View Details</button>
-        </div>
-      </article>
+      <app-event-card
+        *ngFor="let event of filteredEvents(); trackBy: trackEvent"
+        [event]="event"
+        [isAuthenticated]="isAuthenticated()"
+        [isJoined]="isEventJoined(event.id)"
+        (cardClick)="navigateToEvent($event)"
+        (viewDetailsClick)="navigateToEvent($event)">
+      </app-event-card>
     </section>
   </div>
 </div>

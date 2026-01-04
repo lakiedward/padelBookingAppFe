@@ -39,13 +39,6 @@ export class BookingService {
     );
   }
 
-  getMyUpcomingBookings(): Observable<BookingSummaryResponse[]> {
-    return this.http.get<BookingSummaryResponse[]>(
-      `${this.apiBase}/api/bookings/mine/upcoming`,
-      { headers: this.getAuthHeaders() }
-    );
-  }
-
   cancelBooking(bookingId: number): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(
       `${this.apiBase}/api/bookings/${bookingId}`,
