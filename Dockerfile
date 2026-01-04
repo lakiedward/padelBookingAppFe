@@ -20,8 +20,8 @@ FROM nginx:alpine
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built app from build stage
-COPY --from=build /app/dist/PadelBookingFe /usr/share/nginx/html
+# Copy built app from build stage (Angular 20 static output goes to /browser)
+COPY --from=build /app/dist/PadelBookingFe/browser /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
