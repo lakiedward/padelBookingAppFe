@@ -1,22 +1,31 @@
+@use '../../styles/variables' as vars;
+
+:host {
+  display: block;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
 .admin-container {
   position: relative;
-  height: 100vh;
+  height: 100%;
+  min-height: 0 !important; /* Override page-gradient-bg min-height */
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 64px 1fr 72px;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: 64px 1fr;
   grid-template-areas:
-    'topbar'
-    'content'
-    'bottom-nav';
+    'sidebar topbar'
+    'sidebar content';
 
   isolation: isolate;
 }
 
+.admin-container > .sidebar,
 .admin-container > .topbar,
 .admin-container > .content,
 .admin-container > .bottom-nav {
   position: relative;
-  z-index: 2;
 }
 
 .admin-container.page-gradient-bg::before,
@@ -24,14 +33,114 @@
   z-index: 0;
 }
 
+/* Sidebar Styles (Desktop) */
+.sidebar {
+  grid-area: sidebar;
+  background: rgba(11, 17, 23, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(214, 221, 230, 0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+
+  &-header {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(214, 221, 230, 0.1);
+
+    .brand-title {
+      color: #a7ee43;
+      font-weight: 800;
+      font-size: 24px;
+      letter-spacing: 0.08em;
+    }
+  }
+
+  &-nav {
+    flex: 1;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      width: 100%;
+      border-radius: 12px;
+      background: transparent;
+      border: none;
+      color: #9fb0c0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: left;
+
+      svg {
+        width: 20px;
+        height: 20px;
+        stroke-width: 2;
+      }
+
+      &:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.05);
+        color: #d6dde6;
+      }
+
+      &.active {
+        background: rgba(167, 238, 67, 0.15);
+        color: #a7ee43;
+        font-weight: 600;
+
+        svg { stroke-width: 2.5; }
+      }
+    }
+  }
+
+  &-footer {
+    padding: 24px;
+    border-top: 1px solid rgba(214, 221, 230, 0.1);
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 59, 48, 0.1);
+      border: 1px solid rgba(255, 59, 48, 0.3);
+      color: #ff6b6b;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+
+      svg { width: 18px; height: 18px; }
+
+      &:hover {
+        background: rgba(255, 59, 48, 0.2);
+        border-color: rgba(255, 59, 48, 0.5);
+      }
+    }
+  }
+}
+
 .bottom-nav {
+  display: none; /* Hidden by default on desktop */
   grid-area: bottom-nav;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  display: flex;
   justify-content: space-around;
   align-items: center;
   padding: 8px 16px;
@@ -92,12 +201,12 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(214, 221, 230, 0.2);
+  padding: 12px 32px;
+  background: transparent; /* Cleaner look on desktop next to sidebar */
+  border-bottom: 1px solid rgba(214, 221, 230, 0.15);
 
   .brand {
-    display: flex;
+    display: none; /* Hidden on desktop */
   }
 
   .brand-text {
@@ -112,7 +221,7 @@
   }
 
   .separator {
-    display: block;
+    display: none; /* Hidden on desktop */
     width: 1px;
     height: 24px;
     background: rgba(214, 221, 230, 0.25);
@@ -122,13 +231,13 @@
 
   .page-title {
     color: #d6dde6;
-    font-weight: 600;
-    font-size: 18px;
+    font-weight: 700;
+    font-size: 20px;
     display: block;
   }
 
   .logout-btn-header {
-    display: inline-flex;
+    display: none; /* Hidden on desktop */
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
@@ -207,38 +316,42 @@
 
 @media (max-width: 767px) {
   .admin-container {
+    grid-template-columns: 1fr;
     grid-template-rows: 56px 1fr 72px;
+    grid-template-areas:
+      'topbar'
+      'content'
+      'bottom-nav';
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: flex;
   }
 
   .topbar {
     padding: 10px 16px;
+    background: #0b1117; /* Solid background to remove transparency */
+    border-bottom: none; /* Remove the line (border) that appeared under the topbar */
+
+    .brand { display: flex; }
+    .separator { display: block; height: 20px; margin: 0 8px; }
+    .logout-btn-header { display: inline-flex; padding: 8px 12px; font-size: 13px; svg { width: 16px; height: 16px; } }
 
     .brand-title {
       font-size: 16px;
     }
 
-    .separator {
-      height: 20px;
-      margin: 0 8px;
-    }
-
     .page-title {
       font-size: 13px;
-    }
-
-    .logout-btn-header {
-      padding: 8px 12px;
-      font-size: 13px;
-
-      svg {
-        width: 16px;
-        height: 16px;
-      }
     }
   }
 
   .content {
-    padding: 16px 0 88px;
+    padding: vars.$admin-content-padding-mobile 0 88px; /* Add some padding-top to prevent buttons from being cut off */
   }
 
   .content-card {
@@ -246,23 +359,8 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     border: none;
-    padding: 0 16px;
+    padding: 0 var(--admin-card-padding-mobile, 16px);
     border-radius: 0;
-  }
-
-  .bottom-nav {
-    padding: 6px 8px;
-
-    .nav-item {
-      padding: 6px 8px;
-      min-width: 56px;
-      font-size: 10px;
-
-      svg {
-        width: 22px;
-        height: 22px;
-      }
-    }
   }
 
   .modal-content {
@@ -273,27 +371,47 @@
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .admin-container {
+    grid-template-columns: 1fr;
     grid-template-rows: 64px 1fr 72px;
+    grid-template-areas:
+      'topbar'
+      'content'
+      'bottom-nav';
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: flex;
   }
 
   .topbar {
     padding: 12px 20px;
+    background: #0b1117; /* Solid background */
+    border-bottom: none; /* Remove the border on tablet as well */
+
+    .brand { display: flex; }
 
     .brand-title {
       font-size: 18px;
     }
 
     .separator {
+      display: block;
       height: 22px;
     }
 
     .page-title {
       font-size: 16px;
     }
+
+    .logout-btn-header { display: inline-flex; }
   }
 
   .content {
-    padding: 20px 0 92px;
+    padding: vars.$admin-content-padding-tablet 0 92px; /* Add padding-top on tablet as well */
   }
 
   .content-card {
@@ -301,7 +419,7 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     border: none;
-    padding: 0 20px;
+    padding: 0 var(--admin-card-padding-tablet, 20px);
     border-radius: 0;
   }
 }

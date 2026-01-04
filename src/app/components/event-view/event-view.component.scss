@@ -12,12 +12,6 @@
   padding: 0;
 }
 
-@media (min-width: 768px) {
-  .events-header {
-    padding: 0 12px;
-  }
-}
-
 @media (min-width: 1024px) {
   .events-header {
     padding: 0 20px;
@@ -33,15 +27,9 @@
   margin-top: 16px;
 }
 
-@media (min-width: 768px) {
-  .sport-filter-row {
-    padding: 0;
-  }
-}
-
 @media (min-width: 1024px) {
   .sport-filter-row {
-    padding: 0;
+    padding: 0 20px;
   }
 }
 
@@ -123,15 +111,9 @@
   padding: 0;
 }
 
-@media (min-width: 768px) {
-  .panels {
-    padding: 0;
-  }
-}
-
 @media (min-width: 1024px) {
   .panels {
-    padding: 0;
+    padding: 0 20px;
   }
 }
 
@@ -199,7 +181,7 @@
 
 @media (max-width: 1023.98px) {
   .events-wrap {
-    padding: 16px;
+    padding: 0;
   }
 
   .events-header {

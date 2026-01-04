@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export interface ConnectInitRequest { country?: string }
+export interface ConnectInitRequest { country?: string; baseUrl?: string }
 export interface ConnectInitResponse { url: string }
 export interface StripeStatusResponse { chargesEnabled: boolean; payoutsEnabled: boolean; requirementsCurrentlyDue: string[] }
 export interface CreateCheckoutRequest { timeSlotId: number }

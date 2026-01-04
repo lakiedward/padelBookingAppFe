@@ -1,5 +1,5 @@
-import { Component, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { AfterViewInit, ChangeDetectorRef, Component, Inject, PLATFORM_ID, ViewChild, isDevMode } from '@angular/core';
 import { ClubDetailsComponent } from '../club-details/club-details.component';
 import { CourtViewComponent } from '../court-view/court-view.component';
 import { CreateCourtComponent } from '../create-court/create-court.component';
@@ -33,6 +33,8 @@ export class AdminViewComponent implements AfterViewInit {
   @ViewChild(EventViewComponent) eventViewComponent?: EventViewComponent;
 
   constructor(
+    @Inject(DOCUMENT) private document: Document,
+    @Inject(PLATFORM_ID) private platformId: Object,
     private auth: AuthService, 
     private router: Router, 
     public clubService: ClubService,
@@ -113,18 +115,38 @@ export class AdminViewComponent implements AfterViewInit {
   onManageBookingFromClub(courtId: number) {
     this.preselectCourtId = courtId;
     this.select('manage-booking');
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    this.scrollAdminContentToTop();
   }
 
   onManageBookingFromCourt(courtId: number) {
     this.preselectCourtId = courtId;
     this.select('manage-booking');
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    this.scrollAdminContentToTop();
   }
 
   getAvailableSports(): SportKey[] {
     const clubSports = this.clubService.lastSaved()?.sports || [];
     const sports = new Set<SportKey>(['padel', 'tennis', ...clubSports]);
     return Array.from(sports);
+  }
+
+  private scrollAdminContentToTop() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      // In AdminView, scrolling happens inside the `<main class="content">` container
+      // because `html/body` are scroll-locked to prevent double scrollbars.
+      const container = this.document.querySelector('.admin-container > main.content') as HTMLElement | null;
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    } catch (err) {
+      if (isDevMode()) console.error('scrollAdminContentToTop error', err);
+    }
+
+    // Fallback for unexpected layouts
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (err) {
+      if (isDevMode()) console.error('scrollAdminContentToTop fallback error', err);
+    }
   }
 }

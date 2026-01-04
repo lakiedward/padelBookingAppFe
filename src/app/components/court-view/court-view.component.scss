@@ -9,13 +9,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 8px;
-}
-
-@media (min-width: 768px) {
-  .courts-header {
-    padding: 0 20px;
-  }
+  padding: 0;
 }
 
 @media (min-width: 1024px) {
@@ -29,14 +23,8 @@
 .courts-header .actions { margin-left: auto; }
 
 .sport-filter-row {
-  padding: 0 8px;
+  padding: 0;
   margin-top: 16px;
-}
-
-@media (min-width: 768px) {
-  .sport-filter-row {
-    padding: 0 20px;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -97,16 +85,10 @@
 .btn.green-outline { border-color: rgba(167,238,67,0.4); background: rgba(167,238,67,0.2); color: #a7ee43; }
 
 .loading, .error, .empty-state {
-  padding: 40px 8px;
+  padding: 40px 0;
   text-align: center;
   color: #8aa0b5;
   font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  .loading, .error, .empty-state {
-    padding: 40px 20px;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -121,14 +103,8 @@
 .panels {
   display: grid;
   gap: 16px;
-  padding: 0 8px;
+  padding: 0;
   grid-template-columns: 1fr;
-}
-
-@media (min-width: 768px) {
-  .panels {
-    padding: 0 20px;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -296,15 +272,15 @@
   }
 
   .courts-header {
-    padding: 0 16px;
+    padding: 0;
   }
 
   .sport-filter-row {
-    padding: 0 16px;
+    padding: 0;
   }
 
   .panels {
-    padding: 0 16px;
+    padding: 0;
   }
 
   .court-panel {
