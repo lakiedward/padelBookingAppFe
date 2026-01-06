@@ -143,7 +143,7 @@
   z-index: 100;
   justify-content: space-around;
   align-items: center;
-  padding: 8px 16px;
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px));
   background: rgba(11, 17, 23, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -268,7 +268,8 @@
   grid-area: content;
   position: relative;
   z-index: 2;
-  padding: 24px 24px 96px;
+  padding: 24px 24px calc(96px + env(safe-area-inset-bottom, 0px));
+  overflow-x: hidden;
   overflow-y: auto;
 }
 

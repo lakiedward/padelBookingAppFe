@@ -794,6 +794,27 @@
         width: 100%;
       }
     }
+
+    /* Very small phones (e.g. iPhone X width in some zoom modes): prevent footer overflow */
+    .footer {
+      flex-direction: column;
+      align-items: stretch;
+
+      .hint {
+        text-align: left;
+      }
+
+      .button-group {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn.btn--sm {
+        width: 100%;
+        min-width: 0;
+      }
+    }
   }
 }
 
