@@ -1,16 +1,14 @@
-@use '../../styles/variables' as vars;
-
 /* Reset default margins and padding */
 :host {
   display: block;
   width: 100%;
+  overflow-y: visible;
 }
 
 .club-preview {
   margin: 0;
   padding: 0;
   width: 100%;
-  max-width: 100%;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -30,7 +28,6 @@
 .hero {
   position: relative;
   width: 100%;
-  max-width: 100%;
   height: 400px;
   background: linear-gradient(90deg, #0f1b26, #1a2332);
   background-size: cover;
@@ -52,17 +49,17 @@
 
 .hero-content {
   position: absolute;
-  left: 16px;
-  right: 16px;
+  left: var(--admin-card-padding-mobile, 16px);
+  right: var(--admin-card-padding-mobile, 16px);
   bottom: 16px;
   display: flex;
   align-items: end;
   gap: 16px;
   z-index: 2;
 
-  @media (min-width: 768px) {
-    left: 20px;
-    right: 20px;
+  @media (min-width: 768px) and (max-width: 1023px) {
+    left: var(--admin-card-padding-tablet, 20px);
+    right: var(--admin-card-padding-tablet, 20px);
   }
 
   @media (min-width: 1024px) {
@@ -212,19 +209,23 @@
 .hero .hero-actions {
   position: absolute;
   top: 16px;
-  right: 16px;
+  right: var(--admin-card-padding-mobile, 16px);
   z-index: 3;
   display: flex;
   gap: 8px;
 
   @media (max-width: 767px) {
     top: 20px; /* Move buttons down to avoid being cut off or too close to the edge */
-    right: 12px;
+    right: var(--admin-card-padding-mobile, 16px);
   }
 
   @media (min-width: 768px) and (max-width: 1023px) {
     top: 24px;
-    right: 16px;
+    right: var(--admin-card-padding-tablet, 20px);
+  }
+
+  @media (min-width: 1024px) {
+    right: 44px;
   }
 
   .btn {
@@ -279,140 +280,38 @@
 
 .danger-btn .icon { width: 18px; height: 18px; }
 
-.top-divider {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(167,238,67,0.3) 20%, rgba(167,238,67,0.3) 80%, transparent);
-  margin: 24px 0;
-  border-radius: 2px;
-}
-
-.hero {
-  position: relative;
-  height: 400px;
-  background: linear-gradient(90deg, #0f1b26, #1a2332);
-  background-size: cover;
-  background-position: center;
-}
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-}
-.hero-content {
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 16px;
-  display: flex;
-  align-items: end;
-  gap: 16px;
-}
-.logo {
-  width: 96px;
-  height: 96px;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 3px solid #a7ee43;
-  background: rgba(15,27,38,0.9);
-  flex-shrink: 0;
-}
-.logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-.titles h1 { margin: 0; font-size: 28px; }
-.meta { display: flex; gap: 8px; margin-top: 4px; }
-.sport { background: #a7ee43; color: #000a14; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 12px; }
-.location { color: #d6dde6; font-size: 14px; margin-top: 6px; }
-
-.container { padding: 0 0 24px; }
-
-.about, .contact, .courts {
-  padding-left: 8px;
-  padding-right: 8px;
-}
-@media (min-width: 768px) {
-  .about, .contact, .courts {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-}
-@media (min-width: 1024px) {
-  .about, .contact, .courts {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-}
-
-.about h2, .contact h2, .courts h2 { font-size: 20px; margin: 8px 0 8px; }
-.about p { color: #fff; white-space: pre-line; }
-
-.contact .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 640px) { .contact .grid { grid-template-columns: 1fr 1fr; } }
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.icon-box {
-  width: 56px;
-  height: 56px;
-  min-width: 56px;
-  min-height: 56px;
-  border-radius: 16px;
-  background: rgba(167,238,67,0.2);
-  border: 1px solid rgba(167,238,67,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #a7ee43;
-  font-size: 22px;
-}
-.contact-item .content .title { color: #a7ee43; font-weight: 700; font-size: 14px; }
-.contact-item .content .value { color: #fff; font-size: 16px; margin-top: 4px; }
-
-.courts { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(214,221,230,0.15); }
-.courts-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-.courts .hint { color: #8aa0b5; font-size: 13px; }
-.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.chip {
-  border-radius: 999px;
-  padding: 6px 12px;
-  border: 1px solid rgba(214,221,230,0.15);
-  background: rgba(255,255,255,0.05);
-  color: #fff;
-  cursor: pointer;
-  font-size: 12px;
-}
-.chip.active { background: #a7ee43; color: #000a14; border-color: #a7ee43; }
-
 :host, .club-preview {
   display: block;
-  max-width: 100%;
-  overflow: visible;
+  overflow-y: visible;
 }
 .club-preview .hero {
+  overflow: hidden;
+  border-radius: 0;
+
+  /*
+    Full-bleed hero inside the admin content card WITHOUT `100vw`/`50vw` math.
+    This avoids viewport rounding overflow on iOS/Android while still bleeding to the content edges.
+  */
+  margin-top: -24px; /* desktop content-card padding */
   margin-left: -24px;
   margin-right: -24px;
-  margin-top: -24px;
   width: calc(100% + 48px);
   max-width: none;
   height: 424px;
-  border-radius: 0;
-  overflow: hidden;
 
   @media (max-width: 767px) {
-    margin-left: -16px;
-    margin-right: -16px;
-    margin-top: -#{vars.$admin-content-padding-mobile}; /* Negative margin to match the new padding in admin-view */
-    width: calc(100% + 32px);
+    margin-top: calc(0px - var(--admin-content-padding-mobile, 12px));
+    margin-left: calc(0px - var(--admin-card-padding-mobile, 16px));
+    margin-right: calc(0px - var(--admin-card-padding-mobile, 16px));
+    width: calc(100% + var(--admin-card-padding-mobile, 16px) + var(--admin-card-padding-mobile, 16px));
     height: 360px;
   }
 
   @media (min-width: 768px) and (max-width: 1023px) {
-    margin-left: -20px;
-    margin-right: -20px;
-    margin-top: -#{vars.$admin-content-padding-tablet};
-    width: calc(100% + 40px);
+    margin-top: calc(0px - var(--admin-content-padding-tablet, 16px));
+    margin-left: calc(0px - var(--admin-card-padding-tablet, 20px));
+    margin-right: calc(0px - var(--admin-card-padding-tablet, 20px));
+    width: calc(100% + var(--admin-card-padding-tablet, 20px) + var(--admin-card-padding-tablet, 20px));
     height: 400px;
   }
 }
